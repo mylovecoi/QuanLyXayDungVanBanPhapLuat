@@ -1,0 +1,348 @@
+@using Newtonsoft.Json.Linq
+@using System.Reflection
+@using UI.Helper
+@model DataAccess.Entities.KeKhaiDangKyGia.KeKhaiDangKyGia
+@{
+    Layout = "_LayoutReport";
+    var record_id = 1;
+    var details = ViewData["Details"] as IEnumerable<DataAccess.Entities.KeKhaiDangKyGia.KeKhaiDangKyGiaCt>;
+    var donViQuanLy = ViewData["DonViQuanLy"] as DataAccess.Entities.Settings.DanhMucDonVi;
+
+    Func<double, string> FormatNumber = (val) => val.ToString("N0", new System.Globalization.CultureInfo("vi-VN"));
+    Func<double, string> FormatPercent = (val) => val.ToString("N2", new System.Globalization.CultureInfo("vi-VN"));
+
+    JObject? excelData = null;
+    JToken? cellData = null;
+    JObject? styles = null;
+    int maxCol = 0;
+    List<int> rowIndices = new List<int>();
+    var mergeLookup = new Dictionary<string, (bool isParent, bool isChild, int rowSpan, int colSpan)>();
+
+    var spreadsheetJson = Model.ChiTietExcel;
+    if (!string.IsNullOrEmpty(spreadsheetJson))
+    {
+        try
+        {
+            excelData = JObject.Parse(spreadsheetJson);
+            styles = excelData["styles"] as JObject;
+            var sheets = excelData["sheets"] as JObject;
+            var firstSheet = sheets?.Properties()?.FirstOrDefault()?.Value as JObject;
+            cellData = firstSheet?["cellData"];
+            
+            var mergeData = firstSheet?["mergeData"] as JArray;
+            if (mergeData != null)
+            {
+                foreach (var m in mergeData)
+                {
+                    int sR = m["startRow"]?.Value<int>() ?? 0;
+                    int eR = m["endRow"]?.Value<int>() ?? 0;
+                    int sC = m["startColumn"]?.Value<int>() ?? 0;
+                    int eC = m["endColumn"]?.Value<int>() ?? 0;
+
+                    int rSpan = eR - sR + 1;
+                    int cSpan = eC - sC + 1;
+
+                    for (int r = sR; r <= eR; r++)
+                    {
+                        for (int c = sC; c <= eC; c++)
+                        {
+                            string key = $"{r}_{c}";
+                            if (r == sR && c == sC)
+                            {
+                                mergeLookup[key] = (true, false, rSpan, cSpan);
+                            }
+                            else
+                            {
+                                mergeLookup[key] = (false, true, 0, 0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (cellData != null)
+            {
+                foreach (var rowProp in cellData.Children<JProperty>())
+                {
+                    if (int.TryParse(rowProp.Name, out int rIdx))
+                    {
+                        rowIndices.Add(rIdx);
+                        var colProps = rowProp.Value as JObject;
+                        if (colProps != null)
+                        {
+                            foreach (var colProp in colProps.Properties())
+                            {
+                                if (int.TryParse(colProp.Name, out int cIdx))
+                                {
+                                    if (cIdx > maxCol)
+                                    {
+                                        maxCol = cIdx;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                rowIndices.Sort();
+            }
+        }
+        catch { }
+    }
+
+    var tenDn = Model.DoanhNghiepQuanLy?.TenDoanhNghiep ?? "";
+    var diaChiDn = Model.DoanhNghiepQuanLy?.DiaChi ?? "";
+    var soDienThoaiDn = Model.DoanhNghiepQuanLy?.SoDienThoai ?? "";
+    var emailDn = Model.DoanhNghiepQuanLy?.Email ?? "";
+    var tenDvHienThi = donViQuanLy?.TenDonVi ?? "";
+}
+
+<p style="text-align: center; font-weight: bold">Phụ lục VI: MẪU VĂN BẢN KÊ KHAI GIÁ</p>
+<p style="font-style: italic; text-align: center">(Kèm theo Nghị định số 85/2024/NĐ-CP ngày 10 tháng 7 năm 2024 của Chính phủ)</p>
+
+<table width="96%" border="0" cellspacing="0" cellpadding="8" style="margin:0 auto 20px; text-align: center;">
+    <tr>
+        <td width="40%" style="vertical-align: top;">
+            <span style="text-transform: uppercase; font-weight: bold">@tenDn</span>
+            <hr style="width: 10%; vertical-align: top; margin-top: 2px">
+        </td>
+        <td style="vertical-align: top;">
+            <b>
+                CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
+                Độc lập - Tự do - Hạnh phúc
+            </b>
+            <hr style="width: 15%; vertical-align: top; margin-top: 2px">
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top;">Số: @Model.SoQd<br>V/v kê khai giá hàng hóa, dịch<br>vụ bán trong nước hoặc xuất<br>khẩu</td>
+        <td style="text-align: right; vertical-align: top">
+            <i style="margin-right: 25%;">@(diaChiDn), ngày..@Model.NgayQd.Day..tháng..@Model.NgayQd.Month..năm..@Model.NgayQd.Year..</i>
+        </td>
+    </tr>
+</table>
+
+<p style="text-align: center; font-weight: bold; font-size: 16px;"><i><u>Kính gửi</u></i>: @tenDvHienThi</p>
+<br>
+<br>
+<p>Thực hiện quy định tại Luật Giá, Nghị định số 85/2024/NĐ-CP ngày 10 tháng 7 năm 2024 của Chính phủ quy định chi tiết một số điều của Luật Giá.</p>
+<p><b>@tenDn</b> gửi Bảng kê khai mức giá hàng hóa, dịch vụ bán trong nước hoặc xuất khẩu (đính kèm).</p>
+<p>Mức giá kê khai này thực hiện từ ngày @FuntionGlobal.ConvertDateToStr(Model.NgayThucHien) @(Model.ThoiGianThucHien != DateTime.MinValue ? Model.ThoiGianThucHien.ToString("HH:mm") : "")</p>
+<p><b>@tenDn</b> xin chịu trách nhiệm trước pháp luật về tính chính xác của mức giá mà chúng tôi đã kê khai.</p>
+
+<table width="96%" border="0" cellspacing="0" cellpadding="0" style="margin: 20px auto; text-align: center; height:200px">
+    <tr>
+        <td width="40%" style="text-align: left; vertical-align: top;">
+            <span style="font-weight: bold; font-style: italic">Nơi nhận:</span><br>
+            - Như trên:<br>
+            - Lưu.
+        </td>
+        <td style="vertical-align: top;">
+            <span style="text-transform: uppercase; font-weight:bold">@Model.ChucDanhKy</span><br>
+            <i>(Ký tên, đóng dấu)</i><br /><br /><br /><br /><br /><br />
+            <p>@Model.HoTenNguoiKy</p>
+        </td>
+    </tr>
+</table>
+
+<p>- Họ và tên người nộp biểu mẫu : @Model.ThongTinNguoiChuyen</p>
+<p>- Địa chỉ đơn vị thực hiện kê khai: @diaChiDn</p>
+<p>- Số điện thoại liên lạc : @soDienThoaiDn</p>
+<p>- Email : @emailDn</p>
+<p>- Số Fax : </p>
+
+<p style="font-weight: bold; text-align: center; text-transform: uppercase; margin-top: 30px;">GHI NHẬN NGÀY NỘP VĂN BẢN KÊ KHAI GIÁ CỦA CƠ QUAN TIẾP NHẬN</p>
+<p style="text-align: center; font-style: italic;">(Cơ quan tiếp nhận văn bản kê khai giá ghi ngày, tháng, năm nhận được văn bản kê khai giá và<br />đóng dấu công văn đến)</p>
+
+<table cellspacing="0" cellpadding="8" border="1" style="margin: 5px auto; border-collapse: collapse; width:40%; text-align: left;">
+    <tr>
+        <td style="text-align: center; font-weight: bold;"><b>@tenDvHienThi</b></td>
+    </tr>
+    <tr>
+        <td style="text-align: left;">
+            <b>Số:</b> @Model.SoHsDuyet<br>
+            <b>Ngày nhận hồ sơ:</b> @(Model.NgayChuyen != DateTime.MinValue ? FuntionGlobal.ConvertDateToStr(Model.NgayChuyen) : "")<br>
+            <b>Ngày duyệt hồ sơ:</b> @(Model.NgayDuyet != DateTime.MinValue ? FuntionGlobal.ConvertDateToStr(Model.NgayDuyet) : "")
+        </td>
+    </tr>
+</table>
+
+<hr class="in">
+<p style="page-break-before: always">
+
+<!--Trang 2-->
+<table width="96%" border="0" cellspacing="0" cellpadding="8" style="margin:0 auto 20px; text-align: center;">
+    <tr>
+        <td width="40%" style="vertical-align: top;">
+            <span style="text-transform: uppercase; font-weight: bold">@tenDn</span>
+            <hr style="width: 10%; vertical-align: top; margin-top: 2px">
+        </td>
+        <td style="vertical-align: top;">
+            <b>
+                CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
+                Độc lập - Tự do - Hạnh phúc
+            </b>
+            <hr style="width: 15%; vertical-align: top; margin-top: 2px">
+        </td>
+    </tr>
+    <tr>
+        <td></td>
+        <td style="text-align: right">
+            <i style="margin-right: 25%;">@(diaChiDn), ngày..@Model.NgayQd.Day..tháng..@Model.NgayQd.Month..năm..@Model.NgayQd.Year..</i>
+        </td>
+    </tr>
+</table>
+
+<p style="text-align: center; font-weight: bold; font-size: 16px;">BẢNG KÊ KHAI MỨC GIÁ</p>
+<p style="text-align: center; font-style: italic">(Kèm theo công văn số @Model.SoQd ngày @Model.NgayQd.Day tháng @Model.NgayQd.Month năm @Model.NgayQd.Year của @tenDn)</p>
+
+<p>1. Mức giá kê khai bán trong nước:</p>
+<div style="width: 100%; overflow-x: auto; margin-bottom: 20px;">
+    @if (details != null && details.Any())
+    {
+        <table cellspacing="0" cellpadding="5" border="1" style="margin: 20px auto; border-collapse: collapse; font: normal 14px Times, serif; width: 100%;" id="data">
+            <thead>
+                <tr style="background-color: #f2f2f2; text-align: center; font-weight: bold;">
+                    <th width="3%">STT</th>
+                    <th>Tên hàng hóa, dịch vụ</th>
+                    <th>Đặc điểm kinh tế - <br />kỹ thuật, quy cách</th>
+                    <th>Đơn vị<br>tính</th>
+                    <th>Loại giá<br /> (bán buôn, bán lẻ)</th>
+                    <th width="10%">Giá kê khai kỳ liền kề trước<br /> (kèm số văn bản kê khai)</th>
+                    <th width="10%">Giá kê khai<br /> kỳ này</th>
+                    <th>Thời điểm định giá,<br />điều chỉnh giá</th>
+                    <th>Mức tăng/ giảm so với<br /> kỳ liền kề trước</th>
+                    <th>Tỷ lệ tăng/ giảm so với<br /> kỳ liền kề trước</th>
+                    <th>Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in details)
+                {
+                    <tr>
+                        <td style="text-align: center">@(record_id++)</td>
+                        <td>@item.TenDvCungUng</td>
+                        <td>@item.QuyCachChatLuong</td>
+                        <td style="text-align: center">@item.DonViTinh</td>
+                        <td style="text-align: center">@item.LoaiGia</td>
+                        <td style="text-align: right">@FormatNumber(item.MucGiaKeKhaiLk)</td>
+                        <td style="text-align: right">@FormatNumber(item.MucGiaKeKhai)</td>
+                        <td style="text-align: center"></td>
+                        <td style="text-align: right">@FormatNumber(item.MucGiaKeKhai - item.MucGiaKeKhaiLk)</td>
+                        @if (item.MucGiaKeKhaiLk == 0)
+                        {
+                            <td style="text-align: right">100%</td>
+                        }
+                        else
+                        {
+                            <td style="text-align: right">
+                                @FormatPercent((item.MucGiaKeKhai - item.MucGiaKeKhaiLk) / item.MucGiaKeKhaiLk * 100)%
+                            </td>
+                        }
+                        <td>@item.GhiChu</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else if (cellData != null && rowIndices.Any())
+    {
+        var headerRowIdx = rowIndices.FirstOrDefault();
+        <table cellspacing="0" cellpadding="5" border="1" style="width: 100%; border-collapse: collapse; font: normal 14px Times, serif;" id="data_render">
+            <tbody>
+                @foreach (var r in rowIndices)
+                {
+                    <tr>
+                        @for (int c = 0; c <= maxCol; c++)
+                        {
+                            string cellKey = $"{r}_{c}";
+                            bool skipCell = false;
+                            int rowSpan = 1;
+                            int colSpan = 1;
+
+                            if (mergeLookup.TryGetValue(cellKey, out var mergeInfo))
+                            {
+                                if (mergeInfo.isChild)
+                                {
+                                    skipCell = true;
+                                }
+                                else if (mergeInfo.isParent)
+                                {
+                                    rowSpan = mergeInfo.rowSpan;
+                                    colSpan = mergeInfo.colSpan;
+                                }
+                            }
+
+                            if (!skipCell)
+                            {
+                                var cell = cellData[r.ToString()]?[c.ToString()];
+                                var cellVal = cell?["v"]?.ToString() ?? "";
+                                
+                                var styleKey = cell?["s"]?.ToString();
+                                JObject? style = null;
+                                if (!string.IsNullOrEmpty(styleKey) && styles != null)
+                                {
+                                    style = styles[styleKey] as JObject;
+                                }
+
+                                string align = "";
+                                if (style != null && style["ht"] != null)
+                                {
+                                    var ht = style["ht"]?.ToString() ?? "";
+                                    if (ht == "1") align = "text-align: left;";
+                                    else if (ht == "2") align = "text-align: center;";
+                                    else if (ht == "3") align = "text-align: right;";
+                                }
+                                
+                                if (string.IsNullOrEmpty(align) && double.TryParse(cellVal, out _))
+                                {
+                                    align = "text-align: right;";
+                                }
+                                
+                                string weight = "";
+                                if (style != null && style["bl"] != null && style["bl"]?.ToString() == "1")
+                                {
+                                    weight = "font-weight: bold;";
+                                }
+                                
+                                string fontStyle = "";
+                                if (style != null && style["it"] != null && style["it"]?.ToString() == "1")
+                                {
+                                    fontStyle = "font-style: italic;";
+                                }
+
+                                if (r == headerRowIdx)
+                                {
+                                    <th rowspan="@rowSpan" colspan="@colSpan" style="background-color: #f2f2f2; text-align: center; @align @weight @fontStyle">@cellVal</th>
+                                }
+                                else
+                                {
+                                    <td rowspan="@rowSpan" colspan="@colSpan" style="@align @weight @fontStyle">@cellVal</td>
+                                }
+                            }
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <table cellspacing="0" cellpadding="5" border="1" style="width: 100%; border-collapse: collapse; font: normal 14px Times, serif;">
+            <tbody>
+                <tr>
+                    <td style="text-align: center; padding: 20px;">Không có dữ liệu chi tiết!</td>
+                </tr>
+            </tbody>
+        </table>
+    }
+</div>
+
+<p>2. Mức giá kê khai bán xuất khẩu:</p>
+<p>
+    3. Phân tích nguyên nhân điều chỉnh giá bán giữa lần kê khai giá kỳ này so với kỳ liền kề trước:
+    nêu cụ thể nguyên nhân do biến động của các yếu tố hình thành giá và các nguyên nhân khác tác động làm
+    tăng hoặc giảm giá hàng hóa, dịch vụ.
+</p>
+<p>
+    4. Ghi rõ mức thuế giá trị gia tăng đã bao gồm trong giá.
+</p>

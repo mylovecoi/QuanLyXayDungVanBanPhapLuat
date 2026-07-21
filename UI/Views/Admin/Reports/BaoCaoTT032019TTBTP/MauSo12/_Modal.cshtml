@@ -1,0 +1,103 @@
+﻿<div class="modal fade" id="modalDynamicForm" tabindex="-1" role="dialog" aria-labelledby="modalDynamicForm" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    <span id="modalDynamicForm_Title"></span>
+                    <span class="d-block text-muted pt-2 font-size-sm">
+                        <span id="modalDynamicForm_SubTitle"></span>
+                    </span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+
+            <div id="modalDynamicForm_Body">
+                <form id="DynamicReportForm" target="_blank" method="post">
+                    <div class="modal-body"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary font-weight-bold">Xác Nhận</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalExportData" tabindex="-1" role="dialog" aria-labelledby="modalExportData" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Quản lý @ViewData["Title"] Công chứng
+                    <span class="d-block text-muted pt-2 font-size-sm">
+                        <span id="modalExportData_Title">Kết xuất @ViewData["Title"] công chứng</span>
+                    </span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+
+            <div id="modalExportData_Body">
+                <form asp-controller="BaoCaoThongKe" asp-action="ExportZip" id="frmExportZip" onsubmit="HandleSubmitFormExport(event, this)">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-xl-6 form-group">
+                                <label class="form-label text-blue fs-6 font-weight-boldest">Năm Kết Xuất</label>
+                                <label class="form-label text-blue font-weight-boldest">:</label>
+                                <select class="form-control" name="NamKetXuat" id="NamKetXuat">
+                                    @for (int year = DateTime.Now.Year - 5; year <= DateTime.Now.Year; year++)
+                                    {
+                                        <!option value="@year" @(year == DateTime.Now.Year ? "selected" : "")>Năm @year</!option>
+                                    }
+                                </select>
+                                <span id="NamKetXuatError" name="Error" class="text-danger d-flex align-content-center"></span>
+                            </div>
+                            <div class="col-xl-6 form-group">
+                                <label class="form-label text-blue fs-6 font-weight-boldest">Đơn Vị</label>
+                                <label class="form-label text-blue font-weight-boldest">:</label>
+                                <select class="form-control" name="DonViId" id="DonViId">
+                                    @{
+                                        var dmDonVi = ViewData["DanhMucDonVi"] as List<DataAccess.Entities.Settings.DanhMucDonVi>;
+                                        if (dmDonVi != null && dmDonVi.Any())
+                                            foreach (var item in dmDonVi)
+                                            {
+                                                string backIn = FuntionGlobal.GetBackIn(item.Level);
+                                                <option value="@item.Id">@Html.Raw(backIn)@item.TenDonVi</option>
+                                            }
+                                    }
+                                </select>
+                                <span id="DonViIdError" name="Error" class="text-danger d-flex align-content-center"></span>
+                            </div>
+                            <div class="col-xl-12 form-group">
+                                <label class="form-label text-blue fs-6 font-weight-boldest">Nghiệp vụ</label>
+                                <label class="form-label text-blue font-weight-boldest">:</label>
+                                <select class="form-control" name="HopDongIds" id="HopDongIds" multiple>
+                                    @{
+                                        var dmDiaDanhsLevel0 = ViewData["DanhMucHopDong"] as List<DataAccess.Entities.Settings.DanhMucHopDong>;
+                                        if (dmDiaDanhsLevel0 != null && dmDiaDanhsLevel0.Any())
+                                        {
+                                            foreach (var item in dmDiaDanhsLevel0)
+                                            {
+                                                string backIn = FuntionGlobal.GetBackIn(item.Level);
+                                                <option value="@item.Id">@Html.Raw(backIn)@item.TenHopDong</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                                <span id="HopDongIdsError" name="Error" class="text-danger d-flex align-content-center"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary font-weight-bold">Xác Nhận</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

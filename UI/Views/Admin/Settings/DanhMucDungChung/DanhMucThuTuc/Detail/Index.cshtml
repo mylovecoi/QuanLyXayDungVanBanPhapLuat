@@ -1,0 +1,134 @@
+@using DataAccess.Entities.Settings;
+
+@model ThuTucHanhChinh
+
+<div class="mb-3 font-weight-bold font-size-lg">
+	<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin thủ tục hành chính:</label>
+</div>
+<input hidden asp-for="Id" />
+<input hidden id="tableName" name="tableName" value="ThuTucHanhChinh" />
+@Html.AntiForgeryToken()
+<div class="row">
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Mã thủ tục <span class="text-danger">*</span></label>
+			<input class="form-control" asp-for="MaThuTuc" placeholder="Nhập mã thủ tục" autofocus>
+			<span asp-validation-for="MaThuTuc" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Tên thủ tục <span class="text-danger">*</span></label>
+			<input class="form-control" asp-for="TenThuTuc" placeholder="Nhập tên thủ tục">
+			<span asp-validation-for="TenThuTuc" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Tên quyết định <span class="text-danger">*</span></label>
+			<input class="form-control" asp-for="TenQuyetDinh" placeholder="Nhập tên quyết định">
+			<span asp-validation-for="TenQuyetDinh" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Ngày quyết định <span class="text-danger">*</span></label>
+			<input type="date" class="form-control" asp-for="NgayQuyetDinh">
+			<span asp-validation-for="NgayQuyetDinh" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Cơ quan thực hiện <span class="text-danger">*</span></label>
+			<input class="form-control" asp-for="CoQuanThucHien" placeholder="Nhập cơ quan thực hiện">
+			<span asp-validation-for="CoQuanThucHien" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Đối tượng thực hiện <span class="text-danger">*</span></label>
+			<input class="form-control" asp-for="DoiTuongThucHien" placeholder="Nhập đối tượng thực hiện">
+			<span asp-validation-for="DoiTuongThucHien" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Cách thức thực hiện <span class="text-danger">*</span></label>
+			<input class="form-control" asp-for="CachThucThucHien" placeholder="Nhập cách thức thực hiện">
+			<span asp-validation-for="CachThucThucHien" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Thời hạn giải quyết <span class="text-danger">*</span></label>
+			<input class="form-control" asp-for="ThoiHanGiaiQuyet" placeholder="Nhập thời hạn giải quyết">
+			<span asp-validation-for="ThoiHanGiaiQuyet" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-12">
+		<div class="form-group">
+			<label>Trình tự thực hiện <span class="text-danger">*</span></label>
+			<textarea class="form-control" id="TrinhTuThucHien" name="TrinhTuThucHien" rows="5" placeholder="Nhập trình tự thực hiện">@Model.TrinhTuThucHien</textarea>
+			<span asp-validation-for="TrinhTuThucHien" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Phí (VNĐ) <span class="text-danger">*</span></label>
+			<div class="input-group">
+				<input type="number" min="0" class="form-control" asp-for="Phi" placeholder="Nhập phí" data-val="true" data-val-range="Phí không được nhỏ hơn 0" data-val-range-min="0">
+				<div class="input-group-append">
+					<span class="input-group-text">VNĐ</span>
+				</div>
+			</div>
+			<span asp-validation-for="Phi" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Lệ phí (VNĐ) <span class="text-danger">*</span></label>
+			<div class="input-group">
+				<input type="number" min="0" class="form-control" asp-for="LePhi" placeholder="Nhập lệ phí" data-val="true" data-val-range="Lệ phí không được nhỏ hơn 0" data-val-range-min="0">
+				<div class="input-group-append">
+					<span class="input-group-text">VNĐ</span>
+				</div>
+			</div>
+			<span asp-validation-for="LePhi" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-12">
+		<div class="form-group">
+			<label>Thành phần hồ sơ <span class="text-danger">*</span></label>
+			<textarea class="form-control" id="ThanhPhanHoSo" name="ThanhPhanHoSo" rows="3" placeholder="Nhập thành phần hồ sơ">@Model.ThanhPhanHoSo</textarea>
+			<span asp-validation-for="ThanhPhanHoSo" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-12">
+		<div class="form-group">
+			<label>Yêu cầu điều kiện <span class="text-danger">*</span></label>
+			<textarea class="form-control" id="YeuCauDieuKien" name="YeuCauDieuKien" rows="3" placeholder="Nhập yêu cầu điều kiện">@Model.YeuCauDieuKien</textarea>
+			<span asp-validation-for="YeuCauDieuKien" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-12">
+		<div class="form-group">
+			<label>Căn cứ pháp lý <span class="text-danger">*</span></label>
+			<textarea class="form-control" id="CanCuPhapLy" name="CanCuPhapLy" rows="3" placeholder="Nhập căn cứ pháp lý">@Model.CanCuPhapLy</textarea>
+			<span asp-validation-for="CanCuPhapLy" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-12">
+		<div class="form-group">
+			<label>Kết quả thực hiện <span class="text-danger">*</span></label>
+			<textarea class="form-control" id="KetQuaThucHien" name="KetQuaThucHien" rows="3" placeholder="Nhập kết quả thực hiện">@Model.KetQuaThucHien</textarea>
+			<span asp-validation-for="KetQuaThucHien" class="text-danger"></span>
+		</div>
+	</div>
+</div>
+
+<div class="mb-3 font-weight-bold font-size-lg">
+	<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin đính kèm:</label>
+</div>
+<div id="attachedFile_frm" is-public="true" style="width:100%">
+	@await Html.PartialAsync("~/Views/Admin/AttachedFile/Index.cshtml", Model.DSFileDinhKem)
+</div>

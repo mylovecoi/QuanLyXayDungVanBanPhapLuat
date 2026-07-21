@@ -1,0 +1,344 @@
+﻿@*<script>var HOST_URL = "https://preview.keenthemes.com/metronic/theme/html/tools/preview";</script>*@
+<!--begin::Global Config(global config for global JS scripts)-->
+<script>
+    var KTAppSettings = {
+        "breakpoints": { "sm": 576, "md": 768, "lg": 992, "xl": 1200, "xxl": 1400 }, "colors": {
+            "theme": {
+                "base": {
+                    "white": "#ffffff", "primary": "#3699FF", "secondary": "#E5EAEE", "success": "#1BC5BD", "info": "#8950FC", "warning": "#FFA800", "danger": "#F64E60", "light": "#E4E6EF", "dark": "#181C32"
+                }, "light": {
+                    "wte": "#ffffff", "primary": "#E1F0FF", "secondary": "#EBEDF3", "success": "#C9F7F5", "info": "#EEE5FF", "warning": "#FFF4DE", "danger": "#FFE2E5", "light": "#F3F6F9", "dark": "#D6D6E0"
+                }, "inverse": { "white": "#ffffff", "primary": "#ffffff", "secondary": "#3F4254", "success": "#ffffff", "info": "#ffffff", "warning": "#ffffff", "danger": "#ffffff", "light": "#464E5F", "dark": "#ffffff" }
+            }, "gray":
+                { "gray - 100": "#F3F6F9", "gray - 200": "#EBEDF3", "gray - 300": "#E4E6EF", "gray - 400": "#D1D3E0", "gray - 500": "#B5B5C3", "gray - 600": "#7E8299", "gray- 700": "#5E6278", "gray- 800": "#3F4254", "gray - 900": "#181C32" }
+        },
+        "font-family": "Nunito Sans"
+    };
+</script>
+<!--end::Global Config-->
+<!--begin::Global Theme Bundle(used by all pages)-->
+<script src="~/assets/plugins/global/plugins.bundle.js"></script>
+<script src="~/assets/plugins/custom/prismjs/prismjs.bundle.js"></script>
+<script src="~/assets/js/scripts.bundle.js"></script>
+
+<!--end::Global Theme Bundle-->
+<!--begin::Page Vendors(used by this page)-->
+<script src="~/assets/plugins/custom/fullcalendar/fullcalendar.bundle.js"></script>
+<!--end::Page Vendors-->
+<!--begin::Page Scripts(used by this page)-->
+<script src="~/assets/js/pages/widgets.js"></script>
+@*<script src="~/js/microsoft-signalr-8.0.7.min.js"></script>*@
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.8/inputmask.min.js"></script>*@
+<!--end::Page Scripts-->
+<script>
+    $(document).ready(function () {
+        if (typeof KTHeader !== 'undefined' && document.getElementById('kt_header')) {
+            new KTHeader('kt_header', {
+                offset: {
+                    desktop: 200,
+                    tabletAndMobile: 300
+                }
+            });
+        }
+
+        var menuHierarchy = $("#MenuActive").val();
+        if (menuHierarchy) {
+            setMenuHierarchy(menuHierarchy);
+        }
+        keepActiveElementAtTopOnPageLoad();
+    });
+    // SetMenuHierarchy
+    function setMenuHierarchy(menuHierarchy) {
+        // Tách chuỗi thành các cấp độ (a, b, c, d)
+        var menuLevels = menuHierarchy.split('_');
+
+        var menuId = '';
+        // Duyệt qua từng cấp độ để áp dụng lớp CSS
+        for (var i = 0; i < menuLevels.length; i++) {
+
+            menuId += (i === 0 ? '' : '_') + menuLevels[i];
+            var menuItem = $("#" + menuId); // Sử dụng jQuery để lấy phần tử
+
+            if (menuItem.length) {
+
+                if (i === menuLevels.length - 1) {
+                    // Phần tử cuối cùng là menu-item-active
+                    menuItem.addClass("menu-item-active");
+                } else {
+                    // Các phần tử trước đó là menu-item-open và menu-item-here
+                    menuItem.addClass("menu-item-open menu-item-here");
+                }
+            }
+        }
+    }
+
+    function keepActiveElementAtTopOnPageLoad() {
+        var menuElement = $('#kt_aside_menu');
+        if (!menuElement.length) return;
+
+        var activeElement = $('.menu-item-active');
+        if (!activeElement.length) return;
+
+        var targetPosition = activeElement.offset().top;
+        menuElement.stop().animate({
+            scrollTop: targetPosition
+        }, 'slow');
+    }
+    // End SetMenuHierarchy
+
+    function showLoadingOverlay() {
+        $('#loadingOverlay').css('display', 'block'); // Hiển thị LoadingOverlay
+    }
+
+    function hideLoadingOverlay() {
+        $('#loadingOverlay').css('display', 'none') // Ẩn LoadingOverlay khi xong quá trình xử lý
+        $('body').removeClass('modal-open');
+        $('.modal-backdrop').remove();
+    }
+
+    // Gọi hàm showLoadingOverlay khi trang bắt đầu tải
+    //document.addEventListener("DOMContentLoaded", function () {
+    //    showLoadingOverlay();
+    //    fetchUnreadNotifications();
+    //});
+
+    // Gọi hàm hideLoadingOverlay khi trang đã tải xong
+    //window.onload = function () {
+    //    hideLoadingOverlay();
+    //};
+
+    function MoneyDecimalMask() {
+        $('.money-decimal-mask').inputmask({
+            alias: 'numeric',
+            groupSeparator: '.',
+            radixPoint: ',', // Dấu phân cách thập phân
+            autoGroup: true,
+            allowMinus: false, // Không cho phép nhập số âm
+            digits: 3, // Số lượng chữ số thập phân
+            placeholder: "0",
+            rightAlign: true, // Căn lề sang phải
+            onBeforePaste: function (pastedValue, opts) {
+                // Xử lý trường hợp khi người dùng dán giá trị vào input
+                var processedValue = pastedValue.replace(/[^0-9,]/g, ''); // Loại bỏ các ký tự không phải là số hoặc dấu phân cách
+                return processedValue;
+            }
+        });
+    }
+
+    function DateMask() {
+        $('.date-mask').inputmask({
+            mask: "99/99/9999", // Định dạng mặt nạ cơ bản cho ngày tháng năm
+            placeholder: 'dd/mm/yyyy', // Hướng dẫn định dạng
+            clearMaskOnLostFocus: false, // Giữ mặt nạ khi mất focus
+            showMaskOnHover: false, // Không hiển thị mặt nạ khi hover
+            definitions: {
+                '9': { validator: "[0-9]", cardinality: 1 } // Định nghĩa ký tự là chữ số
+            },
+            oninput: function (e) {
+                const input = $(e.target);
+                const value = input.val();
+                let caretPos = e.target.selectionStart;
+
+                // Thêm dấu phân cách tự động
+                if (value.length === 2 || value.length === 5) {
+                    // Thêm dấu phân cách tự động
+                    input.val(value + '/');
+                    caretPos++;
+                    e.target.selectionStart = caretPos;
+                    e.target.selectionEnd = caretPos;
+                }
+
+                // Kiểm tra tính hợp lệ của ngày và tháng
+                const [day, month, year] = value.split('/').map(part => parseInt(part, 10));
+
+                if (day > 31 || day < 1) {
+                    input.css('border', '1px solid red'); // Đánh dấu trường hợp ngày không hợp lệ
+                } else if (month > 12 || month < 1) {
+                    input.css('border', '1px solid red'); // Đánh dấu trường hợp tháng không hợp lệ
+                } else {
+                    input.css('border', ''); // Xóa đánh dấu nếu ngày tháng hợp lệ
+                }
+
+                // Tuỳ chọn: Nếu cần xử lý năm
+                if (year && year.toString().length === 4) {
+                    // Nếu cần kiểm tra năm, thêm logic ở đây
+                }
+            }
+        });
+    }
+
+    function CustomDateMask() {
+        $('.custom-date-mask').inputmask({
+            mask: ["99/99/9999"],
+            placeholder: "__/__/____",  // sửa placeholder để hiển thị đúng
+            showMaskOnHover: false,
+            showMaskOnFocus: true,
+            //keepStatic: true,
+            positionCaretOnClick: "lvp",
+            onBeforePaste: function (pastedValue, opts) {
+                var cleanValue = pastedValue.replace(/\D/g, '');
+                if (cleanValue.length === 8) {
+                    return cleanValue.replace(/^(\d{2})(\d{2})(\d{4})$/, "$1/$2/$3");
+                }
+                if (cleanValue.length === 6) {
+                    var m = cleanValue.substring(0, 2);
+                    var y = cleanValue.substring(2, 6);
+                    return "__/" + m + "/" + y;
+                }
+                if (cleanValue.length === 4) {
+                    return "__/__/" + cleanValue;
+                }
+                return pastedValue;
+            }
+        });
+
+        // Validate sau khi nhập xong hoặc dán
+        $('.custom-date-mask').on('blur', function () {
+            var value = $(this).val();
+            if (value === "") return;
+
+            var parts = value.split('/');
+            var isValid = true;
+
+            if (parts.length === 3) {
+                // dd/mm/yyyy
+                var d = parseInt(parts[0], 10);
+                var m = parseInt(parts[1], 10);
+                var y = parseInt(parts[2], 10);
+
+                if (d < 1 || d > 31 || m < 1 || m > 12 || y < 1900 || y > 2100) {
+                    isValid = false;
+                }
+            } else if (parts.length === 2) {
+                // mm/yyyy
+                var m = parseInt(parts[0], 10);
+                var y = parseInt(parts[1], 10);
+
+                if (m < 1 || m > 12 || y < 1900 || y > 2100) {
+                    isValid = false;
+                }
+            } else if (parts.length === 1) {
+                // yyyy
+                var y = parseInt(parts[0], 10);
+                if (y < 1900 || y > 2100) {
+                    isValid = false;
+                }
+            } else {
+                isValid = false;
+            }
+
+            if (!isValid) {
+                alert("Ngày nhập không hợp lệ. Vui lòng kiểm tra lại!");
+                $(this).val('').focus();
+            }
+        });
+    }
+    function display_ct6() {
+        var x = new Date()
+        var month = x.getMonth() + 1;
+        var date = x.getDate();
+        var year = x.getFullYear();
+        var hour = x.getHours();
+        var minute = x.getMinutes();
+        var second = x.getSeconds();
+
+        if (date < 10) { date = '0' + date }
+        if (month < 10) { month = '0' + month }
+        if (hour < 10) { hour = '0' + hour }
+        if (minute < 10) { minute = '0' + minute }
+        if (second < 10) { second = '0' + second }
+
+        var x1 = date + "/" + month + "/" + year;
+        x1 = x1 + " - " + hour + ":" + minute + ":" + second;
+        document.getElementById('ct6').innerHTML = x1;
+        display_c6();
+    }
+    function display_c6() {
+        var refresh = 1000; // Refresh rate in milli seconds
+        mytime = setTimeout('display_ct6()', refresh)
+    }
+    display_c6()
+
+    // Begin::Notification scripts
+    let hasUnread = false;
+    let shakeInterval;
+
+    function updateNotificationCount(count) {
+        const badge = document.getElementById("notification-badge");
+        hasUnread = count > 0;
+
+        if (hasUnread) {
+            badge.textContent = count > 5 ? "5+" : count;
+            badge.style.display = "flex";
+
+            if (!shakeInterval) {
+                startShakingLoop();
+            }
+        } else {
+            badge.style.display = "none";
+            stopShakingLoop();
+        }
+    }
+
+    function shakeBell() {
+        const bell = document.getElementById("notification-bell");
+        if (!hasUnread || !bell) return;
+
+        bell.classList.add("shake-animation");
+
+        setTimeout(() => {
+            bell.classList.remove("shake-animation");
+        }, 3000);
+    }
+
+    function startShakingLoop() {
+        shakeBell();
+        shakeInterval = setInterval(shakeBell, 30000); // Lắc mỗi 30 giây
+    }
+
+    function stopShakingLoop() {
+        clearInterval(shakeInterval);
+        shakeInterval = null;
+    }
+
+    // Gọi API để lấy số lượng thông báo chưa đọc
+    function fetchUnreadNotifications() {
+        fetch("/Manages/Notification/Count")
+            .then(response => response.json())
+            .then(data => {
+                updateNotificationCount(data.count);
+            })
+            .catch(error => console.error("Lỗi khi tải thông báo:", error));
+    }
+
+    // begin :: signalR
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/RequestHub", {
+            transport: signalR.HttpTransportType.WebSockets, // Ưu tiên WebSockets
+            withCredentials: true // Nếu server cần xác thực
+        })
+        //.configureLogging(signalR.LogLevel.None) // Tắt log hoàn toàn
+        .configureLogging(signalR.LogLevel.Error) // Chỉ hiển thị lỗi
+        .build();
+
+
+    // Kết nối đến SignalR
+    connection.start().then(() => {
+        //console.log("Connected to SignalR!");
+    }).catch(err => console.error(err));
+
+    // Nhận tín hiệu từ SignalR và cập nhật số thông báo
+    connection.on("ReceiveUpdate", () => {
+        // console.log("Có cập nhật mới, gọi API để lấy số thông báo...");
+        fetchUnreadNotifications();
+    });
+    //end :: signalR
+    // End::Notification scripts
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $('#imageCarousel').carousel({
+            interval: 3000,
+            ride: 'carousel'
+        });
+    });
+</script>

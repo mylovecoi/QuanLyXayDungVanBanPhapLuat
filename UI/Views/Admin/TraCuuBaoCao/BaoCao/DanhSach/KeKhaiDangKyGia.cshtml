@@ -1,0 +1,98 @@
+@model IEnumerable<DataAccess.Entities.KeKhaiDangKyGia.KeKhaiDangKyGia>
+
+@{
+    Layout = "_LayoutReport";
+    string tenNghe = ViewData["TenNghe"] as string ?? "";
+    string tuNgay = ViewData["TuNgay"] as string ?? "";
+    string denNgay = ViewData["DenNgay"] as string ?? "";
+    int stt = 1;
+}
+
+<div style="margin: 15mm 15mm 20mm 20mm;">
+    <div class="card-body">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="text-align: center; margin-bottom: 20px;">
+            <tr>
+                <td width="40%" style="vertical-align: top;">
+                    <span style="text-transform: uppercase; font-weight: bold;">SỞ TÀI CHÍNH</span><br>
+                    <span style="font-weight: bold; text-decoration: underline;">TỈNH THÁI NGUYÊN</span>
+                </td>
+                <td style="vertical-align: top;">
+                    <b>
+                        CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
+                        Độc lập - Tự do - Hạnh phúc
+                    </b>
+                    <hr style="width: 150px; vertical-align: top; margin-top: 5px; border: 0.5px solid #000;">
+                </td>
+            </tr>
+        </table>
+
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="font-weight: bold; text-transform: uppercase; margin-top: 20px;">BÁO CÁO HỒ SƠ KÊ KHAI ĐĂNG KÝ GIÁ</h2>
+            <h4 style="font-style: italic;">Danh mục: @tenNghe</h4>
+            @if (!string.IsNullOrEmpty(tuNgay) || !string.IsNullOrEmpty(denNgay))
+            {
+                <p style="font-style: italic; font-size: 13px; margin: 5px 0;">
+                    @(string.IsNullOrEmpty(tuNgay) ? "" : "Từ ngày: " + DateTime.Parse(tuNgay).ToString("dd/MM/yyyy") + "  ")
+                    @(string.IsNullOrEmpty(denNgay) ? "" : "Đến ngày: " + DateTime.Parse(denNgay).ToString("dd/MM/yyyy"))
+                </p>
+            }
+        </div>
+
+        <table cellspacing="0" cellpadding="5" border="1" style="border-collapse: collapse; font-size: 14px; width: 100%;" id="data_render">
+            <thead>
+                <tr style="text-align: center; font-weight: bold; background-color: #f2f2f2;">
+                    <th width="5%">#</th>
+                    <th>Số quyết định</th>
+                    <th>Ngày chuyển hồ sơ</th>
+                    <th>Ngày nhận hồ sơ</th>
+                    <th>Doanh nghiệp quản lý</th>
+                    <th>Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td style="text-align: center;">@(stt++)</td>
+                            <td>
+                                @item.SoQd <br/>
+                            </td>
+                            <td style="text-align: center;">
+                                @(item.NgayChuyen != DateTime.MinValue ? item.NgayChuyen.ToString("dd/MM/yyyy") : "")
+                            </td>
+                            <td style="text-align: center;">
+                                @(item.NgayDuyet != DateTime.MinValue ? item.NgayDuyet.ToString("dd/MM/yyyy") : "")
+                            </td>
+                            <td>@(item.DoanhNghiepQuanLy?.TenDoanhNghiep ?? "")</td>
+                            <td>@item.GhiChu</td>
+                        </tr>
+                    }
+                    <tr style="font-weight: bold; background-color: #f8f9fa;">
+                        <td colspan="2" style="text-align: center;">Tổng số hồ sơ</td>
+                        <td colspan="4" style="text-align: left; padding-left: 10px;">@Model.Count() hồ sơ</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" style="text-align: center; font-style: italic;">Không tìm thấy hồ sơ kê khai giá phù hợp.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 40px; text-align: center;">
+            <tr>
+                <td width="50%"></td>
+                <td width="50%" style="vertical-align: top;">
+                    <i style="font-size: 14px;">Thái Nguyên, ngày @DateTime.Now.Day tháng @DateTime.Now.Month năm @DateTime.Now.Year</i><br>
+                    <span style="text-transform: uppercase; font-weight: bold; display: block; margin-top: 5px;">THỦ TRƯỞNG ĐƠN VỊ</span>
+                    <span style="font-style: italic; font-size: 12px;">(Ký tên, đóng dấu và ghi rõ họ tên)</span>
+                    <br><br><br><br><br><br>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

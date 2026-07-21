@@ -1,0 +1,447 @@
+@using UI.ViewModels;
+@using DataAccess.Entities.DinhGiaHHDV;
+@using DataAccess.Entities.Settings;
+
+@{
+    var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+    string role = ViewData["Role"] as string ?? "";
+    int year = (int)(ViewData["Year"] ?? DateTime.Now.Year);
+    string thang = (string)(ViewData["Thang"] ?? "all");
+    Guid donViId = (Guid)(ViewData["DonViId"] ?? Guid.Empty);
+    string search = (string)(ViewData["Search"] ?? "");
+    int pageSize = (int)(ViewData["PageSize"] ?? 5);
+    int pageCurrent = (int)(ViewData["PageCurrent"] ?? 1);
+
+    var dmDonVi = ViewData["DanhMucDonVi"] as List<DanhMucDonVi> ?? new List<DanhMucDonVi>();
+    var dmDanhMuc = ViewData["GiaThiTruongDanhMuc"] as List<GiaThiTruongDanhMuc> ?? new List<GiaThiTruongDanhMuc>();
+
+    int record_id = 1;
+}
+
+@model VMPageInfoWithData<GiaThiTruongTongHop>
+
+<div class="card card-custom">
+    <div class="card-header flex-nowrap border-0 pt-6 pb-0">
+        <div class="card-title" style="min-width: 0; flex: 1;">
+            <h3 class="card-label" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%;">
+                Quản lý <b title="HỒ SƠ GIÁ THỊ TRƯỜNG TỔNG HỢP">HỒ SƠ GIÁ THỊ TRƯỜNG TỔNG HỢP</b>
+            </h3>
+        </div>
+        <div class="card-toolbar" style="flex-shrink: 0;">
+            @if (session != null && FuntionGlobal.CheckPermission(session, role, "Create") && donViId != Guid.Empty)
+            {
+                <button type="button" class="btn btn-sm btn-primary font-weight-bolder mr-2" id="btnCreateNew" style="display:none;" onclick="OpenCreateModal()">
+                    <i class="la la-plus"></i>Tổng hợp
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <form id="FilterForm" method="get" asp-controller="GiaThiTruongTongHop" asp-action="Index">
+            <div class="row">
+                <div class="col-xl-3">
+                    <div class="form-group">
+                        <label style="font-weight:bold; color:blue">Tháng:</label>
+                        <select class="form-control h-40px" name="Thang" id="FilterThang_Select">
+                            <!option value="all" @(thang == "all" ? "selected" : "")>-- Tất cả --</!option>
+                            @for (int m = 1; m <= 12; m++)
+                            {
+                                <!option value="@m" @(thang == m.ToString() ? "selected" : "")>Tháng @m</!option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xl-3">
+                    <div class="form-group">
+                        <label style="font-weight:bold; color:blue">Năm:</label>
+                        <select class="form-control h-40px" name="Year" id="FilterYear_Select">
+                            <!option value="all" @(year == 0 ? "selected" : "")>-- Tất cả --</!option>
+                            @for (int y = DateTime.Now.Year - 5; y <= DateTime.Now.Year; y++)
+                            {
+                                <!option value="@y" @(year == y ? "selected" : "")>Năm @y</!option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xl-4">
+                    <div class="form-group">
+                        <label style="font-weight:bold; color:blue">Đơn vị quản lý:</label>
+                        <select class="form-control h-40px" name="DonViId" id="FilterDonVi_Select">
+                            <!option value="all" @(donViId == Guid.Empty ? "selected" : "")>-- Tất cả --</!option>
+                            @foreach (var item in dmDonVi)
+                            {
+                                string backIn = FuntionGlobal.GetBackIn(item.Level);
+                                <!option value="@item.Id" @(donViId == item.Id ? "selected" : "")>
+                                    @Html.Raw(backIn) @item.TenDonVi
+                                </!option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-xl-3" style="text-align:left">
+                    <div class="form-group">
+                        <label class="text-blue">Hiển thị</label>
+                        <select class="form-control h-40px" name="PageSize" id="PageSize_Select">
+                            <!option value="5" @(pageSize == 5 ? "selected" : "")>5 thông tin</!option>
+                            <!option value="10" @(pageSize == 10 ? "selected" : "")>10 thông tin</!option>
+                            <!option value="20" @(pageSize == 20 ? "selected" : "")>20 thông tin</!option>
+                            <!option value="50" @(pageSize == 50 ? "selected" : "")>50 thông tin</!option>
+                            <!option value="100" @(pageSize == 100 ? "selected" : "")>100 thông tin</!option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xl-9">
+                    <div class="form-group">
+                        <label class="text-blue">Tìm kiếm</label>
+                        <div class="input-group">
+                            <input class="form-control h-40px" name="Search" id="txt_Search" placeholder="Tìm kiếm theo số báo cáo, ghi chú..." value="@search">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-danger" type="button" onclick="ClearSearch()"><i class="las la-times-circle"></i></button>
+                            </div>
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit"><i class="las la-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input hidden id="PageCurrent" name="PageCurrent" value="@pageCurrent" />
+        </form>
+
+        <!--begin: Datatable-->
+        <div class="table-responsive border rounded-lg mb-8">
+            <table class="table table-striped table-hover table-responsive-lg rounded-lg m-0">
+                <thead class="thead-light">
+                    <tr style="text-align:center;" class="table-active">
+                        <th width="3%">#</th>
+                        <th>Thông tin báo cáo</th>
+                        <th>Số báo cáo</th>
+                        <th>Ngày báo cáo</th>
+                        <th>Nội dung báo cáo</th>
+                        <th>Trạng thái</th>
+                        <th width="10%">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Data != null && Model.Data.Any())
+                    {
+                        @foreach (var item in Model.Data)
+                        {
+                            <tr>
+                                <td style="text-align:center; vertical-align:middle">@(record_id++)</td>
+                                <td style="text-align: center; vertical-align: middle">Tháng @item.Thang / Năm @item.Nam</td>
+                                <td style="vertical-align: middle; text-align: center; font-weight: bold;" class="text-primary">@item.SoBc</td>
+                                <td style="vertical-align: middle; text-align: center">@item.NgayBc.ToString("dd/MM/yyyy")</td>
+                                <td style="vertical-align: middle;">@item.GhiChu</td>
+                                <td style="text-align: center; vertical-align: middle">
+                                    @if (item.TrangThai == "CHT")
+                                    {
+                                        <span class="label font-weight-bold label-lg label-light-warning label-inline">Chưa hoàn thành</span>
+                                    }
+                                    else if (item.TrangThai == "CC")
+                                    {
+                                        <span class="label font-weight-bold label-lg label-light-primary label-inline">Chờ chuyển</span>
+                                    }
+                                    else if (item.TrangThai == "CD")
+                                    {
+                                        <span class="label font-weight-bold label-lg label-light-primary label-inline">Chờ duyệt</span>
+                                    }
+                                    else if (item.TrangThai == "BTL")
+                                    {
+                                        <span class="label font-weight-bold label-lg label-light-danger label-inline">Bị trả lại</span>
+                                    }
+                                    else if (item.TrangThai == "DD")
+                                    {
+                                        <span class="label font-weight-bold label-lg label-light-success label-inline">Đã duyệt</span>
+                                    }
+                                    else if (item.TrangThai == "CB")
+                                    {
+                                        <span class="label font-weight-bold label-lg label-light-info label-inline">Công bố</span>
+                                    }
+                                    else if (item.TrangThai == "HCB")
+                                    {
+                                        <span class="label font-weight-bold label-lg label-danger label-inline text-white" style="background-color: #f64e60 !important;">Hủy công bố</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="label font-weight-bold label-lg label-light-secondary label-inline">@item.TrangThai</span>
+                                    }
+                                </td>
+                                <td style="vertical-align: middle; text-align: center">
+                                    <a class="btn btn-sm btn-clean btn-icon" title="Xem chi tiết"
+                                       asp-controller="GiaThiTruongTongHop" asp-action="Show" asp-route-id="@item.Id" target="_blank">
+                                        <i class="icon-lg la la-eye text-primary"></i>
+                                    </a>
+                                    @if (session != null && FuntionGlobal.CheckPermission(session, role, "Edit"))
+                                    {
+                                        <a asp-controller="GiaThiTruongTongHop" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-clean btn-icon" title="Chỉnh sửa">
+                                            <i class="icon-lg la la-edit text-success"></i>
+                                        </a>
+                                    }
+                                    @if (session != null && FuntionGlobal.CheckPermission(session, role, "Delete"))
+                                    {
+                                        <button type="button" class="btn btn-sm btn-clean btn-icon" title="Xóa" onclick="DeleteRecord('@item.Id')">
+                                            <i class="icon-lg la la-trash text-danger"></i>
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td style="text-align:center" colspan="7">Không tìm thấy thông tin!!!</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <!--end: Datatable-->
+        <div id="Pagination">
+            @await Html.PartialAsync("~/Views/Shared/Pagination.cshtml")
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm mới -->
+<div class="modal fade" id="CreateModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModalLabel" style="font-weight:bold; color:blue">TỔNG HỢP HỒ SƠ GIÁ THỊ TRƯỜNG</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold text-blue">Danh mục giá thị trường (Thông tư/Quyết định):</label>
+                            <select class="form-control select2multi" id="ModalThongTu_Select" style="width:100%" required>
+                                <option value="">-- Chọn danh mục --</option>
+                                @foreach (var item in dmDanhMuc)
+                                {
+                                    <option value="@item.Id">@item.TenTT</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold text-blue">Tháng:</label>
+                            <select class="form-control" id="ModalThang_Select" required>
+                                @for (int m = 1; m <= 12; m++)
+                                {
+                                    <!option value="@m" @(thang == m.ToString() || (thang == "all" && m == DateTime.Now.Month) ? "selected" : "")>Tháng @m</!option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold text-blue">Năm:</label>
+                            <select class="form-control" id="ModalNam_Select" required>
+                                @for (int y = DateTime.Now.Year - 5; y <= DateTime.Now.Year; y++)
+                                {
+                                    <!option value="@y" @(year == y ? "selected" : "")>Năm @y</!option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="font-weight-bold text-success">Danh sách hồ sơ có thể tổng hợp:</label>
+                    <div class="table-responsive border rounded-lg" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-striped table-bordered m-0" id="GiaThiTruongListTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="text-center">Số QĐ</th>
+                                    <th class="text-center">Ngày nhập</th>
+                                    <th class="text-center">Tên đơn vị cập nhật</th>
+                                    <th class="text-center">Địa bàn áp dụng</th>
+                                    <th width="5%" class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Vui lòng chọn danh mục để tải hồ sơ.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary" onclick="SubmitSelection()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="DeleteForm" method="post" asp-controller="GiaThiTruongTongHop" asp-action="Delete" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="DeleteRecordId" />
+</form>
+
+@section custom_script {
+    <script src="~/js/site.js"></script>
+    <script>
+        $(document).ready(function () {
+            SetupSelect2('#FilterYear_Select', 'Lựa Chọn Năm', { enableSearch: false, enableClear: false });
+            SetupSelect2('#FilterThang_Select', 'Lựa Chọn Tháng', { enableSearch: false, enableClear: false });
+            SetupSelect2('#FilterDonVi_Select', 'Lựa Chọn Đơn Vị');
+            SetupSelect2('#PageSize_Select', 'Hiển thị', { enableSearch: false, enableClear: false });
+
+            $('#FilterYear_Select, #FilterThang_Select, #FilterDonVi_Select, #PageSize_Select').change(function() {
+                $('#PageCurrent').val(1);
+                $('#FilterForm').submit();
+            });
+
+            function toggleCreateButton() {
+                var donviVal = $('#FilterDonVi_Select').val();
+                if (donviVal && donviVal !== "all" && donviVal !== "") {
+                    $('#btnCreateNew').show();
+                } else {
+                    $('#btnCreateNew').hide();
+                }
+            }
+            toggleCreateButton();
+
+            // Load records in modal when filter changes
+            $('#ModalThongTu_Select, #ModalThang_Select, #ModalNam_Select').change(function () {
+                LoadGiaThiTruongRecords();
+            });
+        });
+
+        function ClearSearch() {
+            $('#txt_Search').val('');
+            $('#FilterForm').submit();
+        }
+
+        function OpenCreateModal() {
+            $('#CreateModal').modal('show');
+            setTimeout(function() {
+                $('.select2multi').select2({
+                    dropdownParent: $('#CreateModal')
+                });
+            }, 200);
+        }
+
+        function LoadGiaThiTruongRecords() {
+            var thongTuId = $('#ModalThongTu_Select').val();
+            var thang = $('#ModalThang_Select').val();
+            var nam = $('#ModalNam_Select').val();
+
+            if (!thongTuId) {
+                $('#GiaThiTruongListTable tbody').html('<tr><td colspan="5" class="text-center text-muted">Vui lòng chọn danh mục để tải hồ sơ.</td></tr>');
+                return;
+            }
+
+            $('#GiaThiTruongListTable tbody').html('<tr><td colspan="5" class="text-center"><i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>');
+
+            $.ajax({
+                url: '/GiaThiTruongTongHop/GetGiaThiTruongRecords',
+                type: 'GET',
+                data: {
+                    thongTuId: thongTuId,
+                    thang: thang,
+                    nam: nam
+                },
+                success: function (res) {
+                    var html = '';
+                    if (res && res.length > 0) {
+                        $.each(res, function (i, item) {
+                            html += '<tr>';
+                            html += '<td>' + (item.soQd || '') + '</td>';
+                            html += '<td>' + item.thoiDiem + '</td>';
+                            html += '<td>' + item.tenDonVi + '</td>';
+                            html += '<td>' + item.tenDiaBan + '</td>';
+                            html += '<td class="text-center"><input type="checkbox" name="selectedHoSo" value="' + item.maHoSo + '" class="hoso-chk" /></td>';
+                            html += '</tr>';
+                        });
+                    } else {
+                        html = '<tr><td colspan="5" class="text-center text-danger">Không tìm thấy hồ sơ phù hợp.</td></tr>';
+                    }
+                    $('#GiaThiTruongListTable tbody').html(html);
+                },
+                error: function () {
+                    $('#GiaThiTruongListTable tbody').html('<tr><td colspan="5" class="text-center text-danger">Có lỗi khi tải dữ liệu!</td></tr>');
+                }
+            });
+        }
+
+        function SubmitSelection() {
+            var thongTuId = $('#ModalThongTu_Select').val();
+            var thang = $('#ModalThang_Select').val();
+            var nam = $('#ModalNam_Select').val();
+            var donViId = $('#FilterDonVi_Select').val();
+
+            var selectedHoSo = [];
+            $('.hoso-chk:checked').each(function () {
+                selectedHoSo.push($(this).val());
+            });
+
+            if (!thongTuId) {
+                toastr.warning('Vui lòng chọn danh mục!');
+                return;
+            }
+
+            if (selectedHoSo.length === 0) {
+                toastr.warning('Vui lòng chọn ít nhất một hồ sơ!');
+                return;
+            }
+
+            var hosoParams = $.param({ hoso: selectedHoSo }, true);
+            var url = '/GiaThiTruongTongHop/Create?thongTuId=' + thongTuId + '&thang=' + thang + '&nam=' + nam + '&donViId=' + donViId + '&' + hosoParams;
+            window.location.href = url;
+        }
+
+        function DeleteRecord(id) {
+            Swal.fire({
+                title: 'Bạn có chắc chắn muốn xóa hồ sơ tổng hợp này?',
+                text: "Dữ liệu chi tiết liên quan sẽ bị xóa vĩnh viễn!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Đồng ý xóa',
+                cancelButtonText: 'Hủy bỏ'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#DeleteRecordId').val(id);
+                    var form = $('#DeleteForm');
+
+                    $.ajax({
+                        url: form.attr('action'),
+                        type: 'POST',
+                        data: form.serialize(),
+                        success: function (res) {
+                            if (res.isValid) {
+                                Swal.fire(
+                                    'Đã xóa!',
+                                    res.message,
+                                    'success'
+                                ).then(() => {
+                                    window.location.reload();
+                                });
+                            } else {
+                                toastr.error(res.message || 'Có lỗi khi xóa hồ sơ');
+                            }
+                        },
+                        error: function () {
+                            toastr.error('Lỗi kết nối máy chủ!');
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,99 @@
+﻿@using UI.ViewModels;
+@{
+    var pageInfo = ViewData["PageInfo"] as VMPageInfo;
+    var totalRecord = pageInfo?.TotalRecord ?? 0;
+    int pageCurrent = pageInfo?.PageCurrent ?? 1;
+    int pageTotal = pageInfo?.PageTotal ?? 0; ;
+    var pageRange = pageInfo?.PageRange ?? new List<int>();
+    int pageSize = pageInfo?.PageSize ?? 5;
+}
+
+@if (totalRecord > 0)
+{
+    <div class="row">
+        <div class="col-xl-4" style="text-align:left">
+            @if (totalRecord > 0)
+            {
+                <span>Hiển thị @(pageSize < totalRecord ? pageSize : totalRecord) thông tin trên @totalRecord thông tin;</span>
+            }
+        </div>
+
+        <div class="col-xl-8" style="text-align:right">
+            <div class="form-group fv-plugins-icon-container">
+                @if (pageCurrent == 1)
+                {
+                    <button type="button" class="btn btn-icon btn-sm btn-light mr-2 my-1 disabled" disabled>
+                        <i class="ki ki-bold-double-arrow-back icon-xs"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-icon btn-sm btn-light mr-2 my-1 disabled" disabled>
+                        <i class="ki ki-bold-arrow-back icon-xs"></i>
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-icon btn-sm btn-light mr-2 my-1" onclick="ClickPage(1)" title="Trang đầu">
+                        <i class="ki ki-bold-double-arrow-back icon-xs"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-icon btn-sm btn-light mr-2 my-1" onclick="ClickPage((@pageCurrent -1))" title="Trang trước">
+                        <i class="ki ki-bold-arrow-back icon-xs"></i>
+                    </button>
+                }
+
+                @if (pageCurrent > 3 && pageTotal > 5)
+                {
+                    if (!pageRange.Contains(1))
+                    {
+                        <button type="button" class="btn btn-icon btn-sm border-0 btn-light mr-2 my-1" onclick="ClickPage(1)">1</button>
+                    }
+                    if (pageCurrent > 4)
+                    {
+                        <button type="button" class="btn btn-icon btn-sm border-0 btn-light mr-2 my-1 disabled" disabled>...</button>
+                    }
+                }
+
+                @foreach (int p_r in pageRange)
+                {
+                    @if (p_r == pageCurrent)
+                    {
+                        <button type="button" class="btn btn-icon btn-sm border-0 btn-light mr-2 my-1 btn-hover-primary active">@p_r</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-icon btn-sm border-0 btn-light mr-2 my-1" onclick="ClickPage(@p_r)">@p_r</button>
+                    }
+                }
+
+                @if (pageCurrent + 3 < pageTotal && pageTotal > 5)
+                {
+
+                    @if (pageCurrent + 4 <= pageTotal)
+                    {
+                        <button type="button" class="btn btn-icon btn-sm border-0 btn-light mr-2 my-1 disabled" disabled>...</button>
+                    }
+                    <button type="button" class="btn btn-icon btn-sm border-0 btn-light mr-2 my-1" onclick="ClickPage(@pageTotal)">@pageTotal</button>
+                }
+
+                @if (pageCurrent == pageTotal || pageTotal == 0)
+                {
+                    <button type="button" class="btn btn-icon btn-sm btn-light mr-2 my-1 disabled" disabled>
+                        <i class="ki ki-bold-arrow-next icon-xs"></i>
+                    </button>
+                    <button type="button" class="btn btn-icon btn-sm btn-light mr-2 my-1 disabled" disabled>
+                        <i class="ki ki-bold-double-arrow-next icon-xs"></i>
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-icon btn-sm btn-light mr-2 my-1" onclick="ClickPage((@pageCurrent + 1))" title="Trang tiếp">
+                        <i class="ki ki-bold-arrow-next icon-xs"></i>
+                    </button>
+                    <button type="button" class="btn btn-icon btn-sm btn-light mr-2 my-1" onclick="ClickPage(@pageTotal)" title="Trang cuối">
+                        <i class="ki ki-bold-double-arrow-next icon-xs"></i>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+}

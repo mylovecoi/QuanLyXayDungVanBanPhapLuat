@@ -1,0 +1,150 @@
+﻿@using Services.DTOs.Manages.ThongTinHoSo;
+@model VMPageInfoWithData<DataAccess.Entities.Manages.ThongTinHoSo.HoSoCCCT>
+@{
+	ViewData["PageInfo"] = Model;
+	var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+	string role = ViewData["Role"] as string ?? "";
+	var filter = ViewData["Filter"] as HoSoFilter;
+}
+
+<div class="card card-custom">
+	<div class="card-header flex-wrap border-0 pt-6 pb-0">
+		<div class="card-title">
+			<h3 class="card-label">
+				<b>@ViewData["Title"]?.ToString()?.ToUpper() CÔNG CHỨNG - CHỨNG THỰC</b>
+				<span class="d-block text-muted pt-2 font-size-sm">
+					Quản Lý @FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()) Công Chứng - Chứng Thực
+				</span>
+			</h3>
+		</div>
+		<div class="card-toolbar">
+			@if (session != null && FuntionGlobal.CheckPermission(session, role, "Create"))
+			{
+				<button type="button" class="btn btn-sm btn-primary font-weight-bolder mr-2" onclick="HandleBtnShowModalNghiepVu()">
+					<i class="la la-plus"></i>Thêm mới
+				</button>
+			}
+		</div>
+	</div>
+
+	<div class="card-body pt-0">
+		@*<hr />*@
+		<form id="FilterForm">
+			<div class="row">
+				<div class="col-xl-3">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="font-weight:bold; color:blue">Năm:</label>
+						<select class="form-control h-40px" name="Year" id="TargetYear_Select">
+							@for (int year = DateTime.Now.Year - 5; year <= DateTime.Now.Year; year++)
+							{
+								<!option value="@year" @(filter?.TargetYear == year ? "selected" : "")>Năm @year</!option>
+							}
+						</select>
+					</div>
+				</div>
+				<div class="col-xl-3">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="font-weight:bold; color:blue">Đơn vị:</label>
+						<select class="form-control h-40px" name="DonViId" id="DanhMucDonVi_Select">
+							@{
+								var dmDonVi = ViewData["DanhMucDonVi"] as List<DataAccess.Entities.Settings.DanhMucDonVi>;
+								if (dmDonVi != null && dmDonVi.Any())
+									foreach (var item in dmDonVi)
+									{
+										string backIn = FuntionGlobal.GetBackIn(item.Level);
+										bool selected = filter?.DonViId == item.Id;
+										<option value="@item.Id" selected="@selected">
+											@Html.Raw(backIn)
+											@item.TenDonVi
+										</option>
+									}
+							}
+						</select>
+					</div>
+				</div>
+				<div class="col-xl-6">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="font-weight:bold; color:blue">Nghiệp vụ:</label>
+						<select class="form-control h-40px" name="LoaiHopDong" id="LoaiHopDong_Select">
+							<option value="">Lựa Chọn Nghiệp Vụ</option>
+							@{
+								var dmHopDongsLevel0 = ViewData["DanhMucHopDong"] as List<DataAccess.Entities.Settings.DanhMucHopDong>;
+								if (dmHopDongsLevel0 != null && dmHopDongsLevel0.Any())
+								{
+									foreach (var item in dmHopDongsLevel0)
+									{
+										string backIn = FuntionGlobal.GetBackIn(item.Level);
+										bool selected = filter?.LoaiHopDong == item.Id;
+										<option value="@item.Id" selected="@selected">
+											@Html.Raw(backIn)
+											@item.TenHopDong
+											@(item.ParentId == null || item.ParentId == Guid.Empty ? string.Format("(Hợp Đồng {0})", @item.IsCC ? "Công Chứng" : "Chứng Thực") : "")
+										</option>
+									}
+								}
+							}
+						</select>
+					</div>
+				</div>
+			</div>
+			<hr />
+			<div class="row">
+				<div class="col-xl-3" style="text-align:left">
+					<div class="form-group fv-plugins-icon-container">
+						<label class="text-blue">Hiển thị</label>
+						<select class="form-control h-40px" name="PageSize" id="PageSize_Select">
+							<!option value="5" @(filter?.PageSize == 5 ? "selected" : "")>5 thông tin</!option>
+							<!option value="10" @(filter?.PageSize == 10 ? "selected" : "")>10 thông tin</!option>
+							<!option value="20" @(filter?.PageSize == 20 ? "selected" : "")>20 thông tin</!option>
+							<!option value="50" @(filter?.PageSize == 50 ? "selected" : "")>50 thông tin</!option>
+							<!option value="100" @(filter?.PageSize == 100 ? "selected" : "")> 100 thông tin</!option>
+						</select>
+					</div>
+				</div>
+				<div class="col-xl-9">
+					<div class="form-group fv-plugins-icon-container">
+						<label class="text-blue">Tìm kiếm</label>
+						<div class="input-group">
+							<input class="form-control h-40px" name="Search" id="txt_Search" placeholder="Tìm kiếm..." value="@filter?.Search">
+							<div class="input-group-prepend">
+								<button class="btn btn-danger" type="reset"><i class="las la-times-circle"></i></button>
+							</div>
+							<div class="input-group-append">
+								<button class="btn btn-primary" type="submit"><i class="las la-search"></i></button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<input hidden id="sort_current" name="sort_current" value="@Model.Sort" />
+			<input hidden id="PageCurrent" name="PageCurrent" value="@Model.PageCurrent" />
+		</form>
+		<!--begin: Datatable-->
+		<div class="table-responsive border rounded-lg mb-8">
+			@await Html.PartialAsync("~/Views/Admin/Manages/QuanLyHoSo/DanhSachHoSoCCCT/_DataTable.cshtml", Model.Data)
+			<form id="DeleteForm" method="post" style="display:none;" asp-controller="DanhSachHoSoCCCT" asp-action="Delete">
+				<input type="hidden" name="hoSoId" id="recordId" />
+			</form>
+			<form id="ChuyenForm" method="post" style="display:none;" asp-controller="DanhSachHoSoCCCT" asp-action="Chuyen">
+				<input type="hidden" name="hoSoId" id="chuyenId" />
+			</form>
+		</div>
+		<!--end: Datatable-->
+		<div id="Pagination">
+			@await Html.PartialAsync("~/Views/Shared/Pagination.cshtml")
+		</div>
+	</div>
+</div>
+@await Html.PartialAsync("~/Views/Shared/_ModalPartial.cshtml")
+@await Html.PartialAsync("~/Views/Admin/Manages/QuanLyHoSo/DanhSachHoSoCCCT/_Modal.cshtml")
+
+@section custom_style {
+
+}
+
+@section custom_script {
+@* page *@
+	<script src="~/js/site.js"></script>
+	<script src="~/js/pages/Admin/Manages/QuanLyHoSo/DanhSachHoSoCCCT.js"></script>
+@* lib *@
+}

@@ -1,0 +1,119 @@
+﻿@model List<Services.DTOs.Manages.ThongTinHoSo.HoSoCCCTChiTietDto>
+@if (Model != null && Model.Any())
+{
+	<div class="mb-3 font-weight-bold font-size-lg">
+		<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin chi tiết hồ sơ:</label>
+	</div>
+
+	<div id="frmThongTinChiTiet">
+		<div class="row">
+			@foreach (var chiTiet in Model)
+			{
+				var chiTietHopDongId = chiTiet.HopDongChiTietId; // GUID dùng làm index
+
+				<div class="col-sm-12 col-md-12 col-lg-@chiTiet.ColSize col-xl-@chiTiet.ColSize col-xxl-@chiTiet.ColSize form-group">
+
+					<label class="form-label fs-6 font-weight-boldest">@chiTiet.Title</label>
+					<label class="form-label font-weight-boldest">:</label>
+					<span class="text-danger">@(chiTiet.IsRequired ? "(*)" : "")</span>
+
+					<!-- bắt buộc cho binding -->
+					<input type="hidden" name="HoSoCCCTChiTietDtos.index" value="@chiTietHopDongId" />
+					<input type="hidden" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Id" value="@chiTiet.Id" />
+					<input type="hidden" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].HoSoId" value="@chiTiet.HoSoId" />
+					<input type="hidden" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].HopDongChiTietId" value="@chiTietHopDongId" />
+					<input type="hidden" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Title" value="@chiTiet.Title" />
+					<input type="hidden" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Type" value="@chiTiet.Type" />
+					<input type="hidden" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].ColSize" value="@chiTiet.ColSize" />
+					<input type="hidden" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Code" value="@chiTiet.Code" />
+					<input type="hidden" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Order" value="@chiTiet.Order" />
+					<input type="hidden" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].IsRequired" value="@chiTiet.IsRequired" />
+
+					@if (!string.IsNullOrEmpty(chiTiet.Code))
+					{
+						switch (chiTiet.Code)
+						{
+							case "LoaiTaiSan":
+								{
+									<select class="form-control dynamic-select2" id="HoSoCCCTChiTietDtos_@(chiTietHopDongId)__Value" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Value" data-isrequired="@chiTiet.IsRequired" data-title="@chiTiet.Title">
+										@if (chiTiet.Options?.Any() == true)
+										{
+											foreach (var opt in chiTiet.Options)
+											{
+												var selected = opt.Id.ToString() == chiTiet.Value;
+												<option value="@opt.Id" selected="@selected">@opt.DisplayName</option>
+											}
+										}
+									</select>
+									break;
+								}
+
+							case "DiaDanh":
+								{
+									<div class="input-group">
+										<label class="form-control" data-target-label="GroupDiaBan">--Chọn địa bàn--</label>
+										<div class="input-group-append">
+											<button class="btn btn-primary" type="button"
+													onclick="HandleBtnShowModelDiaDanhClick('GroupDiaBan')">
+												Chọn
+											</button>
+										</div>
+									</div>
+									<input type="hidden" id="HoSoCCCTChiTietDtos_@(chiTietHopDongId)__Value" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Value" data-target-input="GroupDiaBan" />
+									break;
+								}
+						}
+					}
+					else
+					{
+						switch (chiTiet.Type)
+						{
+							case DataAccess.Entities.Settings.FieldType.TextArea:
+								{
+									<textarea id="HoSoCCCTChiTietDtos_@(chiTietHopDongId)__Value" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Value" class="form-control" placeholder="Nhập @chiTiet.Title.ToLower()" rows="4">@chiTiet.Value</textarea>
+									break;
+								}
+
+							case DataAccess.Entities.Settings.FieldType.Checkbox:
+								{
+									<input type="hidden" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Value" value="false" />
+									<input type="checkbox" id="HoSoCCCTChiTietDtos_@(chiTietHopDongId)__Value" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Value" value="true" value="@chiTiet.Value" />
+									break;
+								}
+
+							case DataAccess.Entities.Settings.FieldType.Date:
+								{
+									<input type="date" id="HoSoCCCTChiTietDtos_@(chiTietHopDongId)__Value" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Value" class="form-control" placeholder="Nhập @chiTiet.Title.ToLower()" value="@chiTiet.Value" />
+									break;
+								}
+
+							case DataAccess.Entities.Settings.FieldType.Number:
+								{
+									<input type="number" id="HoSoCCCTChiTietDtos_@(chiTietHopDongId)__Value" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Value" class="form-control" inputmode="decimal" placeholder="Nhập @chiTiet.Title.ToLower()" value="@chiTiet.Value" />
+									break;
+								}
+							case DataAccess.Entities.Settings.FieldType.Money:
+								{
+									<input type="text" id="HoSoCCCTChiTietDtos_@(chiTietHopDongId)__Value" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Value" class="form-control" inputmode="decimal" placeholder="Nhập @chiTiet.Title.ToLower()" value="@chiTiet.Value" />
+									break;
+								}
+
+							default: // Text
+								{
+									<input type="text" id="HoSoCCCTChiTietDtos_@(chiTietHopDongId)__Value" name="HoSoCCCTChiTietDtos[@chiTietHopDongId].Value" class="form-control" placeholder="Nhập @chiTiet.Title.ToLower()" value="@chiTiet.Value" />
+									break;
+								}
+						}
+					}
+
+					<span id="@(chiTietHopDongId)Error" name="Error" class="text-danger d-flex align-content-center"></span>
+					<span class="text-danger field-validation-valid" data-valmsg-for="HoSoCCCTChiTietDtos[@chiTietHopDongId].Value" data-valmsg-replace="true"></span>
+					@{
+						var errorMsg = ViewData.ModelState[$"HoSoCCCTChiTietDtos[{chiTiet.HopDongChiTietId}].Error"]?.Errors.FirstOrDefault()?.ErrorMessage;
+						<span class="text-danger">@(!string.IsNullOrEmpty(errorMsg) ? FuntionGlobal.ToSentenceCase(errorMsg) : "")</span>
+					}
+				</div>
+			}
+		</div>
+	</div>
+}

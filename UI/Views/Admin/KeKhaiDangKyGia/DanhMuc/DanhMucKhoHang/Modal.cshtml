@@ -1,0 +1,249 @@
+@using DataAccess.Entities.KeKhaiDangKyGia;
+
+<script>
+    function Create(dnId) {
+        $('#frm_create')[0].reset();
+        $('#DoanhNghiepQuanLyID_create').val(dnId);
+        $('#Create_Modal').modal('show');
+    }
+
+    function Store() {
+        var form = document.getElementById('frm_create');
+        if ($('#MaKH_create').val().trim() === '') {
+            toastr.error("Mã kho hàng không được bỏ trống!", "Lỗi!");
+            return;
+        }
+        if ($('#TenKH_create').val().trim() === '') {
+            toastr.error("Tên kho hàng không được bỏ trống!", "Lỗi!");
+            return;
+        }
+
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        const formData = new FormData(form);
+        $.ajax({
+            url: '/KeKhaiDangKyGiaDMKH/Store',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'JSON',
+            success: function (data) {
+                if (data.status == 'success') {
+                    toastr.success(data.message);
+                    location.reload();
+                } else {
+                    toastr.error(data.message, "Lỗi!");
+                }
+            }
+        });
+    }
+
+    function Edit(id) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/KeKhaiDangKyGiaDMKH/Edit',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: { id: id },
+            success: function (res) {
+                if (res.status == 'success') {
+                    $('#Id_edit').val(res.data.id);
+                    $('#DoanhNghiepQuanLyID_edit').val(res.data.doanhNghiepQuanLyID);
+                    $('#MaKH_edit').val(res.data.maKH);
+                    $('#TenKH_edit').val(res.data.tenKH);
+                    $('#DiaChi_edit').val(res.data.diaChi);
+                    $('#GhiChu_edit').val(res.data.ghiChu);
+                    $('#Edit_Modal').modal('show');
+                } else {
+                    toastr.error(res.message);
+                }
+            },
+            error: function (xhr) {
+                toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+            }
+        });
+    }
+
+    function Update() {
+        var form = document.getElementById('frm_edit');
+        if ($('#MaKH_edit').val().trim() === '') {
+            toastr.error("Mã kho hàng không được bỏ trống!", "Lỗi!");
+            return;
+        }
+        if ($('#TenKH_edit').val().trim() === '') {
+            toastr.error("Tên kho hàng không được bỏ trống!", "Lỗi!");
+            return;
+        }
+
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        const formData = new FormData(form);
+        $.ajax({
+            url: '/KeKhaiDangKyGiaDMKH/Update',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'JSON',
+            success: function (data) {
+                if (data.status == 'success') {
+                    toastr.success(data.message);
+                    location.reload();
+                } else {
+                    toastr.error(data.message, "Lỗi!");
+                }
+            }
+        });
+    }
+
+    // Modal delete confirmation helper
+    function Delete(id, name) {
+        $('#id_delete').val(id);
+        $('#ten_delete').html(name);
+        $('#Delete_Modal').modal('show');
+    }
+</script>
+
+<!-- Create Modal -->
+<div class="modal fade" id="Create_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Danh mục kho hàng
+                    <span class="d-block text-muted pt-2 font-size-sm">Thêm mới kho hàng</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_create">
+                    <input type="hidden" name="DoanhNghiepQuanLyID" id="DoanhNghiepQuanLyID_create" />
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label>Mã kho hàng <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="MaKH" id="MaKH_create" required />
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label>Tên kho hàng <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="TenKH" id="TenKH_create" required />
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label>Địa chỉ</label>
+                                <input type="text" class="form-control" name="DiaChi" id="DiaChi_create" />
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label>Ghi chú</label>
+                                <textarea class="form-control" name="GhiChu" id="GhiChu_create" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Store()">Thêm mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="Edit_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Danh mục kho hàng
+                    <span class="d-block text-muted pt-2 font-size-sm">Chỉnh sửa kho hàng</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_edit">
+                    <input type="hidden" name="Id" id="Id_edit" />
+                    <input type="hidden" name="DoanhNghiepQuanLyID" id="DoanhNghiepQuanLyID_edit" />
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label>Mã kho hàng <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="MaKH" id="MaKH_edit" required />
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label>Tên kho hàng <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="TenKH" id="TenKH_edit" required />
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label>Địa chỉ</label>
+                                <input type="text" class="form-control" name="DiaChi" id="DiaChi_edit" />
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label>Ghi chú</label>
+                                <textarea class="form-control" name="GhiChu" id="GhiChu_edit" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Update()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="Delete_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Danh mục kho hàng
+                    <span class="d-block text-muted pt-2 font-size-sm">Xóa kho hàng</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form action="/KeKhaiDangKyGiaDMKH/Delete" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>
+                            Bạn có chắc chắn muốn xóa kho hàng: <b id="ten_delete" style="color: red"></b>?
+                        </label>
+                    </div>
+                    <input type="hidden" id="id_delete" name="id_delete" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

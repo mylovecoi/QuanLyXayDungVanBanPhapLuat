@@ -1,0 +1,80 @@
+﻿@model DataAccess.Entities.Systems.User
+
+<div class="card card-custom">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="card-label">
+                @ViewData["Title"]
+                <span class="d-block text-muted pt-2 font-size-sm">
+                    Quản lý @ViewData["Title"]
+                </span>
+            </h3>
+        </div>
+    </div>
+    <!--begin::Form-->
+    <form asp-controller="Home" asp-action="UpdateUserInfo" method="post">
+        @Html.AntiForgeryToken()
+        <div class="card-body">
+            <div class="row">
+                <input hidden asp-for="Id" />
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Tên đơn vị báo cáo:</label>
+                        <input type="text" asp-for="TenDonViBaoCao" class="form-control" autofocus />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Tên đơn vị chủ quản báo cáo:</label>
+                        <input type="text" asp-for="TenDonViChuQuanBaoCao" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Đăng nhập lần đầu:</label>
+                        <select asp-for="FirstLogin" class="form-control">
+                            <option value="0">Không</option>
+                            <option value="0">Có</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Địa danh:</label>
+                        <input type="text" asp-for="DiaDanh" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Chức danh ký:</label>
+                        <input type="text" asp-for="ChucDanhKy" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Họ tên người ký:</label>
+                        <input type="text" asp-for="HoTenNguoiKy" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Ký hiệu đơn vị:</label>
+                        <input type="text" asp-for="KyHieuDonVi" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Agent ID:</label>
+                        <input type="text" asp-for="AgentId" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer" style="text-align:center">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-danger"><i class="la la-reply"></i>Quay lại</a>&ensp;
+            <button type="reset" class="btn btn-secondary"><i class="la la-refresh"></i>Nhập lại</button>&ensp;
+            <button type="submit" class="btn btn-primary mr-2"><i class="la la-check"></i>Cập nhật</button>
+        </div>
+    </form>
+    <!--end::Form-->
+</div>

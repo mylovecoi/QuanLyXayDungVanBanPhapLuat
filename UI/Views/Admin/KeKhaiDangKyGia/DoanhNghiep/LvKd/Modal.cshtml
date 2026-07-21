@@ -1,0 +1,115 @@
+@using DataAccess.Entities.Settings;
+@{
+    var listKinhDoanhNganh = ViewData["DanhMucNganhKd"] as IEnumerable<DanhMucKinhDoanh> ?? new List<DanhMucKinhDoanh>();
+    var listKinhDoanhNghe = ViewData["DanhMucKinhDoanh"] as IEnumerable<DanhMucKinhDoanh> ?? new List<DanhMucKinhDoanh>();
+}
+
+<!--Create Modal-->
+<div class="modal fade" id="Create_Lvkd_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Thông tin lĩnh vực kinh doanh
+                    <span class="d-block text-muted pt-2 font-size-sm">Thêm mới thông tin lĩnh vực kinh doanh</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row text-left">
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold">Danh mục kê khai đăng ký giá</label>
+                            <select class="form-control select2basic" id="manghe_create" name="manghe_create" style="width: 100%">
+                                <option value="">--Chọn danh mục kê khai đăng ký giá--</option>
+                                @foreach (var nganh in listKinhDoanhNganh)
+                                {
+                                    <optgroup label="@nganh.TenNghe">
+                                        @{
+                                            var listNgheTheoNganh = listKinhDoanhNghe.Where(t => t.MaNganh == nganh.MaNghe).ToList();
+                                        }
+                                        @foreach (var nghe in listNgheTheoNganh)
+                                        {
+                                            <option value="@nghe.MaNghe">&emsp;@nghe.TenNghe</option>
+                                        }
+                                    </optgroup>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold">Đơn vị nhận hồ sơ</label>
+                            <select class="form-control select2basic" id="madvhs_create" name="madvhs_create" style="width: 100%">
+                                <option value="">--Chọn đơn vị nhận hồ sơ--</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="SetStoreLvkd()">Thêm mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Edit Modal-->
+<div class="modal fade" id="Edit_Lvkd_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Thông tin lĩnh vực kinh doanh
+                    <span class="d-block text-muted pt-2 font-size-sm">Chỉnh sửa thông tin lĩnh vực kinh doanh</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row text-left" id="edit_thongtin">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="SetUpdateLvkd()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Modal-->
+<div class="modal fade" id="Delete_Lvkd_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Thông tin lĩnh vực kinh doanh
+                    <span class="d-block text-muted pt-2 font-size-sm">Xóa thông tin lĩnh vực kinh doanh</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row text-left">
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label>Tên nghề: </label>
+                            <span id="tennghe_delete" style="color:blue; font-weight:bold"></span>
+                        </div>
+                    </div>
+                    <input hidden id="id_delete" name="id_delete" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="SetDeleteLvkd()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>

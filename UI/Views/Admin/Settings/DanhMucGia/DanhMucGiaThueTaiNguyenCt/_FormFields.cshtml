@@ -1,0 +1,71 @@
+@model DataAccess.Entities.Settings.DanhMucGia.DanhMucGiaThueTaiNguyenCt
+
+@{
+    var donViTinhs = ViewData["DonViTinhs"] as IEnumerable<DataAccess.Entities.Settings.DanhMucDonViTinh> ?? new List<DataAccess.Entities.Settings.DanhMucDonViTinh>();
+}
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="DanhMucGiaThueTaiNguyenId" />
+
+<div class="row">
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Cấp I:</label>
+            <input type="text" class="form-control" asp-for="Cap1" />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Cấp II:</label>
+            <input type="text" class="form-control" asp-for="Cap2" />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Cấp III:</label>
+            <input type="text" class="form-control" asp-for="Cap3" />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Cấp IV:</label>
+            <input type="text" class="form-control" asp-for="Cap4" />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Cấp V:</label>
+            <input type="text" class="form-control" asp-for="Cap5" />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Cấp VI:</label>
+            <input type="text" class="form-control" asp-for="Cap6" />
+        </div>
+    </div>
+    <div class="col-xl-9">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Tên nhóm, loại tài nguyên: <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" asp-for="Ten" required />
+        </div>
+    </div>
+    <div class="col-xl-3">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Đơn vị tính:</label>
+            <select class="form-control" asp-for="DonViTinh">
+                <option value="">-- Chọn đơn vị tính --</option>
+                @foreach (var item in donViTinhs)
+                {
+                    <!option value="@item.MaDonViTinh" @(Model.DonViTinh == item.MaDonViTinh ? "selected" : "")>@item.TenDonViTinh</!option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Số thứ tự sắp xếp:</label>
+            <input type="number" class="form-control" asp-for="STTSapXep" required />
+        </div>
+    </div>
+</div>

@@ -1,0 +1,185 @@
+@using DataAccess.Entities.ThamDinhGia;
+
+<!--Create-Modal-->
+<div class="modal fade" id="Create_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Thêm mới @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_create">
+                    @await Html.PartialAsync("~/Views/Admin/ThamDinhGia/DanhMucHangHoa/_FormFields.cshtml", new ThamDinhGiaDanhMucHangHoa())
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Store()">Thêm mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Edit Modal-->
+<div class="modal fade" id="Edit_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Chỉnh sửa @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_edit"></form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Update()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Modal-->
+<div class="modal fade" id="Delete_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Xóa @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="ThamDinhGiaDanhMucHangHoa" asp-action="Delete" method="post">
+                <div class="modal-body">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label>
+                            Tên danh mục hàng hóa:&nbsp;<b id="tendm_delete" name="tendm_delete" style="color: #FF0000"></b>
+                        </label>
+                    </div>
+                    <input hidden id="id_delete" name="id_delete" />
+                    @Html.AntiForgeryToken()
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/modal.validation.js"></script>
+<script>
+    function Create() {
+        $('#Create_Modal').modal('show');
+    }
+
+    function Store() {
+        var form = document.getElementById('frm_create');
+        if (!form) {
+            toastr.error("Không tìm thấy form với id 'frm_create'", "Lỗi!");
+            return;
+        }
+        const fieldsToValidate = [
+            { id: 'TenDanhMucHangHoa', message: 'Thông tin không được bỏ trống' }
+        ];
+        if (validateModalFormFields(form, fieldsToValidate)) {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+            const formData = new FormData(form);
+            $.ajax({
+                url: '/ThamDinhGia/DanhMucHangHoa/Store',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': csrfToken
+                },
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'JSON',
+                success: function (data) {
+                    if (data.status == 'success') {
+                        toastr.success(data.message);
+                        location.reload();
+                    } else {
+                        toastr.error(data.message, "Lỗi!");
+                    }
+                }
+            })
+        }
+    }
+
+    function Edit(id_edit) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/ThamDinhGia/DanhMucHangHoa/Edit',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: {
+                Id: id_edit,
+            },
+            success: function (data) {
+                $('#frm_edit').html(data);
+                $('#Edit_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+            }
+        })
+    }
+
+    function Update() {
+        var form = document.getElementById('frm_edit');
+        if (!form) {
+            toastr.error("Không tìm thấy form với id 'frm_edit'", "Lỗi!");
+            return;
+        }
+        const fieldsToValidate = [
+            { id: 'TenDanhMucHangHoa', message: 'Thông tin không được bỏ trống' }
+        ];
+        if (validateModalFormFields(form, fieldsToValidate)) {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+            const formData = new FormData(form);
+            $.ajax({
+                url: '/ThamDinhGia/DanhMucHangHoa/Update',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': csrfToken
+                },
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'JSON',
+                success: function (data) {
+                    if (data.status == 'success') {
+                        toastr.success(data.message);
+                        location.reload();
+                    } else {
+                        toastr.error(data.message, "Lỗi!");
+                    }
+                }
+            })
+        }
+    }
+
+    function Delete(id, TenDanhMucHangHoa) {
+        document.getElementById("id_delete").value = id;
+        document.getElementById("tendm_delete").innerHTML = TenDanhMucHangHoa;
+        $('#Delete_Modal').modal('show');
+    }
+</script>

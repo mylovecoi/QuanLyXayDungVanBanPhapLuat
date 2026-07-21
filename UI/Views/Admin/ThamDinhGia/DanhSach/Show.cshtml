@@ -1,0 +1,262 @@
+@using Newtonsoft.Json.Linq
+@using System.Reflection
+@model DataAccess.Entities.ThamDinhGia.ThamDinhGia
+@{
+    Layout = "_LayoutReport";
+    var donVi = ViewData["DanhMucDonVi"] as DataAccess.Entities.Settings.DanhMucDonVi;
+    var dmDonViThamDinh = ViewData["DanhMucDonViThamDinh"] as List<DataAccess.Entities.ThamDinhGia.ThamDinhGiaDanhMucDonVi> ?? new List<DataAccess.Entities.ThamDinhGia.ThamDinhGiaDanhMucDonVi>();
+    var dmHoiDong = ViewData["DanhMucHoiDong"] as List<DataAccess.Entities.ThamDinhGia.ThamDinhGiaHoiDong> ?? new List<DataAccess.Entities.ThamDinhGia.ThamDinhGiaHoiDong>();
+
+    JObject? excelData = null;
+    JToken? cellData = null;
+    JObject? styles = null;
+    int maxCol = 0;
+    List<int> rowIndices = new List<int>();
+    var mergeLookup = new Dictionary<string, (bool isParent, bool isChild, int rowSpan, int colSpan)>();
+
+    var spreadsheetJson = Model.ChiTietExcel;
+    if (!string.IsNullOrEmpty(spreadsheetJson))
+    {
+        try
+        {
+            excelData = JObject.Parse(spreadsheetJson);
+            styles = excelData["styles"] as JObject;
+            var sheets = excelData["sheets"] as JObject;
+            var firstSheet = sheets?.Properties()?.FirstOrDefault()?.Value as JObject;
+            cellData = firstSheet?["cellData"];
+            
+            // Build merge cell lookup dictionary
+            var mergeData = firstSheet?["mergeData"] as JArray;
+            if (mergeData != null)
+            {
+                foreach (var m in mergeData)
+                {
+                    int sR = m["startRow"]?.Value<int>() ?? 0;
+                    int eR = m["endRow"]?.Value<int>() ?? 0;
+                    int sC = m["startColumn"]?.Value<int>() ?? 0;
+                    int eC = m["endColumn"]?.Value<int>() ?? 0;
+
+                    int rSpan = eR - sR + 1;
+                    int cSpan = eC - sC + 1;
+
+                    for (int r = sR; r <= eR; r++)
+                    {
+                        for (int c = sC; c <= eC; c++)
+                        {
+                            string key = $"{r}_{c}";
+                            if (r == sR && c == sC)
+                            {
+                                mergeLookup[key] = (true, false, rSpan, cSpan);
+                            }
+                            else
+                            {
+                                mergeLookup[key] = (false, true, 0, 0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (cellData != null)
+            {
+                foreach (var rowProp in cellData.Children<JProperty>())
+                {
+                    if (int.TryParse(rowProp.Name, out int rIdx))
+                    {
+                        rowIndices.Add(rIdx);
+                        var colProps = rowProp.Value as JObject;
+                        if (colProps != null)
+                        {
+                            foreach (var colProp in colProps.Properties())
+                            {
+                                if (int.TryParse(colProp.Name, out int cIdx))
+                                {
+                                    if (cIdx > maxCol)
+                                    {
+                                        maxCol = cIdx;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                rowIndices.Sort();
+            }
+        }
+        catch { }
+    }
+}
+
+<div style="padding: 20px 30px;">
+<p style="text-align: center; font-weight: bold; font-size: 30px;">THÔNG TIN HỒ SƠ THẨM ĐỊNH GIÁ</p>
+<table style="width: 100%; border: none; font: normal 16px Times, serif; margin-bottom: 20px;">
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Đơn vị quản lý/Đơn vị báo cáo:</td>
+        <td>@(donVi?.TenDonVi ?? "")</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Phân loại hồ sơ:</td>
+        <td>@Model.PhanLoai</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Số thông báo kết luận / Ngày ban hành:</td>
+        <td>@Model.SoTbKl @(Model.Thoidiem != DateTime.MinValue ? " - " + FuntionGlobal.ConvertDateToStr(Model.Thoidiem) : "")</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Đơn vị yêu cầu thẩm định:</td>
+        <td>@Model.DvYeuCau</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Đơn vị thẩm định:</td>
+        <td>@(dmDonViThamDinh.FirstOrDefault(x => x.Id == Model.DonViThamDinhId)?.TenDv ?? "")</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Hội đồng thẩm định giá:</td>
+        <td>@(dmHoiDong.FirstOrDefault(x => x.Id == Model.HoiDongId)?.TenHoiDong ?? "")</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Ghi chú:</td>
+        <td>@Model.GhiChu</td>
+    </tr>
+</table>
+
+<p style="color: blue; text-decoration-line: underline; font-weight: bold; font-size: 18px;">Thông tin hồ sơ chi tiết</p><br/>
+<div style="width: 100%; overflow-x: auto; margin-bottom: 20px;">
+<table cellspacing="0" cellpadding="5" border="1" style="width: 100%; border-collapse: collapse; font: normal 14px Times, serif;" id="data_render">
+    @if (cellData != null && rowIndices.Any())
+    {
+        var headerRowIdx = rowIndices.FirstOrDefault();
+        <tbody>
+            @foreach (var r in rowIndices)
+            {
+                <tr>
+                    @for (int c = 0; c <= maxCol; c++)
+                    {
+                        string cellKey = $"{r}_{c}";
+                        bool skipCell = false;
+                        int rowSpan = 1;
+                        int colSpan = 1;
+
+                        if (mergeLookup.TryGetValue(cellKey, out var mergeInfo))
+                        {
+                            if (mergeInfo.isChild)
+                            {
+                                skipCell = true;
+                            }
+                            else if (mergeInfo.isParent)
+                            {
+                                rowSpan = mergeInfo.rowSpan;
+                                colSpan = mergeInfo.colSpan;
+                            }
+                        }
+
+                        if (!skipCell)
+                        {
+                            var cell = cellData[r.ToString()]?[c.ToString()];
+                            var cellVal = cell?["v"]?.ToString() ?? "";
+                            
+                            var styleKey = cell?["s"]?.ToString();
+                            JObject? style = null;
+                            if (!string.IsNullOrEmpty(styleKey) && styles != null)
+                            {
+                                style = styles[styleKey] as JObject;
+                            }
+
+                            string align = "";
+                            if (style != null && style["ht"] != null)
+                            {
+                                var ht = style["ht"]?.ToString() ?? "";
+                                if (ht == "1") align = "text-align: left;";
+                                else if (ht == "2") align = "text-align: center;";
+                                else if (ht == "3") align = "text-align: right;";
+                            }
+                            
+                            if (string.IsNullOrEmpty(align) && double.TryParse(cellVal, out _))
+                            {
+                                align = "text-align: right;";
+                            }
+                            
+                            string weight = "";
+                            if (style != null && style["bl"] != null && style["bl"]?.ToString() == "1")
+                            {
+                                weight = "font-weight: bold;";
+                            }
+                            
+                            string fontStyle = "";
+                            if (style != null && style["it"] != null && style["it"]?.ToString() == "1")
+                            {
+                                fontStyle = "font-style: italic;";
+                            }
+
+                            if (r == headerRowIdx)
+                            {
+                                <th rowspan="@rowSpan" colspan="@colSpan" style="background-color: #f2f2f2; text-align: center; @align @weight @fontStyle">@cellVal</th>
+                            }
+                            else
+                            {
+                                <td rowspan="@rowSpan" colspan="@colSpan" style="@align @weight @fontStyle">@cellVal</td>
+                            }
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    }
+    else if (ViewData["Details"] is IEnumerable<object> details && details.Any())
+    {
+        var firstDetailObj = details.First();
+        var type = firstDetailObj.GetType();
+        var excludedNames = new HashSet<string> { "Id", "HangHoaId", "HangHoa", "MaHoSo", "TrangThai", "STTSapXep" };
+        var detailProps = type.GetProperties()
+            .Where(p => !excludedNames.Contains(p.Name) && p.GetCustomAttribute<System.ComponentModel.DisplayNameAttribute>() != null)
+            .ToArray();
+
+        <thead>
+            <tr>
+                <th style="text-align:center; background-color: #f2f2f2;">STT</th>
+                @foreach (var prop in detailProps)
+                {
+                    var displayNameAttr = prop.GetCustomAttribute<System.ComponentModel.DisplayNameAttribute>();
+                    <th style="text-align:center; background-color: #f2f2f2;">@(displayNameAttr?.DisplayName ?? prop.Name)</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int idx = 1;
+            }
+            @foreach (var item in details)
+            {
+                <tr>
+                    <td style="text-align:center;">@idx</td>
+                    @foreach (var prop in detailProps)
+                    {
+                        var val = prop.GetValue(item);
+                        string cellVal = val?.ToString() ?? "";
+                        string align = "text-align: left;";
+                        if (prop.PropertyType == typeof(double) || prop.PropertyType == typeof(int) || prop.PropertyType == typeof(decimal))
+                        {
+                            if (double.TryParse(cellVal, out double numVal))
+                            {
+                                cellVal = FuntionGlobal.ConvertDblToStr(numVal);
+                            }
+                            align = "text-align: right;";
+                        }
+                        <td style="@align">@cellVal</td>
+                    }
+                </tr>
+                idx++;
+            }
+        </tbody>
+    }
+    else
+    {
+        <tbody>
+            <tr>
+                <td style="text-align: center;">Không có dữ liệu chi tiết!</td>
+            </tr>
+        </tbody>
+    }
+</table>
+</div>
+</div>

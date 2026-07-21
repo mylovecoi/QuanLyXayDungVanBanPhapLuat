@@ -1,0 +1,128 @@
+@using DataAccess.Entities.Systems;
+
+@{
+    var useGroups = ViewData["UseGroups"] as List<OptionData> ?? new List<OptionData>();
+}
+
+@model DataAccess.Entities.Systems.RoleAction
+<div class="row">
+    <input hidden asp-for="Id" />
+    <input hidden asp-for="RoleGroupId" />
+    <input hidden asp-for="Level" />
+    @if (Model.RoleGroupId != Guid.Empty)
+    {
+        <div class="col-xl-12">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Nhóm quyền:</label>
+                <label class="form-control">@Model.TitleRoleGroup</label>
+            </div>
+        </div>
+    }
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Trạng thái:</label>
+            <select asp-for="Status" class="form-control">
+                <option value="Kích hoạt">Kích hoạt</option>
+                <option value="Dừng kích hoạt">Dừng kích hoạt</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Phân loại:</label>
+            <select asp-for="PhanLoai" class="form-control">
+                <option value="Group">Nhóm chức năng</option>
+                <option value="Detail">Chức năng</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Sắp xếp:</label>
+            <input type="number" asp-for="STTSapXep" class="form-control" />
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Mô tả:</label>
+            <input type="text" asp-for="Title" class="form-control" />
+            <span id="TitleError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Quyền:</label>
+            <input type="text" asp-for="Role" class="form-control" />
+            <span id="RoleError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Controller:</label>
+            <input type="text" asp-for="Controller" class="form-control" />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Action:</label>
+            <input type="text" asp-for="Action" class="form-control" />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Table:</label>
+            <input type="text" asp-for="Table" class="form-control" />
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Parameter:</label>
+            <input type="text" asp-for="Parameter" class="form-control" />
+        </div>
+    </div>
+    @if (Model.Level == 0)
+    {
+        <div class="col-xl-12">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Icon (FontAwesome):</label>
+                <select asp-for="Icon" class="form-control">
+                    <option value="">-- Chọn Icon hoặc giữ mặc định --</option>
+                    <option value="fas fa-folder">📁 Thư mục (fas fa-folder)</option>
+                    <option value="fas fa-list">📋 Danh sách (fas fa-list)</option>
+                    <option value="fas fa-th-list">🗂️ Danh mục (fas fa-th-list)</option>
+                    <option value="fas fa-cog">⚙️ Cấu hình (fas fa-cog)</option>
+                    <option value="fas fa-chart-bar">📊 Biểu đồ / Định giá (fas fa-chart-bar)</option>
+                    <option value="fas fa-money-bill-wave">💵 Tài chính / Giá cả (fas fa-money-bill-wave)</option>
+                    <option value="fas fa-calendar-check">📅 Hệ thống / Lịch (fas fa-calendar-check)</option>
+                    <option value="fas fa-user-cog">👥 Quản lý người dùng (fas fa-user-cog)</option>
+                    <option value="fas fa-database">🗄️ Cơ sở dữ liệu (fas fa-database)</option>
+                    <option value="fas fa-file-invoice">🧾 Chứng từ / Hóa đơn (fas fa-file-invoice)</option>
+                    <option value="fas fa-history">⏳ Lịch sử (fas fa-history)</option>
+                    <option value="fas fa-bell">🔔 Thông báo (fas fa-bell)</option>
+                    <option value="fas fa-shield-alt">🛡️ Bảo mật (fas fa-shield-alt)</option>
+                    <option value="fas fa-info-circle">ℹ️ Hướng dẫn / Trợ giúp (fas fa-info-circle)</option>
+                    <option value="fas fa-home">🏠 Trang chủ (fas fa-home)</option>
+                    <option value="fas fa-building">🏢 Đơn vị / Doanh nghiệp (fas fa-building)</option>
+                    <option value="fas fa-file-excel">🟢 Excel (fas fa-file-excel)</option>
+                    <option value="fas fa-print">🖨️ In ấn (fas fa-print)</option>
+                    <option value="fas fa-star">⭐ Yêu thích (fas fa-star)</option>
+                    <option value="fas fa-edit">📝 Chỉnh sửa (fas fa-edit)</option>
+                    <option value="fas fa-search">🔍 Tìm kiếm (fas fa-search)</option>
+                    <option value="fas fa-book">📖 Sách / Hướng dẫn (fas fa-book)</option>
+                    <option value="fas fa-link">🔗 Kết nối (fas fa-link)</option>
+                </select>
+            </div>
+        </div>
+    }
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Nhóm sử dụng:</label>
+            <select asp-for="UseGroupList" class="form-control select2multi" multiple="multiple" style="width:100%">  
+                @foreach (var item in useGroups)
+                {
+                    <option value="@item.Value">@item.DisplayName</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>

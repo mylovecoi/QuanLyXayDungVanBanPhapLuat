@@ -1,0 +1,35 @@
+﻿@{
+    var codeList = ViewData["Code"] as List<string> ?? new List<string>();
+}
+
+@model DataAccess.Entities.Systems.OptionData
+<div class="row">
+    <input hidden asp-for="Id" />
+
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Code:</label>
+            <select class="form-control" asp-for="Code">
+                @foreach (var code in codeList)
+                {
+                    <option value="@code">@code</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">DisplayName:</label>
+            <input class="form-control" asp-for="DisplayName" />
+            <span id="DisplayNameError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Value:</label>
+            <input class="form-control" asp-for="Value" />
+            <span id="ValueError" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+

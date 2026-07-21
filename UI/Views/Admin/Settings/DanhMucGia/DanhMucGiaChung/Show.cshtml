@@ -1,0 +1,73 @@
+@using DataAccess.Entities.Settings;
+@{
+    Layout = "_LayoutReport";
+    var details = ViewData["Details"] as IEnumerable<DanhMucGiaChungCt> ?? new List<DanhMucGiaChungCt>();
+}
+
+@model DanhMucGiaChung
+
+<div class="container mt-4">
+    <h2 class="text-center font-weight-bold mb-6">CHI TIẾT DANH MỤC GIÁ CHUNG</h2>
+
+    <div class="card card-custom mb-6">
+        <div class="card-header bg-light">
+            <h4 class="card-title font-weight-bolder text-dark mb-0 py-3">I. Thông tin chung</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered">
+                <tbody>
+                    <tr>
+                        <td width="30%" class="font-weight-bold">Mã danh mục</td>
+                        <td>@Model.MaDanhMuc</td>
+                    </tr>
+                    <tr>
+                        <td class="font-weight-bold">Tên danh mục</td>
+                        <td>@Model.TenDanhMuc</td>
+                    </tr>
+                    <tr>
+                        <td class="font-weight-bold">Trạng thái theo dõi</td>
+                        <td>
+                            @(Model.TrangThai == "TD" ? "Đang theo dõi" : "Dừng theo dõi")
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card card-custom">
+        <div class="card-header bg-light">
+            <h4 class="card-title font-weight-bolder text-dark mb-0 py-3">II. Danh sách chi tiết danh mục</h4>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped table-bordered m-0" border="1">
+                <thead class="thead-light">
+                    <tr class="text-center font-weight-bold">
+                        <th width="10%">#</th>
+                        <th width="30%">Mã chi tiết</th>
+                        <th>Tên chi tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (details.Any())
+                    {
+                        @foreach (var item in details)
+                        {
+                            <tr>
+                                <td class="text-center">@item.STTSapXep</td>
+                                <td class="font-weight-bold text-center">@item.MaChiTiet</td>
+                                <td>@item.TenChiTiet</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">Chưa có chi tiết nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

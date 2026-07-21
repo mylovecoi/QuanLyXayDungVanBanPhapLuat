@@ -1,0 +1,277 @@
+﻿@model DataAccess.Entities.Settings.DanhMucCanBo
+
+<div class="row">
+	<div class="col-12">
+		<div class="mb-3 font-weight-bold font-size-lg">
+			<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin cơ bản:</label>
+		</div>
+	</div>
+
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Tên cán bộ: </label>
+			<span class="font-weight-bold">@Model.TenCanBo</span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Ngày sinh: </label>
+			<span class="font-weight-bold">@(Model.NgaySinh.HasValue? Model.NgaySinh.Value.ToString("dd/MM/yyyy") : "")</span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Phòng ban: </label>
+			<span class="font-weight-bold">@(Model.PhongBan?.TenPhongBan)</span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Giới tính: </label>
+			<span class="font-weight-bold">@(Model.GioiTinh ? "Nam" : "Nữ")</span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Trình độ chuyên môn: </label>
+			<span class="font-weight-bold">@Model.TrinhDoChuyenMon</span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Loại lao động: </label>
+			<span class="font-weight-bold">
+				@switch (Model.LoaiLaoDong)
+				{
+					case DataAccess.Enums.LoaiLaoDong.CongChungVien:
+						<span>Công chứng viên</span>
+						break;
+					case DataAccess.Enums.LoaiLaoDong.NhanVienNghiepVu:
+						<span>Nhân viên nghiệp vụ</span>
+						break;
+					case DataAccess.Enums.LoaiLaoDong.NhanVienKhac:
+						<span>Nhân viên khác</span>
+						break;
+				}
+			</span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Trạng thái tài khoản: </label>
+			<span class="font-weight-bold">
+				@switch (Model.Status)
+				{
+					case "Kích hoạt":
+						<span class="label font-weight-bold label-lg label-success label-inline">Kích hoạt</span>
+						break;
+					case "Khóa":
+						<span class="label font-weight-bold label-lg label-danger label-inline">Khóa</span>
+						break;
+					case "Chờ kích hoạt":
+						<span class="label font-weight-bold label-lg label-warning label-inline">Chờ kích hoạt</span>
+						break;
+					default:
+						<span class="label font-weight-bold label-lg label-secondary label-inline">Không xác định</span>
+						break;
+				}
+			</span>
+		</div>
+	</div>
+
+	<div class="col-12">
+		<hr />
+		<div class="mb-3 font-weight-bold font-size-lg">
+			<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin tài khoản:</label>
+		</div>
+	</div>
+
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Tên đăng nhập: </label>
+			<span class="font-weight-bold">@Model.Username</span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Email: </label>
+			<span class="font-weight-bold">@Model.Email</span>
+		</div>
+	</div>
+
+	@if (Model.LoaiLaoDong == DataAccess.Enums.LoaiLaoDong.CongChungVien)
+	{
+		<div class="col-12">
+			<hr />
+			<div class="mb-3 font-weight-bold font-size-lg">
+				<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin công chứng viên:</label>
+			</div>
+		</div>
+
+		@if (!string.IsNullOrEmpty(Model.SoQuyetDinhBoNhiem))
+		{
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Số Quyết định bổ nhiệm: </label>
+					<span class="font-weight-bold">@Model.SoQuyetDinhBoNhiem</span>
+				</div>
+			</div>
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Ngày ban hành Quyết định bổ nhiệm: </label>
+					<span class="font-weight-bold">@(Model.NgayQuyetDinhBoNhiem.HasValue? Model.NgayQuyetDinhBoNhiem.Value.ToString("dd/MM/yyyy") : "")</span>
+				</div>
+			</div>
+		}
+
+		@if (!string.IsNullOrEmpty(Model.SoQuyetDinhCapThe))
+		{
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Số Quyết định cấp Thẻ: </label>
+					<span class="font-weight-bold">@Model.SoQuyetDinhCapThe</span>
+				</div>
+			</div>
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Ngày ban hành Quyết định cấp Thẻ: </label>
+					<span class="font-weight-bold">@(Model.NgayQuyetDinhCapThe.HasValue? Model.NgayQuyetDinhCapThe.Value.ToString("dd/MM/yyyy") : "")</span>
+				</div>
+			</div>
+		}
+
+		@if (!string.IsNullOrEmpty(Model.SoTheCongChungVien))
+		{
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Số Thẻ công chứng viên: </label>
+					<span class="font-weight-bold">@Model.SoTheCongChungVien</span>
+				</div>
+			</div>
+		}
+
+		@if (!string.IsNullOrEmpty(Model.ChucVu))
+		{
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Chức vụ: </label>
+					<span class="font-weight-bold">@Model.ChucVu</span>
+				</div>
+			</div>
+		}
+
+		@if (Model.MucPhiBaoHiemTrachNhiem.HasValue && Model.MucPhiBaoHiemTrachNhiem > 0)
+		{
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Mức phí bảo hiểm trách nhiệm nghề nghiệp: </label>
+					<span class="font-weight-bold">@((Model.MucPhiBaoHiemTrachNhiem ?? 0) + " VNĐ")</span>
+				</div>
+			</div>
+		}
+	}
+
+	@if (Model.LoaiLaoDong == DataAccess.Enums.LoaiLaoDong.NhanVienNghiepVu || Model.LoaiLaoDong == DataAccess.Enums.LoaiLaoDong.NhanVienKhac)
+	{
+		<div class="col-12">
+			<hr />
+			<div class="mb-3 font-weight-bold font-size-lg">
+				<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin nhân viên:</label>
+			</div>
+		</div>
+
+		@if (!string.IsNullOrEmpty(Model.ViTriViecLam))
+		{
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Vị trí việc làm: </label>
+					<span class="font-weight-bold">@Model.ViTriViecLam</span>
+				</div>
+			</div>
+		}
+
+		@if (Model.NgayTuyenDung.HasValue)
+		{
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Ngày được tuyển dụng: </label>
+					<span class="font-weight-bold">@Model.NgayTuyenDung.Value.ToString("dd/MM/yyyy")</span>
+				</div>
+			</div>
+		}
+
+		@if (!string.IsNullOrEmpty(Model.SoHopDongLaoDong))
+		{
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Số hợp đồng lao động: </label>
+					<span class="font-weight-bold">@Model.SoHopDongLaoDong</span>
+				</div>
+			</div>
+		}
+
+		@if (Model.NgayKyHopDongLaoDong.HasValue)
+		{
+			<div class="col-xl-6">
+				<div class="form-group fv-plugins-icon-container">
+					<label style="font-weight:bold; color:blue">Ngày ký hợp đồng lao động: </label>
+					<span class="font-weight-bold">@Model.NgayKyHopDongLaoDong.Value.ToString("dd/MM/yyyy")</span>
+				</div>
+			</div>
+		}
+	}
+
+	<div class="col-12">
+		<hr />
+		<div class="mb-3 font-weight-bold font-size-lg">
+			<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin bảo hiểm:</label>
+		</div>
+	</div>
+
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Số tiền BHXH đã nộp: </label>
+			<span class="font-weight-bold">@(Model.SoTienBHXH + " VNĐ")</span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group fv-plugins-icon-container">
+			<label style="font-weight:bold; color:blue">Số tiền BHYT đã nộp: </label>
+			<span class="font-weight-bold">@(Model.SoTienBHYT + " VNĐ")</span>
+		</div>
+	</div>
+
+	@if (Model.Status.Equals("Khóa"))
+	{
+		<div class="col-12">
+			<hr />
+			<div class="mb-3 font-weight-bold font-size-lg">
+				<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin dừng:</label>
+			</div>
+		</div>
+
+		<div class="col-xl-6">
+			<div class="form-group fv-plugins-icon-container">
+				<label style="font-weight:bold; color:blue">Số quyết định dừng: </label>
+				<span class="font-weight-bold">@Model.SoQuyetDinhDung</span>
+			</div>
+		</div>
+		<div class="col-xl-6">
+			<div class="form-group fv-plugins-icon-container">
+				<label style="font-weight:bold; color:blue">Ngày quyết định dừng: </label>
+				<span class="font-weight-bold">@(Model.NgayQuyetDinhDung?.ToString("dd/MM/yyyy"))</span>
+			</div>
+		</div>
+	}
+
+	@if (!string.IsNullOrEmpty(Model.GhiChu))
+	{
+		<div class="col-12">
+			<hr />
+			<div class="form-group fv-plugins-icon-container">
+				<label style="font-weight:bold; color:blue">Ghi chú: </label>
+				<span class="font-weight-bold">@Model.GhiChu</span>
+			</div>
+		</div>
+	}
+</div>

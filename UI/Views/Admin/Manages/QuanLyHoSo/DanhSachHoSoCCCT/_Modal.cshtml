@@ -1,0 +1,134 @@
+<div class="modal fade" id="modalSelectDanhMucHopDong" tabindex="-1" role="dialog" aria-labelledby="modalSelectDanhMucHopDong" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="card-label">
+					<b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper() CÔNG CHỨNG </b>
+					<span class="d-block text-muted pt-2 font-size-sm">
+						<span id="modalExportData_Title">Thêm Mới Thông Tin Hồ Sơ Công Chứng - Chứng Thực</span>
+					</span>
+				</h3>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<i aria-hidden="true" class="ki ki-close"></i>
+				</button>
+			</div>
+
+			<div id="modalSelectDanhMucHopDong_Body">
+				<form asp-controller="DanhSachHoSoCCCT" asp-action="Create" onsubmit="HandleFormSubmitInitDataForCreate(event, this)">
+					<div class="modal-body">
+						<div class="row">
+							<div class="col-xl-12">
+								<label class="form-label text-blue fs-6 font-weight-boldest">Nghiệp vụ</label>
+								<label class="form-label text-blue font-weight-boldest">:</label>
+								<input type="hidden" name="DonViId" id="DanhMucId_Input" />
+								<select class="form-control" name="DmHopDongId" id="DanhMucHopDongId_Select">
+									@{
+										var dmDiaDanhsLevel0 = ViewData["DanhMucHopDong"] as List<DataAccess.Entities.Settings.DanhMucHopDong>;
+										if (dmDiaDanhsLevel0 != null && dmDiaDanhsLevel0.Any())
+										{
+											<option value="">Lựa Chọn Nghiệp Vụ</option>
+											foreach (var item in dmDiaDanhsLevel0)
+											{
+												string backIn = FuntionGlobal.GetBackIn(item.Level);
+												string isSelected = Convert.ToString(ViewData["LoaiHopDong"]) == item.Id.ToString() ? "selected" : "";
+												bool isDisabled = !item.ParentId.HasValue;
+												<option value="@item.Id" disabled="@isDisabled" selected="@isSelected">
+													@Html.Raw(backIn)
+													@item.TenHopDong
+													@(item.ParentId == null || item.ParentId == Guid.Empty ? string.Format("(Hợp Đồng {0})", @item.IsCC ? "Công Chứng" : "Chứng Thực") : "")
+												</option>
+											}
+										}
+									}
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+						<button type="submit" class="btn btn-primary font-weight-bold">Xác Nhận</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Modal Chuyển – Bị trả lại -->
+<div class="modal fade" id="Chuyen_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="card-label">
+					<b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper()</b>
+					<span class="d-block text-muted pt-2 font-size-sm">
+						<span id="modalExportData_Title">Chuyển Xử Lý Thông Tin Hồ Sơ Công Chứng</span>
+					</span>
+				</h3>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<i aria-hidden="true" class="ki ki-close"></i>
+				</button>
+			</div>
+			<form asp-action="Chuyen" method="post" id="FormChuyen" onsubmit="return HandleSubmitChuyenHoSoViPham(event, this)">
+				<div class="modal-body">
+					<div class="col-xl-12 mb-3">
+						<div class="form-group mb-2">
+							<label>
+								Mã Khai Thác:&nbsp;<b id="maHopDong" style="color: #0000FF"></b>
+								- Tên Mỏ:&nbsp;<b id="tenHopDong" style="color: #0000FF"></b>
+							</label>
+						</div>
+					</div>
+					<div class="col-xl-12">
+						<div class="form-group">
+							<label style="font-weight:bold; color:blue">Đơn vị tiếp nhận: </label>
+							<select class="form-control" id="donViTiepNhan_Select" name="donViTiepNhanId">
+							</select>
+						</div>
+					</div>
+					<input type="hidden" id="hoSpId" name="hoSoId" />
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+					<button type="submit" class="btn btn-primary font-weight-bold">Đồng ý</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<!--LyDoTraLai Modal-->
+<div class="modal fade" id="LyDoTraLai_Modal" data-backdrop="static" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="card-label">
+					<b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper()</b>
+					<span class="d-block text-muted pt-2 font-size-sm">
+						<span id="modalExportData_Title">Lý Do Trả Lại Thông Tin Hồ Sơ Công Chứng</span>
+					</span>
+				</h3>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<i class="ki ki-close"></i>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="col-xl-12">
+					<div class="form-group m-0">
+						<label>
+							Số Hợp Đồng:&nbsp;<b id="maHopDong" style="color: #0000FF"></b>
+							- Tên Hợp Đồng:&nbsp;<b id="tenHopDong" style="color: #0000FF"></b>
+						</label>
+					</div>
+				</div>
+				<div class="col-xl-12">
+					<div class="form-group m-0">
+						<label>Lý do trả lại:&nbsp;<b id="lyDoTraLai" style="color: #0000FF"></b></label>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+			</div>
+
+		</div>
+	</div>
+</div>

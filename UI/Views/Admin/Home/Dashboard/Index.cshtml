@@ -1,0 +1,194 @@
+@{
+	var dashboardImages = ViewData["DashboardImages"] as List<string> ?? new List<string>();
+	// var first = true;
+}
+@model Services.DTOs.HomeResponseDto
+@if (dashboardImages != null && dashboardImages.Count() > 0)
+{
+	// <div class="d-flex flex-row-fluid bgi-size-cover bgi-position-top" style="height: 300px;">
+	// 	<div id="imageCarousel" class="carousel slide w-100 h-100" data-bs-ride="carousel" data-bs-interval="10000">
+	// 		<div class="carousel-inner h-100 rounded">
+	// 			@foreach (var img in dashboardImages)
+	// 			{
+	// 				<div class="carousel-item @(first ? "active" : "") h-100">
+	// 					<div class="d-flex flex-row-fluid bgi-size-cover bgi-position-top"
+	// 					style="background-image: url('@Url.Content(img)'); height: 300px;">
+	// 					</div>
+	// 				</div>
+	// 				first = false;
+	// 			}
+	// 		</div>
+	// 	</div>
+	// </div>
+	<div style="height: 50px;"></div>
+}
+else
+{
+	<div style="height: 50px;"></div>
+}
+<div class="container-fluid mt-n10">
+	<!-- TỔNG HỢP HỒ SƠ TOÀN HỆ THỐNG -->
+	<h2 class="mb-5 text-dark font-weight-bold">Tổng hợp hồ sơ toàn hệ thống</h2>
+	<div class="row">
+		<div class="col-12">
+			<div class="card card-custom gutter-b shadow">
+				<div class="card-header h-auto">
+					<div class="card-title py-5">
+						<h3 class="card-label font-weight-boldest">Diễn biến số lượng hồ sơ theo tháng (Năm <span class="tonghop-chart-year">@DateTime.Now.Year</span>)</h3>
+					</div>
+				</div>
+				<div class="card-body" style="min-height: 380px;">
+					<div id="CharCombinedSinWaveByYear">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- HỒ SƠ ĐỊNH GIÁ -->
+	<h2 class="mb-5 text-dark font-weight-bold">Dữ liệu định giá hàng hóa dịch vụ</h2>
+	<div class="row">
+		<div class="col-xl-6 col-lg-12">
+			<div class="card card-custom gutter-b shadow">
+				<div class="card-header h-auto">
+					<div class="card-title py-5">
+						<h3 class="card-label font-weight-boldest">Biểu đồ Số lượng hồ sơ định giá theo danh mục</h3>
+					</div>
+				</div>
+				<div class="card-body" style="min-height: 350px;">
+					<div id="CharColumTotalDinhGiaByYear">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xl-6 col-lg-12">
+			<div class="card card-custom gutter-b shadow">
+				<div class="card-header h-auto">
+					<div class="card-title py-5">
+						<h3 class="card-label font-weight-boldest">Biểu đồ Tỷ lệ hồ sơ định giá theo danh mục</h3>
+					</div>
+				</div>
+				<div class="card-body" style="min-height: 350px; display: flex; flex-direction: column; justify-content: center;">
+					<div id="CharDonutDinhGiaStatus">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- HỒ SƠ KÊ KHAI ĐĂNG KÝ GIÁ -->
+	<h2 class="mb-5 mt-5 text-dark font-weight-bold">Dữ liệu kê khai đăng ký giá</h2>
+	<div class="row">
+		<div class="col-xl-6 col-lg-12">
+			<div class="card card-custom gutter-b shadow">
+				<div class="card-header h-auto">
+					<div class="card-title py-5">
+						<h3 class="card-label font-weight-boldest">Số lượng hồ sơ kê khai đăng ký giá theo tháng (Năm <span class="kekhai-chart-year">@DateTime.Now.Year</span>)</h3>
+					</div>
+				</div>
+				<div class="card-body" style="min-height: 350px;">
+					<div id="CharColumTotalKeKhaiByYear">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xl-6 col-lg-12">
+			<div class="card card-custom gutter-b shadow">
+				<div class="card-header h-auto">
+					<div class="card-title py-5">
+						<h3 class="card-label font-weight-boldest">Tỷ lệ hồ sơ kê khai đăng ký giá theo trạng thái</h3>
+					</div>
+				</div>
+				<div class="card-body" style="min-height: 350px; display: flex; flex-direction: column; justify-content: center;">
+					<div id="CharDonutKeKhaiStatus">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- HỒ SƠ GIÁ THỊ TRƯỜNG -->
+	<h2 class="mb-5 mt-5 text-dark font-weight-bold">Dữ liệu giá thị trường</h2>
+	<div class="row">
+		<div class="col-xl-6 col-lg-12">
+			<div class="card card-custom gutter-b shadow">
+				<div class="card-header h-auto">
+					<div class="card-title py-5">
+						<h3 class="card-label font-weight-boldest">Số lượng hồ sơ giá thị trường theo tháng (Năm <span class="giathitruong-chart-year">@DateTime.Now.Year</span>)</h3>
+					</div>
+				</div>
+				<div class="card-body" style="min-height: 350px;">
+					<div id="CharColumTotalGiaThiTruongByYear">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xl-6 col-lg-12">
+			<div class="card card-custom gutter-b shadow">
+				<div class="card-header h-auto">
+					<div class="card-title py-5">
+						<h3 class="card-label font-weight-boldest">Tỷ lệ hồ sơ giá thị trường theo trạng thái</h3>
+					</div>
+				</div>
+				<div class="card-body" style="min-height: 350px; display: flex; flex-direction: column; justify-content: center;">
+					<div id="CharDonutGiaThiTruongStatus">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- HỒ SƠ THẨM ĐỊNH GIÁ -->
+	<h2 class="mb-5 mt-5 text-dark font-weight-bold">Dữ liệu thẩm định giá</h2>
+	<div class="row">
+		<div class="col-xl-6 col-lg-12">
+			<div class="card card-custom gutter-b shadow">
+				<div class="card-header h-auto">
+					<div class="card-title py-5">
+						<h3 class="card-label font-weight-boldest">Số lượng hồ sơ thẩm định giá theo tháng (Năm <span class="thamdinhgia-chart-year">@DateTime.Now.Year</span>)</h3>
+					</div>
+				</div>
+				<div class="card-body" style="min-height: 350px;">
+					<div id="CharColumTotalThamDinhGiaByYear">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-xl-6 col-lg-12">
+			<div class="card card-custom gutter-b shadow">
+				<div class="card-header h-auto">
+					<div class="card-title py-5">
+						<h3 class="card-label font-weight-boldest">Tỷ lệ hồ sơ thẩm định giá theo trạng thái</h3>
+					</div>
+				</div>
+				<div class="card-body" style="min-height: 350px; display: flex; flex-direction: column; justify-content: center;">
+					<div id="CharDonutThamDinhGiaStatus">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	@* @await Html.PartialAsync("~/Views/Admin/Home/Dashboard/Supports.cshtml") *@
+</div>
+
+@section custom_style {
+
+}
+
+@section custom_script {
+@* <script src="~/assets/js/bootstrap5.3.3.bundle.min.js"></script> *@
+	<script src="~/js/site.js" asp-append-version="true"></script>
+	<script src="~/js/pages/Admin/Home/dashboard.js" asp-append-version="true"></script>
+
+	<script>
+		$(document).ready(() => {
+			// perfectScrollbar.active('#ThuTucHanhChinhDataTable');
+			// perfectScrollbar.active('#HeThongVanBanaDataTable');
+		});
+	</script>
+}

@@ -1,0 +1,72 @@
+﻿@{
+
+	var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+	string role = ViewData["Role"] as string ?? "";
+}
+
+<div class="card card-custom wave wave-animate-slow wave-primary">
+	<div class="card-header flex-wrap border-0 pt-6 pb-0">
+		<div class="card-title">
+			<h3 class="card-label">
+				BÁO CÁO KHÁC
+				<span class="d-block text-muted pt-2 font-size-sm">
+					Thông tin báo cáo khác
+				</span>
+			</h3>
+		</div>
+		<div class="card-toolbar">
+		</div>
+	</div>
+	<div class="card-body">
+		<ol>
+			<li>
+				<button onclick="loadFormFields()" class="btn btn-link" style="text-align:left">
+					<span style="font-size:16px; color:blue; font-weight: bold">
+						Sổ theo dõi việc sử dụng lao động
+					</span>
+					<br />
+					(Mẫu số TP-CC-36 || Thông tư số 05/2025/TT-BTP)
+				</button>
+			</li>
+
+		</ol>
+	</div>
+</div>
+
+@await Html.PartialAsync("~/Views/Admin/BaoCaoKhac/BaoCaoSuDungLaoDong/_Modal.cshtml")
+
+@section custom_style {
+
+}
+
+@section custom_script {
+	<script src="~/js/site.js"></script>
+	<script>
+		const loadFormFields = () => {
+			const urlPost = "/Report/BaoCaoSuDungLaoDong/GetFormFields";
+			HandlePostAjax({
+				url: urlPost,
+				successCallback: (res) => {
+					if (res.isValid) {
+						// Cập nhật form fields content nếu có HTML
+						if (res.html) {
+							$('#modalBaoCaoSuDungLaoDong .modal-body').html(res.html);
+						}
+						
+						// Hiển thị modal
+						$('#modalBaoCaoSuDungLaoDong').modal('show');
+						
+						// Cập nhật form action để submit đến action Index
+						$('#BaoCaoSuDungLaoDongForm').attr('action', '/Report/BaoCaoSuDungLaoDong');
+					}
+					else {
+						toastr.warning(res.message || 'Có lỗi khi khi thao tác với dữ liệu', 'Cảnh Báo!');
+					}
+				},
+				errorCallback: (xhr, status, error) => {
+					toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
+				}
+			})
+		}
+	</script>
+}

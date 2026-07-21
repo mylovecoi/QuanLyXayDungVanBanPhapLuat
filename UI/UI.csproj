@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>annotations</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\Admin\DinhGiaHHDV\DinhGia\**" />
+    <Compile Remove="Views\Admin\DinhGiaHHDV\DinhGia\**" />
+    <Content Remove="Controllers\Admin\DinhGiaHHDV\DinhGia\**" />
+    <Content Remove="Views\Admin\DinhGiaHHDV\DinhGia\**" />
+    <EmbeddedResource Remove="Controllers\Admin\DinhGiaHHDV\DinhGia\**" />
+    <EmbeddedResource Remove="Views\Admin\DinhGiaHHDV\DinhGia\**" />
+    <None Remove="Controllers\Admin\DinhGiaHHDV\DinhGia\**" />
+    <None Remove="Views\Admin\DinhGiaHHDV\DinhGia\**" />
+  </ItemGroup>
+
+
+
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.17.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="9.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
+    <PackageReference Include="System.IO.Packaging" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
+    <ProjectReference Include="..\Services\Services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\Admin\Settings\DanhMucDonViSuDung\" />
+    <Folder Include="Views\Admin\KeKhaiDangKyGia\DoanhNghiep\DangKy\" />
+    <Folder Include="Views\Admin\KeKhaiDangKyGia\DoanhNghiep\DanhSach\" />
+    <Folder Include="Views\Admin\KeKhaiDangKyGia\DoanhNghiep\LvKd\" />
+    <Folder Include="Views\Admin\Settings\DanhMucDonViSuDung\" />
+    <Folder Include="Views\Admin\Settings\DanhMucDonViSuDung\" />
+    <Folder Include="wwwroot\FileUpload\HDSD\" />
+    <Folder Include="wwwroot\lib\microsoft\signalr\dist\browser\" />
+  </ItemGroup>
+
+</Project>

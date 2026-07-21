@@ -1,0 +1,47 @@
+﻿@model List<DataAccess.Entities.Settings.ThuTucHanhChinh>
+<table class="table table-sm table-head-custom table-head-bg table-borderless table-vertical-center">
+	<thead class="">
+		<tr class="text-left text-uppercase">
+			<th style="min-width: 100px" class="text-center">
+				<span class="text-dark-75">Số Quyết Định</span>
+			</th>
+			<th style="min-width: 100px" class="text-center">
+				<span class="text-dark-75">Mã Thủ Tục</span>
+			</th>
+			<th style="min-width: 100px" class="text-center">
+				<span class="text-dark-75">Tên Thủ Tục</span>
+			</th>
+			<th style="min-width: 100px" class="pl-15">
+				<span class="text-dark-75">Cơ Quan Thực Hiện</span>
+			</th>
+			@* <th style="min-width: 100px" class="text-center">
+					<span class="text-dark-75">Mô Tả</span>
+				</th> *@
+		</tr>
+	</thead>
+	<tbody>
+		@if (Model != null && Model.Any())
+		{
+			foreach (var item in Model)
+			{
+				<tr>
+					<td>
+						<span class="text-dark-75 text-center font-weight-bolder d-block font-size-lg">@item.TenQuyetDinh</span>
+						<span class="text-muted text-center font-weight-bold d-block">@FuntionGlobal.ConvertDateToStr(item.NgayQuyetDinh)</span>
+					</td>
+					<td>
+						<span class="text-dark-75 text-center font-weight-bolder d-block font-size-lg">@item.MaThuTuc</span>
+					</td>
+					<td style="max-width: 200px;">
+						<a href="avascript:void(0)" target="_blank" class="text-dark-75 text-center text-hover-primary font-weight-bolder d-block font-size-lg text-truncate">@item.TenThuTuc</a>
+					</td>
+					<td style="max-width: 200px;">
+						<span class="text-dark-75 text-center font-weight-bolder d-block font-size-lg text-truncate">
+							@item.CoQuanThucHien
+						</span>
+					</td>
+				</tr>
+			}
+		}
+	</tbody>
+</table>

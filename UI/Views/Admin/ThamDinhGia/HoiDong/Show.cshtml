@@ -1,0 +1,153 @@
+@using DataAccess.Entities.ThamDinhGia;
+@{
+    Layout = "_LayoutReport";
+    var members = ViewData["Members"] as IEnumerable<ThamDinhGiaHoiDongCt> ?? new List<ThamDinhGiaHoiDongCt>();
+    int record_id = 1;
+}
+
+@model ThamDinhGiaHoiDong
+
+<div class="container mt-4">
+    <h2 class="text-center font-weight-bold mb-6">THÔNG TIN HỘI ĐỒNG THẨM ĐỊNH GIÁ</h2>
+
+    <div class="card card-custom mb-6">
+        <div class="card-header bg-light">
+            <h4 class="card-title font-weight-bolder text-dark mb-0 py-3">I. Thông tin chung hội đồng</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td width="40%" class="font-weight-bold">Tên hội đồng</td>
+                                <td>@Model.TenHoiDong</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Số quyết định</td>
+                                <td>@Model.SoQd</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Ngày quyết định</td>
+                                <td>@Model.NgayQd.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Cơ quan ban hành</td>
+                                <td>@Model.CoQuanBanHanh</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Chủ tịch hội đồng</td>
+                                <td>@Model.ChuTichHoiDong</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Chức vụ</td>
+                                <td>@Model.ChucVu</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Cấp hội đồng</td>
+                                <td>
+                                    @(Model.CapHoiDong == 1 ? "Nhà nước" : Model.CapHoiDong == 2 ? "Bộ, cơ quan trung ương" : Model.CapHoiDong == 3 ? "Cấp Tỉnh/Thành phố" : Model.CapHoiDong == 4 ? "Cấp Quận/Huyện" : "Cơ quan, tổ chức, đơn vị khác")
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Phân loại hội đồng</td>
+                                <td>
+                                    @(Model.LoaiHoiDong == 1 ? "Hội đồng theo vụ việc" : "Hội đồng thường xuyên")
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <td width="40%" class="font-weight-bold">Phân loại tố tụng</td>
+                                <td>
+                                    @(Model.ToTung == "1" ? "Hội đồng định giá trong hoạt động tố tụng hình sự" : "Không phải là hội đồng định giá trong hoạt động tố tụng hình sự")
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Nhiệm vụ hội đồng</td>
+                                <td>@Model.NhiemVuHoiDong</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Nội dung quyết định</td>
+                                <td>@Model.NoiDungQd</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Căn cứ pháp lý</td>
+                                <td>@Model.CanCuPhapLy</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Theo đề nghị</td>
+                                <td>@Model.TheoDeNghi</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Mã tỉnh áp dụng</td>
+                                <td>@Model.MaTinhApDung</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Mã huyện áp dụng</td>
+                                <td>@Model.MaHuyenApDung</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">File đính kèm</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(Model.Ipf1))
+                                    {
+                                        <a href="/FileUpload/ThamDinhGia/@Model.Ipf1" target="_blank" class="text-primary font-weight-bold">
+                                            @Model.Ipf1
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không có</span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-custom">
+        <div class="card-header bg-light">
+            <h4 class="card-title font-weight-bolder text-dark mb-0 py-3">II. Danh sách thành viên hội đồng</h4>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped table-bordered m-0" border="1">
+                <thead class="thead-light">
+                    <tr class="text-center font-weight-bold">
+                        <th width="5%">#</th>
+                        <th>Họ và tên</th>
+                        <th>Chức vụ</th>
+                        <th>Vai trò</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (members.Any())
+                    {
+                        @foreach (var item in members)
+                        {
+                            <tr>
+                                <td class="text-center">@(record_id++)</td>
+                                <td class="font-weight-bold">@item.HoTen</td>
+                                <td>@item.ChucVu</td>
+                                <td>@item.VaiTro</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">Hội đồng chưa có thành viên nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,164 @@
+@{
+    Layout = null;
+    var train = ViewData["Train"] as bool? ?? false;
+}
+<!DOCTYPE html>
+<html lang="en">
+<!--begin::Head-->
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] | CSDL Giá Thái Nguyên</title>
+    <meta name="description" content="Login page" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="canonical" href="https://keenthemes.com/metronic" />
+    <!--begin::Fonts-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,500,600,700" />
+    <!--end::Fonts-->
+    <!--begin::Page Custom Styles(used by this page)-->
+    <link href="~/assets/css/pages/login/classic/login-3.css" rel="stylesheet" type="text/css" />
+    <!--end::Page Custom Styles-->
+    <!--begin::Global Theme Styles(used by all pages)-->
+    <link href="~/assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/plugins/custom/prismjs/prismjs.bundle.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
+    <!--end::Global Theme Styles-->
+    <!--begin::Layout Themes(used by all pages)-->
+    <link href="~/assets/css/themes/layout/header/base/light.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/css/themes/layout/header/menu/light.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/css/themes/layout/brand/dark.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/css/themes/layout/aside/dark.css" rel="stylesheet" type="text/css" />
+    <!--end::Layout Themes-->
+    <link rel="shortcut icon" href="~/FileUpload/Logo/logoLife.png" />
+</head>
+<!--end::Head-->
+<!--begin::Body-->
+<body id="kt_body" class="header-fixed header-mobile-fixed subheader-enabled subheader-fixed aside-enabled aside-fixed aside-minimize-hoverable page-loading">
+    <!--begin::Main-->
+    <div class="d-flex flex-column flex-root">
+        <!--begin::Login-->
+        <div class="login login-3 login-signin-on d-flex flex-row-fluid" id="kt_login">
+            <div class="d-flex flex-center bgi-size-cover bgi-no-repeat flex-row-fluid" style="background-image: url(/assets/media/bg/bg-3.jpg);">
+                <div class="login-form text-center text-dark p-7 position-relative overflow-hidden" style="background: rgba(255, 255, 255, 0.65); border-radius: 16px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1); border: 1px solid rgba(255, 255, 255, 0.45);">
+                    <!--begin::Login Header-->
+                    <div class="d-flex flex-center mb-15">
+                        <a asp-controller="Home" asp-action="Index">
+                            <img src="~/FileUpload/Logo/logoThaiNguyen.png" class="max-h-150px" alt="Thái Nguyên" />
+                        </a>
+                    </div>
+                    <h1>@Html.Raw(ViewData["AppName"])</h1>
+                    <!--end::Login Header-->
+                    <!--begin::Login Sign in form-->
+                    <div class="login-signin">
+                        <div class="mb-7">
+                            <p class="opacity-60 font-weight-bold">Đăng Nhập Vào Chương Trình</p>
+                        </div>
+                        <div class="mb-3">
+                            @if (train)
+                            {
+                                <a asp-controller="Train" asp-action="Index" class="text-primary font-weight-bold" style="text-decoration: underline;">Danh sách tập huấn</a>
+                            }
+                        </div>
+                        <span class="text-danger" style="font-weight:bold">@Html.ValidationMessage("error")</span>
+
+                        <!-- <form class="form" id="kt_login_signin_form"> -->
+                        <form class="form" id="kt_login_signin_form" method="post" action="/Auth/Signin">
+                            @Html.AntiForgeryToken()
+                            <div class="form-group">
+                                <!-- <input type="text" class="form-control" placeholder="Username" name="username" id="username" value="@ViewData["username"]" -->
+                                <input type="text" class="form-control" placeholder="Username" name="username_otp" id="username" value="@ViewData["username"]"
+                                       style="font-weight:bold;" autocomplete="off" autofocus>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group input-group-solid">
+                                    <!-- <input type="password" class="form-control" placeholder="Password" name="password" id="password" value="@ViewData["password"]" -->
+                                    <input type="password" class="form-control" placeholder="Password" name="password_otp" id="password" value="@ViewData["password"]"
+                                           style="font-weight:bold;" autocomplete="off">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">
+                                            <i class="la la-eye icon-lg" onmouseover="mouseoverPass();" onmouseout="mouseoutPass();"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group d-flex flex-wrap justify-content-between align-items-center px-8">
+                                <div class="checkbox-inline">
+                                    <a asp-controller="DoanhNghiep" asp-action="DangKy" class="text-dark-70 text-hover-primary font-weight-bold">Đăng ký tài khoản</a>
+                                </div>
+                                <div class="checkbox-inline">
+                                    <a id="kt_login_forgot" class="text-dark-70 text-hover-primary font-weight-bold" style="cursor: pointer;">Quên mật khẩu?</a>
+                                </div>
+                            </div>
+                            <div class="form-group text-center mt-10">
+                                @*<a asp-controller="SSO" asp-action="Authorize" class="btn btn-pill btn-outline-white font-weight-bold opacity-90 px-15 py-3">Đăng nhập bằng SSO</a>*@
+                                @*<button type="button" id="kt_login_signin_submit" class="btn btn-pill btn-outline-white font-weight-bold opacity-90 px-15 py-3" onclick="GetOTPValidate()">Đăng nhập</button>*@
+                                <button type="submit" id="kt_login_signin_submit" class="btn btn-pill btn-primary font-weight-bold px-15 py-3">Đăng nhập</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!--end::Login Sign in form-->
+                    <!--begin::Login forgot password form-->
+                    <div class="login-forgot">
+                        <div class="mb-10">
+                            <p class="opacity-60">Nhập tên đăng nhập và email để đặt lại mật khẩu</p>
+                        </div>
+                        <form asp-controller="Auth" asp-action="ForgotPassword" method="post" class="form" id="kt_login_forgot_form">
+                            @Html.AntiForgeryToken()
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Username" name="username_fp" id="username_fp" style="font-weight:bold;" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Email" name="email_fp" id="email_fp" style="font-weight:bold;" autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <button type="button" id="kt_login_forgot_cancel" class="btn btn-pill btn-outline-secondary text-dark font-weight-bold px-15 py-3 m-2" onclick="document.getElementById('kt_login').classList.remove('login-forgot-on'); document.getElementById('kt_login').classList.add('login-signin-on');">Quay lại</button>
+                                <button id="kt_login_forgot_submit" class="btn btn-pill btn-primary font-weight-bold px-15 py-3 m-2">Đồng ý</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!--end::Login forgot password form-->
+                    <div class="mt-10">
+                        <span class="text-dark opacity-70 mr-4" style="font-weight:bold">
+                            @Html.Raw(ViewData["Copyright"])
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--end::Login-->
+    </div>
+    <!--end::Main-->
+    <script>var HOST_URL = "https://preview.keenthemes.com/metronic/theme/html/tools/preview";</script>
+    <!--begin::Global Config(global config for global JS scripts)-->
+    <script>var KTAppSettings = { "breakpoints": { "sm": 576, "md": 768, "lg": 992, "xl": 1200, "xxl": 1400 }, "colors": { "theme": { "base": { "white": "#ffffff", "primary": "#3699FF", "secondary": "#E5EAEE", "success": "#1BC5BD", "info": "#8950FC", "warning": "#FFA800", "danger": "#F64E60", "light": "#E4E6EF", "dark": "#181C32" }, "light": { "white": "#ffffff", "primary": "#E1F0FF", "secondary": "#EBEDF3", "success": "#C9F7F5", "info": "#EEE5FF", "warning": "#FFF4DE", "danger": "#FFE2E5", "light": "#F3F6F9", "dark": "#D6D6E0" }, "inverse": { "white": "#ffffff", "primary": "#ffffff", "secondary": "#3F4254", "success": "#ffffff", "info": "#ffffff", "warning": "#ffffff", "danger": "#ffffff", "light": "#464E5F", "dark": "#ffffff" } }, "gray": { "gray-100": "#F3F6F9", "gray-200": "#EBEDF3", "gray-300": "#E4E6EF", "gray-400": "#D1D3E0", "gray-500": "#B5B5C3", "gray-600": "#7E8299", "gray-700": "#5E6278", "gray-800": "#3F4254", "gray-900": "#181C32" } }, "font-family": "Poppins" };</script>
+    <!--end::Global Config-->
+    <!--begin::Global Theme Bundle(used by all pages)-->
+    <script src="~/assets/plugins/global/plugins.bundle.js"></script>
+    <script src="~/assets/plugins/custom/prismjs/prismjs.bundle.js"></script>
+    <script src="~/assets/js/scripts.bundle.js"></script>
+    <!--end::Global Theme Bundle-->
+    <!--begin::Page Scripts(used by this page)-->
+    <script src="~/assets/js/pages/custom/login/login-general.js"></script>
+    <script>
+        // Gắn sự kiện nhấn Enter để gọi getOtp
+        /*
+        document.getElementById("kt_login_signin_form").addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // Ngăn gửi form mặc định
+                GetOTPValidate(); // Gọi hàm lấy OTP
+            }
+        });
+        */
+        function mouseoverPass(obj) {
+            var obj = document.getElementById('password');
+            obj.type = "text";
+        }
+
+        function mouseoutPass(obj) {
+            var obj = document.getElementById('password');
+            obj.type = "password";
+        }
+    </script>
+    @await Html.PartialAsync("~/Views/Admin/Systems/Auth/Modal.cshtml")
+</body>
+<!--end::Body-->
+</html>

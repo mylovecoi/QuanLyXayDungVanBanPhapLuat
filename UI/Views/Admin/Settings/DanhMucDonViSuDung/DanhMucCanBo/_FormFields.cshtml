@@ -1,0 +1,327 @@
+﻿@using DataAccess.Entities.Settings;
+@using DataAccess.Enums;
+
+@model DataAccess.Entities.Settings.DanhMucCanBo
+@{
+	var phongBans = ViewData["DanhMucPhongBans"] as List<DanhMucPhongBan> ?? new List<DanhMucPhongBan>();
+	var donViId = ViewData["DonViQuanLyId"] as Guid?;
+	var fromCreate = ViewData["FromCreate"] as bool? ?? false;
+	var formPrefix = fromCreate ? "Create" : "Edit";
+}
+
+<div class="modal-body">
+	<div class="mb-3 font-weight-bold font-size-lg">
+		<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin cán bộ:</label>
+	</div>
+	<input hidden asp-for="Id" />
+	<input hidden asp-for="UserId" />
+	<input hidden asp-for="DonViQuanLyId" value="@donViId" />
+	@Html.AntiForgeryToken()
+
+<div class="row">
+    <!-- Thông tin cơ bản -->
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Tên cán bộ <span class="text-danger">*</span></label>
+            <input class="form-control" asp-for="TenCanBo" placeholder="Nhập tên cán bộ" autofocus>
+            <span asp-validation-for="TenCanBo" class="text-danger"></span>
+            <span id="TenCanBoError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Ngày sinh <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" asp-for="NgaySinh">
+            <span asp-validation-for="NgaySinh" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Phòng ban <span class="text-danger">*</span></label>
+            <select class="form-control w-100" asp-for="PhongBanId" id="PhongBanId@(formPrefix)">
+                <option value="">-- Chọn phòng ban --</option>
+                @foreach (var item in phongBans)
+                {
+                    if (Model?.PhongBanId == item.Id)
+                    {
+                        <option value="@item.Id" selected>@item.TenPhongBan</option>
+                    }
+                    else
+                    {
+                        <option value="@item.Id">@item.TenPhongBan</option>
+                    }
+                }
+            </select>
+            <span asp-validation-for="PhongBanId" class="text-danger"></span>
+            <span id="PhongBanIdError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Giới tính <span class="text-danger">*</span></label>
+            <div class="radio-inline mt-2">
+                <label class="radio">
+                    <input type="radio" required name="GioiTinh" value="true" @(Model?.GioiTinh == true ? "checked" : "") />
+                    <span></span>Nam
+                </label>
+                <label class="radio">
+                    <input type="radio" required name="GioiTinh" value="false" @(Model?.GioiTinh == false ? "checked" : "") />
+                    <span></span>Nữ
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Trình độ chuyên môn <span class="text-danger">*</span></label>
+            <input class="form-control" asp-for="TrinhDoChuyenMon" id="TrinhDoChuyenMon@(formPrefix)" placeholder="Nhập trình độ chuyên môn">
+            <span asp-validation-for="TrinhDoChuyenMon" class="text-danger"></span>
+            <span id="TrinhDoChuyenMon@(formPrefix)Error" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Loại lao động <span class="text-danger">*</span></label>
+            <select class="form-control" asp-for="LoaiLaoDong" id="LoaiLaoDong@(formPrefix)">
+                <option value="@LoaiLaoDong.CongChungVien">Công chứng viên</option>
+                <option value="@LoaiLaoDong.NhanVienNghiepVu">Nhân viên nghiệp vụ</option>
+                <option value="@LoaiLaoDong.NhanVienKhac">Nhân viên khác</option>
+            </select>
+            <span asp-validation-for="LoaiLaoDong" class="text-danger"></span>
+        </div>
+    </div>
+
+    <!-- Thông tin BHXH và BHYT - chung cho tất cả loại lao động -->
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Số tiền BHXH đã nộp <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" asp-for="SoTienBHXH" placeholder="Nhập số tiền BHXH">
+            <span asp-validation-for="SoTienBHXH" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Số tiền BHYT đã nộp <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" asp-for="SoTienBHYT" placeholder="Nhập số tiền BHYT">
+            <span asp-validation-for="SoTienBHYT" class="text-danger"></span>
+        </div>
+    </div>
+    @if (!fromCreate)
+    {
+        <div class="col-xl-4">
+            <div class="form-group">
+                <label>Trạng thái tài khoản <span class="text-danger">*</span></label>
+                <select class="form-control" asp-for="Status" id="Status@(formPrefix)">
+                    <option value="Kích hoạt">Kích hoạt</option>
+                    <option value="Khóa">Khóa</option>
+                    <option value="Chờ kích hoạt">Chờ kích hoạt</option>
+                </select>
+            </div>
+        </div>
+    }
+
+    <div class="col-xl-12">
+        <div class="form-group">
+            <label>Ghi chú</label>
+            <textarea class="form-control" asp-for="GhiChu" placeholder="Nhập ghi chú" rows="2"></textarea>
+        </div>
+    </div>
+
+
+    <!-- Thông tin công chứng viên -->
+    <div id="thongTinCongChungVien@(formPrefix)" class="col-xl-12">
+        <hr />
+        <div class="mb-3 font-weight-bold font-size-lg">
+            <label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin công chứng viên:</label>
+        </div>
+        <div class="row">
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label>Số Quyết định bổ nhiệm <span class="text-danger validation-required">*</span></label>
+                    <input class="form-control" asp-for="SoQuyetDinhBoNhiem" id="SoQuyetDinhBoNhiem@(formPrefix)" placeholder="Nhập số quyết định bổ nhiệm">
+                    <span id="SoQuyetDinhBoNhiem@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label>Ngày ban hành Quyết định bổ nhiệm <span class="text-danger validation-required">*</span></label>
+                    <input type="date" class="form-control" asp-for="NgayQuyetDinhBoNhiem" id="NgayQuyetDinhBoNhiem@(formPrefix)">
+                    <span id="NgayQuyetDinhBoNhiem@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label>Số Quyết định cấp Thẻ <span class="text-danger validation-required">*</span></label>
+                    <input class="form-control" asp-for="SoQuyetDinhCapThe" id="SoQuyetDinhCapThe@(formPrefix)" placeholder="Nhập số quyết định cấp thẻ">
+                    <span id="SoQuyetDinhCapThe@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label>Ngày ban hành Quyết định cấp Thẻ <span class="text-danger validation-required">*</span></label>
+                    <input type="date" class="form-control" asp-for="NgayQuyetDinhCapThe" id="NgayQuyetDinhCapThe@(formPrefix)">
+                    <span id="NgayQuyetDinhCapThe@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label>Số Thẻ công chứng viên <span class="text-danger validation-required">*</span></label>
+                    <input class="form-control" asp-for="SoTheCongChungVien" id="SoTheCongChungVien@(formPrefix)" placeholder="Nhập số thẻ công chứng viên">
+                    <span id="SoTheCongChungVien@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label>Chức vụ <span class="text-danger validation-required">*</span></label>
+                    <input class="form-control" asp-for="ChucVu" id="ChucVu@(formPrefix)" placeholder="Nhập chức vụ">
+                    <span id="ChucVu@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="form-group">
+                    <label>Mức phí bảo hiểm trách nhiệm nghề nghiệp <span class="text-danger validation-required">*</span></label>
+                    <input type="number" class="form-control" asp-for="MucPhiBaoHiemTrachNhiem" id="MucPhiBaoHiemTrachNhiem@(formPrefix)" placeholder="Nhập mức phí bảo hiểm">
+                    <span id="MucPhiBaoHiemTrachNhiem@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin nhân viên nghiệp vụ và nhân viên khác -->
+    <div id="thongTinNhanVien@(formPrefix)" class="col-xl-12" style="display: none;">
+        <hr />
+        <div class="mb-3 font-weight-bold font-size-lg">
+            <label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin nhân viên:</label>
+        </div>
+        <div class="row">
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label>Vị trí việc làm <span class="text-danger validation-required">*</span></label>
+                    <input class="form-control" asp-for="ViTriViecLam" id="ViTriViecLam@(formPrefix)" placeholder="Nhập vị trí việc làm">
+                    <span id="ViTriViecLam@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label>Ngày được tuyển dụng <span class="text-danger validation-required">*</span></label>
+                    <input type="date" class="form-control" asp-for="NgayTuyenDung" id="NgayTuyenDung@(formPrefix)">
+                    <span id="NgayTuyenDung@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label>Số hợp đồng lao động <span class="text-danger validation-required">*</span></label>
+                    <input class="form-control" asp-for="SoHopDongLaoDong" id="SoHopDongLaoDong@(formPrefix)" placeholder="Nhập số hợp đồng lao động">
+                    <span id="SoHopDongLaoDong@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label>Ngày ký hợp đồng lao động <span class="text-danger validation-required">*</span></label>
+                    <input type="date" class="form-control" asp-for="NgayKyHopDongLaoDong" id="NgayKyHopDongLaoDong@(formPrefix)">
+                    <span id="NgayKyHopDongLaoDong@(formPrefix)Error" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin quyết định dừng - chỉ hiển thị khi trạng thái là Khóa -->
+    @if (!fromCreate)
+    {
+        <div id="thongTinDung@(formPrefix)" class="col-xl-12" style="display: none;">
+            <hr />
+            <div class="mb-3 font-weight-bold font-size-lg">
+                <label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin dừng:</label>
+            </div>
+            <div class="row">
+                <div class="col-xl-6">
+                    <div class="form-group">
+                        <label>Số quyết định dừng <span class="text-danger validation-required">*</span></label>
+                        <input class="form-control" asp-for="SoQuyetDinhDung" id="SoQuyetDinhDung@(formPrefix)" placeholder="Nhập số quyết định dừng">
+                        <span asp-validation-for="SoQuyetDinhDung" class="text-danger"></span>
+                        <span id="SoQuyetDinhDung@(formPrefix)Error" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group">
+                        <label>Ngày quyết định dừng <span class="text-danger validation-required">*</span></label>
+                        <input type="date" class="form-control" asp-for="NgayQuyetDinhDung" id="NgayQuyetDinhDung@(formPrefix)">
+                        <span asp-validation-for="NgayQuyetDinhDung" class="text-danger"></span>
+                        <span id="NgayQuyetDinhDung@(formPrefix)Error" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Thông tin đăng nhập - chỉ hiển thị khi tạo mới -->
+    @if (fromCreate)
+    {
+        <div class="col-12">
+            <hr />
+            <div class="mb-3 font-weight-bold font-size-lg">
+                <label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin đăng nhập:</label>
+            </div>
+        </div>
+
+        <div class="col-xl-3">
+            <div class="form-group">
+                <label>Tên đăng nhập <span class="text-danger">*</span></label>
+                <input class="form-control" asp-for="Username" placeholder="Nhập tên đăng nhập">
+                <span asp-validation-for="Username" class="text-danger"></span>
+                <span id="UsernameError" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-xl-3">
+            <div class="form-group">
+                <label>Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" asp-for="Email" placeholder="Nhập email">
+                <span asp-validation-for="Email" class="text-danger"></span>
+                <span id="EmailError" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-xl-3">
+            <div class="form-group">
+                <label>Mật khẩu <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" asp-for="Password" id="Password" placeholder="Nhập mật khẩu">
+                <span asp-validation-for="Password" class="text-danger"></span>
+                <span id="PasswordError" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-xl-3">
+            <div class="form-group">
+                <label>Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" asp-for="ConfirmPassword" id="ConfirmPassword" placeholder="Nhập lại mật khẩu">
+                <div id="passwordMatch" class="text-danger d-none">Mật khẩu xác nhận không khớp</div>
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                <span id="ConfirmPasswordError" class="text-danger"></span>
+            </div>
+        </div>
+    }
+</div>
+</div>
+
+<script>
+	$(document).ready(function() {
+		// Kiểm tra hai mật khẩu có giống nhau không
+		$('#Password, #ConfirmPassword').on('keyup', function () {
+			if ($('#Password').val() !== '' && $('#ConfirmPassword').val() !== '' &&
+				$('#Password').val() !== $('#ConfirmPassword').val()) {
+				$('#passwordMatch').removeClass('d-none').addClass('d-block');
+			} else {
+				$('#passwordMatch').removeClass('d-block').addClass('d-none');
+			}
+		});
+
+		// Hiển thị/ẩn thông tin dừng dựa trên trạng thái tài khoản
+		$('#Status@(formPrefix)').change(function() {
+			if ($(this).val() == 'Khóa') {
+				$('#thongTinDung@(formPrefix)').show();
+			} else {
+				$('#thongTinDung@(formPrefix)').hide();
+			}
+		}).change(); // Gọi .change() để thiết lập trạng thái hiển thị ban đầu
+	});
+</script>

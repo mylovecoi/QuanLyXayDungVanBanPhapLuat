@@ -1,0 +1,71 @@
+﻿@model DataAccess.Entities.Systems.User
+
+<div class="card card-custom">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="card-label">
+                @ViewData["Title"]
+                <span class="d-block text-muted pt-2 font-size-sm">
+                    Quản lý @ViewData["Title"]
+                </span>
+            </h3>
+        </div>
+    </div>
+    <!--begin::Form-->
+    <form asp-controller="Home" asp-action="UpdateThemeSetting" method="post">
+        @Html.AntiForgeryToken()
+        <div class="card-body">
+            <div class="row">
+                <input hidden asp-for="Id" />
+                <div class="col-xl-2"></div>
+                <div class="col-xl-7">
+                    <div class="form-group row">
+                        <label class="col-form-label col-3 text-lg-right text-left"></label>
+                        <div class="col-9">
+                            <span class="text-danger">@Html.ValidationMessage("error")</span>
+                        </div>
+                    </div>
+                    <!--begin::Group-->
+                    <div class="form-group row">
+                        <label class="col-form-label col-3 text-lg-right text-left font-weight-bold">Giao diện:</label>
+                        <div class="col-9">
+                            <select class="form-control" asp-for="Theme">
+                                <option value="Dark">Dark Mode</option>
+                                <option value="Light">Light Mode</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!--end::Group-->
+                    <!--begin::Group-->
+                    <div class="form-group row">
+                        <label class="col-form-label col-3 text-lg-right text-left font-weight-bold">Quản lý menu chức năng:</label>
+                        <div class="col-9">
+                            <select class="form-control" asp-for="Menu">
+                                <option value="Fixed">Cố định</option>
+                                <option value="Minimize">Thu gọn</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!--end::Group-->
+                    <!--begin::Group-->
+                    <div class="form-group row">
+                        <label class="col-form-label col-3 text-lg-right text-left font-weight-bold">Nội dung hiển thị:</label>
+                        <div class="col-9">
+                            <select class="form-control" asp-for="Content">
+                                <option value="Fixted">Cố định</option>
+                                <option value="Max">Tối đa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!--end::Group-->
+                </div>
+            </div>
+        </div>
+        <div class="card-footer" style="text-align:center">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-danger"><i class="la la-reply"></i>Quay lại</a>&ensp;
+            <button type="reset" class="btn btn-secondary"><i class="la la-refresh"></i>Nhập lại</button>&ensp;
+            <button type="submit" class="btn btn-primary mr-2"><i class="la la-check"></i>Cập nhật</button>
+        </div>
+    </form>
+    <!--end::Form-->
+</div>

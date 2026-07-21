@@ -1,0 +1,424 @@
+@using UI.ViewModels;
+@using DataAccess.Entities.ThamDinhGia;
+@using DataAccess.Entities.Settings;
+
+@{
+    var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+    string role = ViewData["Role"] as string ?? "";
+    int year = (int)(ViewData["Year"] ?? DateTime.Now.Year);
+    string search = (string)(ViewData["Search"] ?? "");
+    int pageSize = (int)(ViewData["PageSize"] ?? 5);
+    int pageCurrent = (int)(ViewData["PageCurrent"] ?? 1);
+    
+    var dmDonVi = ViewData["DanhMucDonVi"] as List<DanhMucDonVi> ?? new List<DanhMucDonVi>();
+    var dmDonViThamDinh = ViewData["DanhMucDonViThamDinh"] as List<ThamDinhGiaDanhMucDonVi> ?? new List<ThamDinhGiaDanhMucDonVi>();
+
+    int record_id = 1;
+}
+
+@model VMPageInfoWithData<ThamDinhGia>
+
+<div class="card card-custom">
+    <div class="card-header flex-nowrap border-0 pt-6 pb-0">
+        <div class="card-title" style="min-width: 0; flex: 1;">
+            <h3 class="card-label" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; width: 100%;">
+                Quản lý Xét duyệt <b title="@ViewData["Title"]?.ToString()?.ToUpper()">@ViewData["Title"]?.ToString()?.ToUpper()</b>
+            </h3>
+        </div>
+    </div>
+
+    <div class="card-body pt-0">
+        <form id="FilterForm" method="get" asp-controller="ThamDinhGiaXetDuyet" asp-action="Index">
+            <div class="row">
+                <div class="col-xl-3">
+                    <div class="form-group">
+                        <label style="font-weight:bold; color:blue">Năm:</label>
+                        <select class="form-control h-40px" name="Year" id="FilterYear_Select">
+                            <!option value="all" @(year == 0 ? "selected" : "")>-- Tất cả --</!option>
+                            @for (int y = DateTime.Now.Year - 5; y <= DateTime.Now.Year; y++)
+                            {
+                                <!option value="@y" @(year == y ? "selected" : "")>Năm @y</!option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-xl-3" style="text-align:left">
+                    <div class="form-group">
+                        <label class="text-blue">Hiển thị</label>
+                        <select class="form-control h-40px" name="PageSize" id="PageSize_Select">
+                            <!option value="5" @(pageSize == 5 ? "selected" : "")>5 thông tin</!option>
+                            <!option value="10" @(pageSize == 10 ? "selected" : "")>10 thông tin</!option>
+                            <!option value="20" @(pageSize == 20 ? "selected" : "")>20 thông tin</!option>
+                            <!option value="50" @(pageSize == 50 ? "selected" : "")>50 thông tin</!option>
+                            <!option value="100" @(pageSize == 100 ? "selected" : "")>100 thông tin</!option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xl-9">
+                    <div class="form-group">
+                        <label class="text-blue">Tìm kiếm</label>
+                        <div class="input-group">
+                            <input class="form-control h-40px" name="Search" id="txt_Search" placeholder="Tìm kiếm theo số thông báo kết luận, ghi chú..." value="@search">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-danger" type="button" onclick="ClearSearch()"><i class="las la-times-circle"></i></button>
+                            </div>
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit"><i class="las la-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input hidden id="PageCurrent" name="PageCurrent" value="@pageCurrent" />
+        </form>
+
+        <!--begin: Datatable-->
+        <div class="table-responsive border rounded-lg mb-8">
+            <table class="table table-striped table-hover table-responsive-lg rounded-lg m-0">
+                <thead class="thead-light">
+                    <tr style="text-align:center;" class="table-active">
+                        <th width="3%">#</th>
+                        <th>Đơn vị báo cáo</th>
+                        <th>Phân loại hồ sơ</th>
+                        <th>Số thông báo kết luận/<br/>Ngày ban hành</th>
+                        <th>Đơn vị thẩm định</th>
+                        <th>Trạng thái</th>
+                        <th width="12%">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Data != null && Model.Data.Any())
+                    {
+                        @foreach (var item in Model.Data)
+                        {
+                            var donViName = dmDonVi.FirstOrDefault(x => x.Id == item.DonViQuanLyId)?.TenDonVi ?? "";
+                            var unitApprName = dmDonViThamDinh.FirstOrDefault(x => x.Id == item.DonViThamDinhId)?.TenDv ?? "";
+                            <tr class="@FuntionGlobal.GetClassTableWithStatus(item.TrangThai)">
+                                <td style="text-align:center; vertical-align:middle">@(record_id++)</td>
+                                <td style="vertical-align: middle;">@donViName</td>
+                                <td style="vertical-align: middle;">@item.PhanLoai</td>
+                                <td style="vertical-align: middle; text-align: center">
+                                    <span class="text-primary font-weight-bold">@item.SoTbKl</span><br/>
+                                    <span class="text-muted">@item.Thoidiem.ToString("dd/MM/yyyy")</span>
+                                </td>
+                                <td style="vertical-align: middle;">@unitApprName</td>
+                                <td class="text-center text-nowrap" style="vertical-align: middle">
+                                    @{
+                                        string labelText = "";
+                                        string labelClass = "label label-lg label-inline font-weight-bolder";
+                                        string ngayTitle = "";
+                                        string ngayValue = item.Thoidiem.ToString("dd/MM/yyyy");
+
+                                        if (item.TrangThai == "CD")
+                                        {
+                                            labelText = "Chờ duyệt";
+                                            labelClass += " label-warning";
+                                            ngayTitle = "Ngày chuyển";
+                                        }
+                                        else if (item.TrangThai == "DD")
+                                        {
+                                            labelText = "Đã duyệt";
+                                            labelClass += " label-success";
+                                            ngayTitle = "Ngày duyệt";
+                                        }
+                                        else if (item.TrangThai == "BTL")
+                                        {
+                                            labelText = "Bị trả lại";
+                                            labelClass += " label-danger";
+                                            ngayTitle = "Ngày bị trả lại";
+                                        }
+                                        else if (item.TrangThai == "CB")
+                                        {
+                                            labelText = "Công bố";
+                                            labelClass += " label-success";
+                                            ngayTitle = "Ngày công bố";
+                                        }
+                                        else if (item.TrangThai == "HCB")
+                                        {
+                                            labelText = "Hủy công bố";
+                                            labelClass += " label-danger";
+                                            ngayTitle = "Ngày hủy công bố";
+                                        }
+
+                                        if (!string.IsNullOrEmpty(labelText))
+                                        {
+                                            <span class="@labelClass">@labelText</span>
+                                            if (!string.IsNullOrEmpty(ngayTitle))
+                                            {
+                                                <br />
+                                                <span>@ngayTitle</span>
+                                                <br />
+                                                <span>@ngayValue</span>
+                                            }
+                                        }
+                                    }
+                                </td>
+                                <td class="text-center text-nowrap" style="vertical-align: middle">
+                                    <a class="btn btn-sm btn-clean btn-icon" title="Xem chi tiết" target="_blank"
+                                       asp-controller="ThamDinhGia" asp-action="Show" asp-route-hoSoId="@item.Id">
+                                        <i class="icon-lg la la-eye text-success"></i>
+                                    </a>
+
+                                    @if (item.TrangThai == "CD")
+                                    {
+                                        if (session != null && FuntionGlobal.CheckPermission(session, role, "Approve"))
+                                        {
+                                            <button type="button" class="btn btn-sm btn-clean btn-icon" title="Duyệt" onclick="HandleDuyet('@item.Id', '@item.SoTbKl')">
+                                                <i class="icon-lg la la-check text-success"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-clean btn-icon" title="Trả lại" onclick="HandleTraLai('@item.Id', '@item.SoTbKl')">
+                                                <i class="icon-lg la la-reply text-danger"></i>
+                                            </button>
+                                        }
+                                    }
+                                    else if (item.TrangThai == "DD")
+                                    {
+                                        if (session != null && FuntionGlobal.CheckPermission(session, role, "Approve"))
+                                        {
+                                            <button type="button" class="btn btn-sm btn-clean btn-icon" title="Hủy duyệt" onclick="HandleHuyDuyet('@item.Id', '@item.SoTbKl')">
+                                                <i class="icon-lg la la-times text-danger"></i>
+                                            </button>
+                                        }
+                                        if (session != null && FuntionGlobal.CheckPermission(session, role, "Public"))
+                                        {
+                                            <button type="button" class="btn btn-sm btn-clean btn-icon" title="Công bố" onclick="HandleCongBo('@item.Id', '@item.SoTbKl')">
+                                                <i class="icon-lg la la-globe text-primary"></i>
+                                            </button>
+                                        }
+                                    }
+                                    else if (item.TrangThai == "CB")
+                                    {
+                                        if (session != null && FuntionGlobal.CheckPermission(session, role, "Public"))
+                                        {
+                                            <button type="button" class="btn btn-sm btn-clean btn-icon" title="Hủy công bố" onclick="HandleHuyCongBo('@item.Id', '@item.SoTbKl')">
+                                                <i class="icon-lg la la-times text-danger"></i>
+                                            </button>
+                                        }
+                                    }
+                                    else if (item.TrangThai == "HCB")
+                                    {
+                                        if (session != null && FuntionGlobal.CheckPermission(session, role, "Approve"))
+                                        {
+                                            <button type="button" class="btn btn-sm btn-clean btn-icon" title="Hủy duyệt" onclick="HandleHuyDuyet('@item.Id', '@item.SoTbKl')">
+                                                <i class="icon-lg la la-times text-danger"></i>
+                                            </button>
+                                        }
+                                        if (session != null && FuntionGlobal.CheckPermission(session, role, "Public"))
+                                        {
+                                            <button type="button" class="btn btn-sm btn-clean btn-icon" title="Công bố" onclick="HandleCongBo('@item.Id', '@item.SoTbKl')">
+                                                <i class="icon-lg la la-globe text-primary"></i>
+                                            </button>
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td style="text-align:center" colspan="7">Không tìm thấy thông tin!!!</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <!--end: Datatable-->
+        <div id="Pagination">
+            @await Html.PartialAsync("~/Views/Shared/Pagination.cshtml")
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Admin/ThamDinhGia/XetDuyet/_Modal.cshtml")
+
+@section custom_style {
+}
+
+@section custom_script {
+    <script src="~/js/site.js"></script>
+    <script>
+        $(document).ready(function () {
+            SetupSelect2('#FilterYear_Select', 'Lựa Chọn Năm', { enableSearch: false, enableClear: false });
+            HandleRegisterFormFilter('#FilterForm', '#Pagination', '');
+        });
+
+        const ClearSearch = () => {
+            $('#txt_Search').val('');
+            $('#FilterForm').submit();
+        }
+
+        const HandleDuyet = (hoSoId, soQd) => {
+            $('#soqd_duyet').text(soQd);
+            $('#duyetId').val(hoSoId);
+            $('#Duyet_Modal').modal('show');
+        }
+
+        const SubmitDuyetForm = (e) => {
+            e.preventDefault();
+            const urlPost = $('#DuyetForm').attr('action');
+            HandlePostAjax({
+                url: urlPost,
+                data: new FormData($('#DuyetForm')[0]),
+                successCallback: (res) => {
+                    if (res.isValid) {
+                        $('#Duyet_Modal').modal('hide');
+                        Swal.fire({
+                            icon: "success",
+                            title: "<span class='font-weight-boldest font-size-h1 text-capitalize text-blue mb-n5'>Thành công!</span>",
+                            text: res.message,
+                            confirmButtonText: "Tiếp tục",
+                            confirmButtonClass: 'btn btn-primary font-weight-bold',
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        toastr.warning(res.message || 'Có lỗi khi thao tác với dữ liệu', 'Cảnh Báo!');
+                    }
+                },
+                errorCallback: (xhr, status, error) => {
+                    toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
+                },
+            });
+        }
+
+        const HandleHuyDuyet = (hoSoId, soQd) => {
+            $('#soqd_huyduyet').text(soQd);
+            $('#huyduyetId').val(hoSoId);
+            $('#HuyDuyet_Modal').modal('show');
+        }
+
+        const SubmitHuyDuyetForm = (e) => {
+            e.preventDefault();
+            const urlPost = $('#HuyDuyetForm').attr('action');
+            HandlePostAjax({
+                url: urlPost,
+                data: new FormData($('#HuyDuyetForm')[0]),
+                successCallback: (res) => {
+                    if (res.isValid) {
+                        $('#HuyDuyet_Modal').modal('hide');
+                        Swal.fire({
+                            icon: "success",
+                            title: "<span class='font-weight-boldest font-size-h1 text-capitalize text-blue mb-n5'>Thành công!</span>",
+                            text: res.message,
+                            confirmButtonText: "Tiếp tục",
+                            confirmButtonClass: 'btn btn-primary font-weight-bold',
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        toastr.warning(res.message || 'Có lỗi khi thao tác với dữ liệu', 'Cảnh Báo!');
+                    }
+                },
+                errorCallback: (xhr, status, error) => {
+                    toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
+                },
+            });
+        }
+
+        const HandleTraLai = (hoSoId, soQd) => {
+            $('#soqd_tralai').text(soQd);
+            $('#tralaiId').val(hoSoId);
+            $('#TraLai_Modal').modal('show');
+        }
+
+        const SubmitTraLaiForm = (e) => {
+            e.preventDefault();
+            const urlPost = $('#TraLaiForm').attr('action');
+            HandlePostAjax({
+                url: urlPost,
+                data: new FormData($('#TraLaiForm')[0]),
+                successCallback: (res) => {
+                    if (res.isValid) {
+                        $('#TraLai_Modal').modal('hide');
+                        Swal.fire({
+                            icon: "success",
+                            title: "<span class='font-weight-boldest font-size-h1 text-capitalize text-blue mb-n5'>Thành công!</span>",
+                            text: res.message,
+                            confirmButtonText: "Tiếp tục",
+                            confirmButtonClass: 'btn btn-primary font-weight-bold',
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        toastr.warning(res.message || 'Có lỗi khi thao tác với dữ liệu', 'Cảnh Báo!');
+                    }
+                },
+                errorCallback: (xhr, status, error) => {
+                    toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
+                },
+            });
+        }
+
+        const HandleCongBo = (hoSoId, soQd) => {
+            $('#soqd_congbo').text(soQd);
+            $('#congboId').val(hoSoId);
+            $('#CongBo_Modal').modal('show');
+        }
+
+        const SubmitCongBoForm = (e) => {
+            e.preventDefault();
+            const urlPost = $('#CongBoForm').attr('action');
+            HandlePostAjax({
+                url: urlPost,
+                data: new FormData($('#CongBoForm')[0]),
+                successCallback: (res) => {
+                    if (res.isValid) {
+                        $('#CongBo_Modal').modal('hide');
+                        Swal.fire({
+                            icon: "success",
+                            title: "<span class='font-weight-boldest font-size-h1 text-capitalize text-blue mb-n5'>Thành công!</span>",
+                            text: res.message,
+                            confirmButtonText: "Tiếp tục",
+                            confirmButtonClass: 'btn btn-primary font-weight-bold',
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        toastr.warning(res.message || 'Có lỗi khi thao tác với dữ liệu', 'Cảnh Báo!');
+                    }
+                },
+                errorCallback: (xhr, status, error) => {
+                    toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
+                },
+            });
+        }
+
+        const HandleHuyCongBo = (hoSoId, soQd) => {
+            $('#soqd_huycongbo').text(soQd);
+            $('#huycongboId').val(hoSoId);
+            $('#HuyCongBo_Modal').modal('show');
+        }
+
+        const SubmitHuyCongBoForm = (e) => {
+            e.preventDefault();
+            const urlPost = $('#HuyCongBoForm').attr('action');
+            HandlePostAjax({
+                url: urlPost,
+                data: new FormData($('#HuyCongBoForm')[0]),
+                successCallback: (res) => {
+                    if (res.isValid) {
+                        $('#HuyCongBo_Modal').modal('hide');
+                        Swal.fire({
+                            icon: "success",
+                            title: "<span class='font-weight-boldest font-size-h1 text-capitalize text-blue mb-n5'>Thành công!</span>",
+                            text: res.message,
+                            confirmButtonText: "Tiếp tục",
+                            confirmButtonClass: 'btn btn-primary font-weight-bold',
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        toastr.warning(res.message || 'Có lỗi khi thao tác với dữ liệu', 'Cảnh Báo!');
+                    }
+                },
+                errorCallback: (xhr, status, error) => {
+                    toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
+                },
+            });
+        }
+    </script>
+}

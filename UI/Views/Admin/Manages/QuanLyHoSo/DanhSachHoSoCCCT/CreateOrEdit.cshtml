@@ -1,0 +1,92 @@
+﻿@* @model DataAccess.Entities.Manages.ThongTinHoSo.HoSoCCCT *@
+@model Services.DTOs.Manages.ThongTinHoSo.HoSoCCCTDto
+@{
+
+}
+<div class="card card-custom border">
+	@if (Model != null)
+	{
+		<div class="card-header flex-wrap border-0 pt-6 pb-0">
+			<div class="card-title">
+				<h3 class="card-label">
+					<b>@ViewData["Title"]?.ToString()?.ToUpper() CÔNG CHỨNG - CHỨNG THỰC</b>
+					<span class="d-block text-muted pt-2 font-size-sm">
+						@(Model.Status == "CXD" ? "Thêm Mới" : "Cập nhật") Thông Tin Hồ Sơ Công Chứng - Chứng Thực
+					</span>
+				</h3>
+			</div>
+		</div>
+		<hr />
+		<form asp-action="@(Model.Status == "CXD" ? "Store" : "Update")" id="FormFields" method="post" onsubmit="return HandleSubmitFormThongTin(event,this);">
+			<div id="loadingCreateForm" class="overlay overlay-block">
+				<div class="bg-secondary loading">
+					<div class="spinner spinner-lg spinner-primary"></div>
+					<span class="text-dark">Đang xử lý! Vui lòng đợi trong giây lát...</span>
+				</div>
+			</div>
+
+			<div class="card-body pt-0">
+				@await Html.PartialAsync("~/Views/Admin/Manages/QuanLyHoSo/DanhSachHoSoCCCT/_FormFields.cshtml")
+			</div>
+			<div class="card-footer" style="text-align:center">
+				<a asp-controller="DanhSachHoSoCCCT" asp-action="Index" class="btn btn-danger mr-2"><i class="la la-reply"></i>Quay lại</a>
+				<button type="reset" class="btn btn-secondary mr-2"><i class="la la-refresh"></i>Nhập lại</button>
+				<button type="submit" class="btn btn-primary"><i class="la la-check"></i>Hoàn Thành</button>
+			</div>
+		</form>
+	}
+	else
+	{
+		<div class="card-header flex-wrap border-0 pt-6 pb-0">
+			<div class="card-title">
+				<h3 class="card-label">
+					<b>@ViewData["Title"]?.ToString()?.ToUpper() CÔNG CHỨNG</b>
+					<span class="d-block text-muted pt-2 font-size-sm">
+						Thông Tin Hồ Sơ Công Chứng
+					</span>
+				</h3>
+			</div>
+		</div>
+		<div class="card-body">
+			<h3>@ViewData["Messages"]</h3>
+		</div>
+		<div class="card-footer" style="text-align:center">
+			<a asp-controller="DanhSachHoSoCCCT" asp-action="Index" class="btn btn-danger mr-2"><i class="la la-reply"></i>Quay lại</a>
+		</div>
+	}
+</div>
+@await Html.PartialAsync("~/Views/Shared/_ModalPartial.cshtml")
+@await Html.PartialAsync("~/Views/Admin/Manages/QuanLyHoSo/DanhSachHoSoCCCT/ChiTietPhiLePhi/_Modal.cshtml")
+
+@section custom_style {
+	<style>
+		.overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(255, 255, 255, 0.7);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 10;
+			display: none;
+		}
+	</style>
+}
+@section custom_script {
+	@* page *@
+	<script src="~/js/site.js"></script>
+	<script src="~/js/agent-scan.js"></script>
+	<script src="~/js/pages/Admin/Manages/QuanLyHoSo/CreateOrEdit.js"></script>
+	@* lib *@
+	<script>
+		$(document).ready(function () {
+		   urlIndex = '@Url.Action("Index", "DanhSachHoSoCCCT")';
+		})
+		document.addEventListener("DOMContentLoaded", function () {
+			startAgentConnection();
+		});
+	</script>
+}

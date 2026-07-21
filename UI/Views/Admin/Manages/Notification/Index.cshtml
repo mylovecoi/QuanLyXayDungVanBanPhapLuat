@@ -1,0 +1,217 @@
+﻿@using UI.ViewModels;
+@{
+    var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+    int pageSize = (ViewData["PageInfo"] as VMPageInfo)?.PageSize ?? 5;
+    string timKiem = (ViewData["PageInfo"] as VMPageInfo)?.Search ?? "";
+    string sort = (ViewData["PageInfo"] as VMPageInfo)?.Sort ?? "";
+    string role = ViewData["Role"]?.ToString() ?? "";
+    int record_id = 1;
+    string trangThai = ViewData["Status"]?.ToString() ?? "";
+}
+
+@model IEnumerable<DataAccess.Entities.Manages.Notification>
+
+@section custom_style {
+
+}
+
+@section custom_script {
+    <script>
+        $('#PageSize_Search').change(function () {
+            ReloadFrm();
+        });
+
+        $('#Status').change(function () {
+            ReloadFrm();
+        });
+
+        function ClearTxtSearch() {
+            $('#txt_Search').val('');
+        }
+
+        function SubmitTxtSearch() {
+            ReloadFrm();
+        }
+
+        function ReloadFrm() {
+            var current_path_url = window.location.pathname + '?';
+            var timkiem = '&TimKiem=' + $('#txt_Search').val();
+            var status = '&Status=' + $('#Status').val();
+            var pageSize = '&PageSize=' + $('#PageSize_Search').val();
+            var url = current_path_url + timkiem + status + pageSize;
+            window.location.href = url;
+        }
+
+        function ClickPage(pageSelect) {
+            var current_path_url = window.location.pathname + '?';
+            var timkiem = '&TimKiem=' + $('#txt_Search').val();
+            var status = '&Status=' + $('#Status').val();
+            var pageSize = '&PageSize=' + $('#PageSize_Search').val();
+            var pageCurrent = '&PageCurrent=' + pageSelect;
+            var url = current_path_url + timkiem + status + pageSize + pageCurrent;
+            window.location.href = url;
+        }
+
+        function MarkAsRead(id) {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: '/Manages/Notification/MarkAsRead',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': csrfToken
+                },
+                data: {
+                    Id: id
+                },
+                dataType: 'JSON',
+                success: function (data) {
+                    if (data.status == 'success') {
+                        toastr.success(data.message);
+                        ReloadFrm();
+                    } else {
+                        toastr.error(data.message, "Lỗi!");
+                    }
+                }
+            });
+        }
+    </script>
+}
+
+<div class="card card-custom">
+    <div class="card-header flex-wrap border-0 pt-6 pb-0">
+        <div class="card-title">
+            <h3 class="card-label">
+                @ViewData["Title"]
+                <span class="d-block text-muted pt-2 font-size-sm">
+                    Quản lý @ViewData["Title"]?.ToString()?.ToLower()
+                </span>
+            </h3>
+        </div>
+        <div class="card-toolbar">
+        </div>
+    </div>
+    @Html.AntiForgeryToken()
+    <div class="card-body">
+        <div class="row">
+            <div class="col-xl-3" style="text-align:left">
+                <div class="form-group fv-plugins-icon-container">
+                    <label style="color:blue; font-weight:bold;">Trạng thái</label>
+                    <select class="form-control select2basic" name="Status" id="Status">
+                        <!option value="" @(trangThai == "" ? "selected" : "")>Tất cả</!option>
+                        <!option value="ChuaXem" @(trangThai == "ChuaXem" ? "selected" : "")>Chưa xem</!option>
+                        <!option value="DaXem" @(trangThai == "DaXem" ? "selected" : "")>Đã xem</!option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-xl-3">
+                <div class="form-group fv-plugins-icon-container">
+                    <label class="text-blue">Hiển thị</label>
+                    <select class="form-control" name="PageSize_Search" id="PageSize_Search">
+                        <!option value="5" @(pageSize == 5 ? "selected" : "")>5 thông tin</!option>
+                        <!option value="10" @(pageSize == 10 ? "selected" : "")>10 thông tin</!option>
+                        <!option value="20" @(pageSize == 20 ? "selected" : "")>20 thông tin</!option>
+                        <!option value="50" @(pageSize == 50 ? "selected" : "")>50 thông tin</!option>
+                        <!option value="100" @(pageSize == 100 ? "selected" : "")>100 thông tin</!option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-xl-9">
+                <div class="form-group fv-plugins-icon-container">
+                    <label class="text-blue">Tìm kiếm</label>
+                    <div class="input-group">
+                        <input class="form-control" name="txt_Search" id="txt_Search" placeholder="Tìm kiếm..." value="@timKiem">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-danger" type="button" onclick="ClearTxtSearch()"><i class="las la-times-circle"></i></button>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="submit" onclick="SubmitTxtSearch()"><i class="las la-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input hidden id="sort_current" name="sort_current" value="@ViewData["Sort"]" />
+        <input hidden id="PageCurrent" name="PageCurrent" value="@ViewData["PageCurrent"]" />
+        <!--begin: Datatable-->
+        <table class="table table-striped table-hover table-responsive-lg rounded-lg">
+            <thead>
+                <tr style="text-align:center;" class="table-active">
+                    <th width="2%">#</th>
+                    <th style="font-weight: bold;">Gửi từ đơn vị</th>
+                    <th style="font-weight: bold;">Nội dung</th>
+                    <th style="font-weight: bold;">Trạng thái</th>
+                    <th style="font-weight: bold;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count() > 0)
+                {
+                    @foreach (var item in Model)
+                    {
+                        int record = record_id++;
+                        <tr class="@FuntionGlobal.GetClassTable(record)">
+                            <td style="text-align: center; vertical-align:middle; @FuntionGlobal.GetStyleNotiRead(item.DaXem)" width="5%">@record</td>
+                            <td style="vertical-align: middle; @FuntionGlobal.GetStyleNotiRead(item.DaXem)">
+                                @item.TenDonViGuiThongBao
+                            </td>
+                            <td style="vertical-align: middle; @FuntionGlobal.GetStyleNotiRead(item.DaXem)">
+                                @item.NoiDung
+                            </td>
+
+                            <td style="text-align: center; vertical-align: middle; @FuntionGlobal.GetStyleNotiRead(item.DaXem)">
+                                <span style="width: 112px;">
+                                    @if (item.DaXem)
+                                    {
+                                        <span class="label font-weight-bold label-lg label-light-info label-inline">Đã xem</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="label font-weight-bold label-lg label-warning label-inline">Chưa xem</span>
+                                    }
+                                </span>
+                            </td>
+                            <td style="text-align: center; vertical-align: middle;">
+                                @if (session != null)
+                                {
+                                    @if (FuntionGlobal.CheckPermission(session, item.RoleDanhSach ?? "", "Index"))
+                                    {
+                                        <a class="btn btn-sm btn-clean btn-icon" title="Đi tới thông tin hồ sơ"
+                                           asp-controller="Notification" asp-action="Show" asp-route-Id="@item.Id" asp-route-PhanLoai="DanhSach">
+                                            <i class="icon-lg la la-file-alt text-success"></i>
+                                        </a>
+                                    }
+                                    @if (FuntionGlobal.CheckPermission(session, item.RoleXetDuyet ?? "", "Index"))
+                                    {
+                                        <a class="btn btn-sm btn-clean btn-icon" title="Đi tới xét duyệt hồ sơ"
+                                           asp-controller="Notification" asp-action="Show" asp-route-Id="@item.Id" asp-route-PhanLoai="XetDuyet">
+                                            <i class="icon-lg la la-check-square text-primary"></i>
+                                        </a>
+                                    }
+                                    @if (!item.DaXem)
+                                    {
+                                        <a class="btn btn-sm btn-clean btn-icon" title="Đánh dấu đã xem" onclick="MarkAsRead('@item.Id')">
+                                            <i class="icon-lg la la-check-double text-primary"></i>
+                                        </a>
+                                    }
+                                }
+
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td style="text-align:center" colspan="5">Không tìm thấy thông tin!!!</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <!--end: Datatable-->
+        @await Html.PartialAsync("~/Views/Shared/Pagination.cshtml")
+    </div>
+</div>

@@ -1,0 +1,216 @@
+@using DataAccess.Entities.Settings;
+@using DataAccess.Enums;
+
+@model DataAccess.Entities.Manages.ThongTinNganChan
+@{
+	var fromCreate = ViewData["FromCreate"] as bool? ?? false;
+}
+
+<div class="mb-3 font-weight-bold font-size-lg">
+	<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin ngăn chặn:</label>
+</div>
+<input hidden asp-for="Id" />
+<input hidden id="tableName" name="tableName" value="ThongTinNganChan" />
+@Html.AntiForgeryToken()
+<div class="row">
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Cơ quan ban hành <span class="text-danger">*</span></label>
+			<input class="form-control" asp-for="CoQuanBanHanh" placeholder="Nhập tên cơ quan ban hành">
+			<span asp-validation-for="CoQuanBanHanh" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Số quyết định <span class="text-danger">*</span></label>
+			<input class="form-control" asp-for="SoQuyetDinh" placeholder="Nhập số quyết định" autofocus>
+			<span asp-validation-for="SoQuyetDinh" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Ngày quyết định <span class="text-danger">*</span></label>
+			<input type="date" class="form-control" asp-for="NgayQuyetDinh">
+			<span asp-validation-for="NgayQuyetDinh" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-6">
+		<div class="form-group">
+			<label>Ngày áp dụng <span class="text-danger">*</span></label>
+			<input type="date" class="form-control" asp-for="NgayApDung">
+			<span asp-validation-for="NgayApDung" class="text-danger"></span>
+		</div>
+	</div>
+	<div class="col-xl-12">
+		<div class="form-group">
+			<label>Thông tin tài sản <span class="text-danger">*</span></label>
+			<textarea class="form-control" asp-for="ThongTinTaiSan" placeholder="Nhập thông tin tài sản" rows="5"></textarea>
+			<span asp-validation-for="ThongTinTaiSan" class="text-danger"></span>
+		</div>
+	</div>
+
+	@if (!fromCreate)
+	{
+		<div class="col-xl-6">
+			<div class="form-group">
+				<label>Trạng thái <span class="text-danger">*</span></label>
+				<div class="radio-inline">
+					<label class="radio">
+						<input type="radio" asp-for="TrangThai" value="@TrangThaiNganChan.KhongApDung" id="trangThaiKhongApDung" />
+						<span></span>Không áp dụng
+					</label>
+					<label class="radio">
+						<input type="radio" asp-for="TrangThai" value="@TrangThaiNganChan.ApDung" id="trangThaiApDung" />
+						<span></span>Áp dụng
+					</label>
+				</div>
+				<span asp-validation-for="TrangThai" class="text-danger"></span>
+			</div>
+		</div>
+	}
+	else
+	{
+		<input type="hidden" asp-for="TrangThai" value="@TrangThaiNganChan.ApDung" />
+	}
+
+	<div id="thongTinDung" class="col-xl-12" style="@(Model?.TrangThai == TrangThaiNganChan.KhongApDung ? "" : "display: none;")">
+		<div class="row">
+			<div class="col-xl-6">
+				<div class="form-group">
+					<label>Cơ quan dừng <span class="text-danger">*</span></label>
+					<input class="form-control" asp-for="CoQuanDung" id="CoQuanDung" placeholder="Nhập tên cơ quan dừng" data-msg-required="Vui lòng nhập cơ quan dừng">
+					<span asp-validation-for="CoQuanDung" class="text-danger"></span>
+				</div>
+			</div>
+			<div class="col-xl-6">
+				<div class="form-group">
+					<label>Số quyết định dừng <span class="text-danger">*</span></label>
+					<input class="form-control" asp-for="SoQuyetDinhDung" id="SoQuyetDinhDung" placeholder="Nhập số quyết định dừng" data-msg-required="Vui lòng nhập số quyết định dừng">
+					<span asp-validation-for="SoQuyetDinhDung" class="text-danger"></span>
+				</div>
+			</div>
+			<div class="col-xl-6">
+				<div class="form-group">
+					<label>Ngày quyết định dừng <span class="text-danger">*</span></label>
+					<input type="date" class="form-control" asp-for="NgayQuyetDinhDung" id="NgayQuyetDinhDung" data-msg-required="Vui lòng chọn ngày quyết định dừng">
+					<span asp-validation-for="NgayQuyetDinhDung" class="text-danger"></span>
+				</div>
+			</div>
+			<div class="col-xl-6">
+				<div class="form-group">
+					<label>Ngày áp dụng dừng <span class="text-danger">*</span></label>
+					<input type="date" class="form-control" asp-for="NgayApDungDung" id="NgayApDungDung" data-msg-required="Vui lòng chọn ngày áp dụng dừng">
+					<span asp-validation-for="NgayApDungDung" class="text-danger"></span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="mb-3 font-weight-bold font-size-lg">
+	<label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin đính kèm:</label>
+</div>
+<div id="attachedFile_frm" style="width:100%">
+	@await Html.PartialAsync("~/Views/Admin/AttachedFile/Index.cshtml", Model.DSHopDongDinhKem)
+</div>
+
+@if (!fromCreate)
+{
+	<script>
+		$(document).ready(function() {
+			// Event handler cho việc thay đổi trạng thái
+			$('#trangThaiKhongApDung, #trangThaiApDung').change(function() {
+				if ($('#trangThaiKhongApDung').is(':checked')) {
+					$('#thongTinDung').slideDown();
+					$('#SoQuyetDinhDung').prop('required', true);
+					$('#CoQuanDung').prop('required', true);
+					$('#NgayQuyetDinhDung').prop('required', true);
+					$('#NgayApDungDung').prop('required', true);
+
+					// Tự động set ngày hiện tại nếu chưa có giá trị
+					if (!$('#NgayQuyetDinhDung').val()) {
+						var today = new Date().toISOString().split('T')[0];
+						$('#NgayQuyetDinhDung').val(today);
+					}
+
+					if (!$('#NgayApDungDung').val()) {
+						var today = new Date().toISOString().split('T')[0];
+						$('#NgayApDungDung').val(today);
+					}
+				} else {
+					$('#thongTinDung').slideUp();
+					$('#SoQuyetDinhDung').prop('required', false);
+					$('#CoQuanDung').prop('required', false);
+					$('#NgayQuyetDinhDung').prop('required', false);
+					$('#NgayApDungDung').prop('required', false);
+					$('#soQuyetDinhDungError').hide();
+				}
+			});
+
+			// Kiểm tra validation trước khi submit form
+			$('form').on('submit', function(e) {
+				if ($('#trangThaiKhongApDung').is(':checked')) {
+					var hasError = false;
+
+					// Kiểm tra Cơ quan dừng
+					if ($('#CoQuanDung').val() === '') {
+						e.preventDefault();
+						$('.text-danger[data-valmsg-for="CoQuanDung"]').text('Vui lòng nhập cơ quan dừng');
+						$('#CoQuanDung').addClass('is-invalid');
+						hasError = true;
+					} else {
+						$('.text-danger[data-valmsg-for="CoQuanDung"]').text('');
+						$('#CoQuanDung').removeClass('is-invalid');
+					}
+
+					// Kiểm tra Số quyết định dừng
+					if ($('#SoQuyetDinhDung').val() === '') {
+						e.preventDefault();
+						$('#soQuyetDinhDungError').show();
+						$('#SoQuyetDinhDung').addClass('is-invalid');
+						hasError = true;
+					} else {
+						$('#soQuyetDinhDungError').hide();
+						$('#SoQuyetDinhDung').removeClass('is-invalid');
+					}
+
+					// Kiểm tra Ngày quyết định dừng
+					if ($('#NgayQuyetDinhDung').val() === '') {
+						e.preventDefault();
+						$('.text-danger[data-valmsg-for="NgayQuyetDinhDung"]').text('Vui lòng chọn ngày quyết định dừng');
+						$('#NgayQuyetDinhDung').addClass('is-invalid');
+						hasError = true;
+					} else {
+						$('.text-danger[data-valmsg-for="NgayQuyetDinhDung"]').text('');
+						$('#NgayQuyetDinhDung').removeClass('is-invalid');
+					}
+
+					// Kiểm tra Ngày áp dụng dừng
+					if ($('#NgayApDungDung').val() === '') {
+						e.preventDefault();
+						$('.text-danger[data-valmsg-for="NgayApDungDung"]').text('Vui lòng chọn ngày áp dụng dừng');
+						$('#NgayApDungDung').addClass('is-invalid');
+						hasError = true;
+					} else {
+						$('.text-danger[data-valmsg-for="NgayApDungDung"]').text('');
+						$('#NgayApDungDung').removeClass('is-invalid');
+					}
+
+					if (hasError) {
+						if ($('#CoQuanDung').val() === '') {
+							$('#CoQuanDung').focus();
+						} else if ($('#SoQuyetDinhDung').val() === '') {
+							$('#SoQuyetDinhDung').focus();
+						} else if ($('#NgayQuyetDinhDung').val() === '') {
+							$('#NgayQuyetDinhDung').focus();
+						} else if ($('#NgayApDungDung').val() === '') {
+							$('#NgayApDungDung').focus();
+						}
+						return false;
+					}
+				}
+				return true;
+			});
+		});
+	</script>
+}

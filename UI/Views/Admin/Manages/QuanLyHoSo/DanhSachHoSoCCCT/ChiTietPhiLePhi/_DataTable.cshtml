@@ -1,0 +1,59 @@
+﻿@{
+    var record_lephi = 1;
+}
+
+@model IEnumerable<DataAccess.Entities.Manages.ThongTinHoSo.HoSoCCCTChiPhi>
+
+<div class="table-responsive border rounded-lg mb-8">
+    <table class="table table-striped table-hover rounded-lg m-0">
+        <thead class="thead-light">
+            <tr class="table-active">
+                <th style="text-align: center; font-weight: bold;" width="5%">#</th>
+                <th style="text-align: center; font-weight: bold;">Mô tả</th>
+                <th style="text-align: center; font-weight: bold;">Số lượng</th>
+                <th style="text-align: center; font-weight: bold;">Phí cố định</th>
+                <th style="text-align: center; font-weight: bold;">Tỷ lệ vượt mức</th>
+                <th style="text-align: center; font-weight: bold;">Thành tiền</th>
+                <th style="text-align: center; font-weight: bold;" width="10%">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle" width="2%">@(record_lephi++)</td>
+                        <td style="vertical-align: middle">
+                            <div class="row">
+                                <div class="col-2"></div>
+                                <div class="col-10">@item.MoTa</div>
+                            </div>
+                        </td>
+                        <td style="vertical-align: middle; text-align: center;">@item.SoLuong @item.DonViTinh</td>
+                        <td style="vertical-align: middle; text-align: right;">@FuntionGlobal.ConvertDblToStr(item.PhiCoDinh)</td>
+                        <td style="vertical-align: middle; text-align: center;">@FuntionGlobal.ConvertDblToStr(item.TyLeVuotMuc)@(item.TyLeVuotMuc > 0 ? "%" : "")</td>
+                        <td style="vertical-align: middle; text-align: right;">@FuntionGlobal.ConvertDblToStr(item.ThanhTien)</td>
+                        <td class="text-center text-nowrap" style="vertical-align: middle">
+                            <button type="button" onclick="EditLePhi('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Chỉnh sửa">
+                                <i class="icon-lg la la-edit text-success"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="4"></td>
+                    <td style="text-align: center; vertical-align: middle; font-weight:bold;">Tổng cộng</td>
+                    <td style="text-align: right; vertical-align: middle; font-weight:bold;">@FuntionGlobal.ConvertDblToStr(Model.Sum(item => item.ThanhTien))</td>
+                    <td></td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" style="text-align:center">Không có thông tin</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

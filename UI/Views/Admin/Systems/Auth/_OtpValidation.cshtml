@@ -1,0 +1,46 @@
+﻿@model UI.ViewModels.VMOtpValidation;
+
+<div class="modal-body" id="otpvalidate_data">
+    <input hidden id="username_otp" name="username_otp" value="@Model.Username" />
+    <input hidden id="password_otp" name="password_otp" value="@Model.Password" />
+    
+    <div class="row">
+        <div class="col-xl-5">
+            <div class="row">
+                <div class="col-xl-12 text-center">
+                    <div class="form-group">
+                        @if (Model.FirstLogin)
+                        {
+                            <label style="font-weight:bold">Quét QR Code bằng Google Authenticator:</label>
+                            <br />
+                            <div class="image-input image-input-outline">
+                                <img src="https://quickchart.io/qr?text=@Model.OtpQrCodeUrl&size=150" alt="QR Code" class="image-input-wrapper" />
+                            </div>
+                        }
+                        else
+                        {
+                            <label style="font-weight:bold">Sử dụng Google Authenticator để lấy mã OTP</label>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-7">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="form-group">
+                        <label style="font-weight:bold">Username:</label>
+                        <label class="form-control" style="font-weight:bold; color:blue">@Model.Username</label>
+                    </div>
+                </div>
+                <div class="col-xl-12">
+                    <div class="form-group">
+                        <label style="font-weight:bold">OTP:</label>
+                        <input type="text" class="form-control" style="font-weight:bold; color:blue" id="key_otp" name="key_otp" maxlength="6" />
+                    </div>
+                </div>
+                <input hidden id="clientUnixTimestamp_otp" name="clientUnixTimestamp_otp" />
+            </div>
+        </div>
+    </div>
+</div>

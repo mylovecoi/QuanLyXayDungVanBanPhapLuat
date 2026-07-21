@@ -1,0 +1,424 @@
+﻿@using DataAccess.Enums
+<!--Create-Modal-->
+<div class="modal fade" id="Create_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    <b>@ViewData["Title"]?.ToString()?.ToUpper()</b>
+                    <span class="d-block text-muted pt-2 font-size-sm">Thêm mới @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="DanhMucCanBo" asp-action="Store" method="post" id="frm_create" enctype="multipart/form-data">
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Store()">Thêm mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Edit-Modal-->
+<div class="modal fade" id="Edit_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    <b>@ViewData["Title"]?.ToString()?.ToUpper()</b>
+                    <span class="d-block text-muted pt-2 font-size-sm">Cập nhật @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="DanhMucCanBo" asp-action="Update" method="post" id="frm_edit" enctype="multipart/form-data">
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Update()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete-Modal-->
+<div class="modal fade" id="Delete_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Đồng ý xóa @ViewData["Title"] ?</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="DanhMucCanBo" asp-action="Delete" method="post" id="frm_delete">
+                <div class="modal-body">
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Tên cán bộ: </label>
+                            <span id="tenCanBo_delete"></span>
+                        </div>
+                    </div>
+                    <input hidden id="id_delete" name="id_delete" />
+                    @Html.AntiForgeryToken()
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--Show-Modal-->
+<div class="modal fade" id="Show_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Chi tiết @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="frm_show">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function Create() {
+        $.ajax({
+            url: '/Settings/DanhMucDonViSuDung/DanhMucCanBo/Create',
+            type: 'GET',
+
+            success: function (data) {
+                if (data) {
+                    $('#frm_create').html(data);
+                    $('#Create_Modal').modal('show');
+                    
+                    // Khởi tạo Select2 và các sự kiện cho modal Create
+                    initModalEvents('Create');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Không thể tải thông tin", "Lỗi!");
+            }
+        });
+    }
+
+    function Store() {
+        var form = document.getElementById('frm_create');
+        if (!form) {
+            console.error('Không tìm thấy form.');
+            return;
+        }
+
+        // Validate the form fields
+        if (validateFormFields(form, 'Create')) {
+            form.submit();
+        } else {
+            console.log('Form validation failed. Please correct the highlighted fields.');
+        }
+    }
+
+    function Edit(id) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Settings/DanhMucDonViSuDung/DanhMucCanBo/Edit',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Id: id,
+            },
+            success: function (data) {
+                $('#frm_edit').html(data);
+                $('#Edit_Modal').modal('show');
+                
+                // Khởi tạo Select2 và các sự kiện cho modal Edit
+                initModalEvents('Edit');
+            },
+            error: function () {
+                toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+            }
+        })
+    }
+
+    function Update() {
+        var form = document.getElementById('frm_edit');
+        if (!form) {
+            console.error('Form with id "frm_edit" not found.');
+            return;
+        }
+
+        // Validate the form fields
+        if (validateFormFields(form, 'Edit')) {
+            form.submit();
+        } else {
+            console.log('Form validation failed. Please correct the highlighted fields.');
+        }
+    }
+
+    function initModalEvents(formPrefix) {
+        // Khởi tạo Select2 cho dropdown PhongBanId
+        var phongBanSelect = $("#PhongBanId" + formPrefix);
+        if (phongBanSelect.length > 0) {
+            phongBanSelect.select2({
+                placeholder: "Chọn phòng ban",
+                allowClear: true,
+                dropdownParent: $("#" + formPrefix + "_Modal"),
+                width: '100%'
+            });
+        }
+        
+        // Xử lý sự kiện thay đổi loại lao động
+        $("#LoaiLaoDong" + formPrefix).off('change.loaiLaoDong').on('change.loaiLaoDong', function() {
+            handleLoaiLaoDongChange(formPrefix);
+        });
+        
+        // Xử lý sự kiện thay đổi trạng thái (chỉ cho form Edit)
+        if (formPrefix === 'Edit') {
+            $("#Status" + formPrefix).off('change.status').on('change.status', function() {
+                handleStatusChange(formPrefix);
+            });
+            
+            // Trigger change event để thiết lập trạng thái ban đầu
+            setTimeout(function() {
+                handleStatusChange(formPrefix);
+                handleLoaiLaoDongChange(formPrefix);
+            }, 100);
+        } else {
+            // Trigger change event cho Create
+            setTimeout(function() {
+                handleLoaiLaoDongChange(formPrefix);
+            }, 100);
+        }
+    }
+    
+    function handleLoaiLaoDongChange(formPrefix) {
+        var loaiLaoDong = $("#LoaiLaoDong" + formPrefix).val();
+        var congChungVienDiv = $("#thongTinCongChungVien" + formPrefix);
+        var nhanVienDiv = $("#thongTinNhanVien" + formPrefix);
+        
+        // Ẩn tất cả các section trước
+        congChungVienDiv.hide();
+        nhanVienDiv.hide();
+        
+        // Xóa validation cho tất cả các trường trong các section bị ẩn
+        clearValidationInSection(congChungVienDiv);
+        clearValidationInSection(nhanVienDiv);
+        
+        // Hiển thị section tương ứng và thêm validation
+        switch (loaiLaoDong) {
+            case "@LoaiLaoDong.CongChungVien":
+                congChungVienDiv.show();
+                addValidationToSection(congChungVienDiv, formPrefix);
+                break;
+            case "@LoaiLaoDong.NhanVienNghiepVu":
+            case "@LoaiLaoDong.NhanVienKhac":
+                nhanVienDiv.show();
+                addValidationToSection(nhanVienDiv, formPrefix);
+                break;
+        }
+    }
+    
+    function handleStatusChange(formPrefix) {
+        var status = $("#Status" + formPrefix).val();
+        var thongTinDungDiv = $("#thongTinDung" + formPrefix);
+        
+        if (status === "Khóa") {
+            thongTinDungDiv.show();
+            addValidationToSection(thongTinDungDiv, formPrefix);
+        } else {
+            thongTinDungDiv.hide();
+            clearValidationInSection(thongTinDungDiv);
+        }
+    }
+    
+    function addValidationToSection(section, formPrefix) {
+        section.find('input[required], select[required]').each(function() {
+            $(this).attr('data-validate', 'true');
+        });
+        
+        // Thêm validation cho các trường có class validation-required
+        section.find('.validation-required').each(function() {
+            var input = $(this).closest('.form-group').find('input, select');
+            if (input.length > 0) {
+                input.attr('data-validate', 'true');
+            }
+        });
+    }
+    
+    function clearValidationInSection(section) {
+        section.find('input, select').each(function() {
+            $(this).removeAttr('data-validate');
+            $(this).removeClass('is-invalid');
+            // Xóa error message
+            var errorSpan = section.find('#' + $(this).attr('id') + 'Error');
+            if (errorSpan.length > 0) {
+                errorSpan.text('');
+            }
+        });
+    }
+
+    // Function to validate form fields
+    function validateFormFields(form, formPrefix) {
+        // Define the basic fields to check along with their respective error messages
+        var basicFields = [
+            { id: 'TenCanBo', message: 'Tên cán bộ không được bỏ trống' },
+            { id: 'PhongBanId' + formPrefix, message: 'Vui lòng chọn phòng ban' },
+            { id: 'TrinhDoChuyenMon' + formPrefix, message: 'Trình độ chuyên môn không được bỏ trống' }
+        ];
+        
+        // Nếu là form tạo mới, thêm các field validate cho thông tin đăng nhập
+        if (formPrefix === 'Create') {
+            basicFields.push(
+                { id: 'Username', message: 'Tên đăng nhập không được bỏ trống' },
+                { id: 'Email', message: 'Email không được bỏ trống' },
+                { id: 'Password', message: 'Mật khẩu không được bỏ trống' },
+                { id: 'ConfirmPassword', message: 'Xác nhận mật khẩu không được bỏ trống' }
+            );
+            
+            // Kiểm tra mật khẩu khớp nhau
+            var password = form.querySelector('#Password');
+            var confirmPassword = form.querySelector('#ConfirmPassword');
+            
+            if (password && confirmPassword && password.value !== confirmPassword.value) {
+                var errorElement = form.querySelector('#ConfirmPasswordError');
+                if (errorElement) {
+                    errorElement.textContent = 'Mật khẩu xác nhận không khớp';
+                }
+                return false;
+            }
+        }
+
+        var isValid = true;
+
+        // Validate basic fields
+        basicFields.forEach(function (field) {
+            var inputElement = form.querySelector('#' + field.id);
+            if (!inputElement) {
+                console.warn('Input element with id "' + field.id + '" not found within form.');
+                return;
+            }
+
+            var errorElement = form.querySelector('#' + field.id + 'Error');
+            if (!errorElement) {
+                // Create the error element if it doesn't exist
+                errorElement = document.createElement('span');
+                errorElement.id = field.id + 'Error';
+                errorElement.className = 'text-danger';
+                inputElement.parentNode.appendChild(errorElement);
+            }
+
+            // Validate the input field
+            if (inputElement.value.trim() === '') {
+                isValid = false;
+                inputElement.style.border = '1px solid red';
+                errorElement.textContent = field.message;
+            } else {
+                inputElement.style.border = '';
+                errorElement.textContent = '';
+            }
+        });
+
+        // Validate conditional fields based on visibility and data-validate attribute
+        var conditionalFields = form.querySelectorAll('[data-validate="true"]');
+        conditionalFields.forEach(function(field) {
+            var fieldId = field.id;
+            var errorElementId = fieldId + 'Error';
+            var errorElement = form.querySelector('#' + errorElementId);
+            
+            if (!errorElement) {
+                errorElement = document.createElement('span');
+                errorElement.id = errorElementId;
+                errorElement.className = 'text-danger';
+                field.parentNode.appendChild(errorElement);
+            }
+            
+            var fieldName = getFieldDisplayName(field);
+            
+            if (field.type === 'date') {
+                if (!field.value) {
+                    isValid = false;
+                    field.style.border = '1px solid red';
+                    errorElement.textContent = fieldName + ' không được bỏ trống';
+                } else {
+                    field.style.border = '';
+                    errorElement.textContent = '';
+                }
+            } else if (field.tagName.toLowerCase() === 'select') {
+                if (!field.value || field.value.trim() === '') {
+                    isValid = false;
+                    field.style.border = '1px solid red';
+                    errorElement.textContent = 'Vui lòng chọn ' + fieldName.toLowerCase();
+                } else {
+                    field.style.border = '';
+                    errorElement.textContent = '';
+                }
+            } else {
+                if (!field.value || field.value.trim() === '') {
+                    isValid = false;
+                    field.style.border = '1px solid red';
+                    errorElement.textContent = fieldName + ' không được bỏ trống';
+                } else {
+                    field.style.border = '';
+                    errorElement.textContent = '';
+                }
+            }
+        });
+
+        return isValid;
+    }
+    
+    function getFieldDisplayName(field) {
+        var label = field.closest('.form-group').querySelector('label');
+        if (label) {
+            return label.textContent.replace('*', '').trim();
+        }
+        return 'Trường này';
+    }
+
+    function Delete(id, tenCanBo) {
+        $('#tenCanBo_delete').html(tenCanBo);
+        $('#id_delete').val(id);
+        $('#Delete_Modal').modal('show');
+    }
+
+    function Show(id) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Settings/DanhMucDonViSuDung/DanhMucCanBo/Show',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Id: id,
+            },
+            success: function (data) {
+                $('#frm_show').html(data);
+                $('#Show_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+            }
+        })
+    }
+</script>

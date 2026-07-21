@@ -1,0 +1,253 @@
+﻿@{
+    var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+}
+
+<!--begin::Header-->
+<div class="offcanvas-header d-flex align-items-center justify-content-between pb-5">
+    <h3 class="font-weight-bold m-0">
+        @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+        {
+            <span>Thông tin tài khoản</span>
+        }
+        else
+        {
+            <span>Bạn chưa đăng nhập hệ thống</span>
+        }
+        <small class="text-muted font-size-sm ml-2"></small>
+    </h3>
+    <a href="#" class="btn btn-xs btn-icon btn-light btn-hover-primary" id="kt_quick_user_close">
+        <i class="ki ki-close icon-xs text-muted"></i>
+    </a>
+</div>
+<!--end::Header-->
+<!--begin::Content-->
+<div class="offcanvas-content pr-5 mr-n5">
+    <!--begin::Header-->
+    <div class="d-flex align-items-center mt-5">
+        <div class="symbol symbol-100 mr-5">
+            <div class="symbol-label">
+                <img src="@Url.Content("~/FileUpload/Avatar/default-user.png")"
+                     width="100" height="100" />
+                <i class="symbol-badge bg-primary"></i>
+            </div>
+        </div>
+        <div class="d-flex flex-column">
+            <a href="#" class="font-weight-bold font-size-h5 text-dark-75 text-hover-primary">
+                @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                {
+                    <span>@FuntionGlobal.GetSsAdmin(session, "Name")</span>
+                }
+                else
+                {
+                    <span>Chưa xác định</span>
+                }
+            </a>
+            <div class="text-muted mt-1">
+                @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                {
+                    <span>@FuntionGlobal.GetSsAdmin(session, "Username")</span>
+                }
+                else
+                {
+                    <span>Chưa xác định</span>
+                }
+            </div>
+            <div class="navi mt-2">
+                <a href="#" class="navi-item">
+                    <span class="navi-link p-0 pb-2">
+                        <span class="navi-icon mr-1">
+                            <span class="svg-icon svg-icon-lg svg-icon-primary">
+                                <!--begin::Svg Icon | path:assets/media/svg/icons/Communication/Mail-notification.svg-->
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                        <rect x="0" y="0" width="24" height="24" />
+                                        <path d="M21,12.0829584 C20.6747915,12.0283988 20.3407122,12 20,12 C16.6862915,12 14,14.6862915 14,18 C14,18.3407122 14.0283988,18.6747915 14.0829584,19 L5,19 C3.8954305,19 3,18.1045695 3,17 L3,8 C3,6.8954305 3.8954305,6 5,6 L19,6 C20.1045695,6 21,6.8954305 21,8 L21,12.0829584 Z M18.1444251,7.83964668 L12,11.1481833 L5.85557487,7.83964668 C5.4908718,7.6432681 5.03602525,7.77972206 4.83964668,8.14442513 C4.6432681,8.5091282 4.77972206,8.96397475 5.14442513,9.16035332 L11.6444251,12.6603533 C11.8664074,12.7798822 12.1335926,12.7798822 12.3555749,12.6603533 L18.8555749,9.16035332 C19.2202779,8.96397475 19.3567319,8.5091282 19.1603533,8.14442513 C18.9639747,7.77972206 18.5091282,7.6432681 18.1444251,7.83964668 Z" fill="#000000" />
+                                        <circle fill="#000000" opacity="0.3" cx="19.5" cy="17.5" r="2.5" />
+                                    </g>
+                                </svg>
+                                <!--end::Svg Icon-->
+                            </span>
+                        </span>
+                        <span class="navi-text text-muted text-hover-primary">
+                            @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                            {
+                                <span>@FuntionGlobal.GetSsAdmin(session, "Email")</span>
+                            }
+                            else
+                            {
+                                <span>Chưa xác định</span>
+                            }
+                        </span>
+                    </span>
+                </a>
+                @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                {
+                    <a asp-controller="Auth" asp-action="Logout" class="btn btn-sm btn-light-danger font-weight-bolder py-2 px-5">Đăng xuất</a>
+                }
+                else
+                {
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-sm btn-light-primary font-weight-bolder py-2 px-5">Đăng nhập</a>
+                }
+            </div>
+        </div>
+    </div>
+    <!--end::Header-->
+    <!--begin::Separator-->
+    <div class="separator separator-dashed mt-8 mb-5"></div>
+    <!--end::Separator-->
+    <!--begin::Nav-->
+    @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+    {
+        <div class="navi navi-spacer-x-0 p-0">
+            <a asp-controller="Home" asp-action="ChangePassword" class="navi-item">
+                <div class="navi-link">
+                    <div class="symbol symbol-40 bg-light mr-3">
+                        <div class="symbol-label">
+                            <span class="svg-icon svg-icon-md svg-icon-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                        <mask fill="white">
+                                            <use xlink:href="#path-1"></use>
+                                        </mask>
+                                        <g></g>
+                                        <path d="M7,10 L7,8 C7,5.23857625 9.23857625,3 12,3 C14.7614237,3 17,5.23857625 17,8 L17,10 L18,10 C19.1045695,10 20,10.8954305 20,12 L20,18 C20,19.1045695 19.1045695,20 18,20 L6,20 C4.8954305,20 4,19.1045695 4,18 L4,12 C4,10.8954305 4.8954305,10 6,10 L7,10 Z M12,5 C10.3431458,5 9,6.34314575 9,8 L9,10 L15,10 L15,8 C15,6.34314575 13.6568542,5 12,5 Z" fill="#000000"></path>
+                                    </g>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="navi-text">
+                        <div class="font-weight-bold">Mật khẩu truy cập</div>
+                        <div class="text-muted">
+                            Thay đổi mật khẩu
+                            <span class="label label-light-primary label-inline font-weight-bold">Cập nhật</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            @* <a asp-controller="Home" asp-action="ThemeSetting" class="navi-item">
+                <div class="navi-link">
+                    <div class="symbol symbol-40 bg-warning mr-3">
+                        <div class="symbol-label">
+                            <span class="svg-icon svg-icon-md svg-icon-warning">
+                                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                        <rect opacity="0.200000003" x="0" y="0" width="24" height="24" />
+                                        <path d="M4.5,7 L9.5,7 C10.3284271,7 11,7.67157288 11,8.5 C11,9.32842712 10.3284271,10 9.5,10 L4.5,10 C3.67157288,10 3,9.32842712 3,8.5 C3,7.67157288 3.67157288,7 4.5,7 Z M13.5,15 L18.5,15 C19.3284271,15 20,15.6715729 20,16.5 C20,17.3284271 19.3284271,18 18.5,18 L13.5,18 C12.6715729,18 12,17.3284271 12,16.5 C12,15.6715729 12.6715729,15 13.5,15 Z" fill="#000000" opacity="0.3" />
+                                        <path d="M17,11 C15.3431458,11 14,9.65685425 14,8 C14,6.34314575 15.3431458,5 17,5 C18.6568542,5 20,6.34314575 20,8 C20,9.65685425 18.6568542,11 17,11 Z M6,19 C4.34314575,19 3,17.6568542 3,16 C3,14.3431458 4.34314575,13 6,13 C7.65685425,13 9,14.3431458 9,16 C9,17.6568542 7.65685425,19 6,19 Z" fill="#000000" />
+                                    </g>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="navi-text">
+                        <div class="font-weight-bold">Giao diện chương trình</div>
+                        <div class="text-muted">
+                            Thiết lập giao diện
+                            <span class="label label-light-warning label-inline font-weight-bold">Cập nhật</span>
+                        </div>
+                    </div>
+                </div>
+            </a> *@
+            <div class="navi-item dropdown">
+                <!-- Nút trigger -->
+                <div class="navi-link" data-toggle="dropdown" style="cursor: pointer;">
+                    <div class="symbol symbol-40 bg-danger mr-3">
+                        <div class="symbol-label">
+                            <span class="svg-icon svg-icon-md svg-icon-success">
+                                <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+                                    <g id="Stockholm-icons-/-Files-/-File" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                        <polygon id="Shape" points="0 0 24 0 24 24 0 24"></polygon>
+                                        <path d="M5.85714286,2 L13.7364114,2 C14.0910962,2 14.4343066,2.12568431 14.7051108,2.35473959 L19.4686994,6.3839416 C19.8056532,6.66894833 20,7.08787823 20,7.52920201 L20,20.0833333 C20,21.8738751 19.9795521,22 18.1428571,22 L5.85714286,22 C4.02044787,22 4,21.8738751 4,20.0833333 L4,3.91666667 C4,2.12612489 4.02044787,2 5.85714286,2 Z" id="Combined-Shape" fill="#000000" fill-rule="nonzero" opacity="0.3"></path>
+                                        <rect id="Rectangle" fill="#000000" x="6" y="11" width="9" height="2" rx="1"></rect>
+                                        <rect id="Rectangle-Copy" fill="#000000" x="6" y="15" width="5" height="2" rx="1"></rect>
+                                    </g>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="navi-text">
+                        <div>
+                            <div class="font-weight-bold">Tài liệu hướng dẫn</div>
+                            <div class="text-muted">
+                                Thông tin tài liệu hướng dẫn
+                                <span class="label label-light-success label-inline font-weight-bold">Tải về</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danh sách file tải -->
+                <div class="dropdown-menu bg-light-dark">
+                    <a class="dropdown-item hover-bg-primary hover-text-white"
+                       href="~/FileUpload/HDSD/HuongDanSuDung_PM CCCT.pdf" download=download>
+                        📄 Hướng dẫn sử dụng
+                    </a>
+                    <a class="dropdown-item hover-bg-primary hover-text-white"
+                       href="~/FileUpload/HDSD/HuongDanCaiDatAgent_CCCT.pdf" download=download>
+                        ⚙️ Cài đặt kết nối máy scan 
+                    </a>
+                </div>
+            </div>
+
+            <div class="separator separator-dashed my-7"></div>
+            <div>
+                <!--begin:Heading-->
+                <h3 class="font-weight-bold m-0">
+                    Thông tin báo cáo thống kê
+                    <small class="text-muted font-size-sm ml-2"></small>
+                </h3>
+                <br />
+                <!--end:Heading-->
+                <!--begin::Item-->
+                <div class="d-flex align-items-center bg-light-info rounded p-5">
+                    <div class="d-flex flex-column flex-grow-1 mr-2">
+                        <span class="font-weight-normel text-dark-75 text-hover-primary font-size-lg mb-1">Tên đơn vị: </span>
+                        <span class="font-size-sm" style="color:blue">
+                            @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                            {
+                                @Html.Raw(FuntionGlobal.GetSsAdmin(session, "TenDonViBaoCao"))
+                            }
+                        </span>
+                        <span class="font-weight-normel text-dark-75 text-hover-primary font-size-lg mb-1">Tên đơn vị chủ quản: </span>
+                        <span class="font-size-sm" style="color:blue">
+                            @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                            {
+                                @Html.Raw(FuntionGlobal.GetSsAdmin(session, "TenDonViChuQuanBaoCao"))
+                            }
+                        </span>
+                        <span class="font-weight-normel text-dark-75 text-hover-primary font-size-lg mb-1">Địa danh: </span>
+                        <span class="font-size-sm" style="color:blue">
+                            @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                            {
+                                @FuntionGlobal.GetSsAdmin(session, "DiaDanh")
+                            }
+                        </span>
+                        <span class="font-weight-normel text-dark-75 text-hover-primary font-size-lg mb-1">Chức danh người ký: </span>
+                        <span class="font-size-sm" style="color:blue">
+                            @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                            {
+                                @Html.Raw(FuntionGlobal.GetSsAdmin(session, "ChucDanhKy"))
+                            }
+                        </span>
+                        <span class="font-weight-normel text-dark-75 text-hover-primary font-size-lg mb-1">Họ và tên người ký: </span>
+                        <span class="font-size-sm" style="color:blue">
+                            @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                            {
+                                @FuntionGlobal.GetSsAdmin(session, "HoTenNguoiKy")
+                            }
+                        </span>
+                        <br />
+                        <a asp-controller="Home" asp-action="UserInfo" class="btn btn-transparent-primary mr-2">Cập nhật</a>
+                    </div>
+                </div>
+                <!--end:Item-->
+            </div>
+            <!--end::Nav-->
+            <div class="separator separator-dashed my-7"></div>
+
+        </div>
+    }
+    <!--end::Content-->
+</div>

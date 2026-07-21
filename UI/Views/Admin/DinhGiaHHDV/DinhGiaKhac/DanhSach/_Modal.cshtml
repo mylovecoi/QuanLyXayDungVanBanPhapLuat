@@ -1,0 +1,127 @@
+@{
+    var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+    string role = ViewData["Role"] as string ?? "";
+}
+
+<!--Chuyen Modal-->
+<div class="modal fade" id="Chuyen_Modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form id="ChuyenForm" method="post" asp-controller="DinhGia" asp-action="Chuyen" onsubmit="SubmitChuyenForm(event)">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h3 class="card-label">
+                        <b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper()</b>
+                        <span class="d-block text-muted pt-2 font-size-sm">
+                            Chuyển thông tin hồ sơ định giá
+                        </span>
+                    </h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-custom alert-light-primary fade show mb-5" role="alert">
+                        <div class="alert-text font-weight-bold text-primary">
+                            Hồ sơ đã hoàn thành sẽ được chuyển lên đơn vị tiếp nhận. Bạn cần liên hệ đơn vị tiếp nhận để chỉnh sửa hồ sơ nếu cần!
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-12 mb-3">
+                            <div class="form-group m-0">
+                                <label>Số QĐ:&nbsp;<b id="soqd_chuyen" style="color: #0000FF"></b></label>
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group m-0">
+                                <label class="control-label font-weight-bold">Trạng thái hồ sơ:</label>
+                                <select class="form-control" id="trangthai_chuyen" name="trangThai">
+                                    <option value="CD">Chờ duyệt</option>
+                                    @if (session != null && FuntionGlobal.CheckPermission(session, role, "Approve"))
+                                    {
+                                        <option value="DD">Đã duyệt</option>
+                                    }
+                                    @if (session != null && FuntionGlobal.CheckPermission(session, role, "Public"))
+                                    {
+                                        <option value="CB">Công bố</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="chuyenId" name="hoSoId" type="hidden" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Hủy thao tác</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold">Hoàn thành</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--LyDoTraLai Modal-->
+<div class="modal fade" id="LyDoTraLai_Modal" data-backdrop="static" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    <b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper()</b>
+                    <span class="d-block text-muted pt-2 font-size-sm">
+                        Lý do trả lại hồ sơ
+                    </span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-xl-12 col-md-12 mb-3">
+                    <div class="form-group m-0">
+                        <label>Số QĐ:&nbsp;<b id="soQuyetDinh" style="color: #0000FF"></b></label>
+                    </div>
+                </div>
+                <div class="col-xl-12 col-md-12">
+                    <div class="form-group m-0">
+                        <label>Lý do trả lại:&nbsp;<b id="lyDoTraLai" style="color: #FF0000"></b></label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--SelectCategory Modal-->
+<div class="modal fade" id="SelectCategory_Modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    <b>LỰA CHỌN DANH MỤC ÁP DỤNG</b>
+                    <span class="d-block text-muted pt-2 font-size-sm">
+                        Chọn danh mục/văn bản áp dụng cho hồ sơ định giá này
+                    </span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="font-weight-bold control-label text-blue">Danh mục áp dụng: <span class="text-danger">*</span></label>
+                    <select class="form-control" id="danhMucSelection" style="width:100%">
+                        <option value="">--Chọn danh mục--</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="SubmitCreateWithCategory()">Tiếp tục</button>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,220 @@
+﻿<!--Create Modal-->
+<div class="modal fade" id="Create_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Thêm mới @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_create">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Store()">Thêm mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Edit Modal-->
+<div class="modal fade" id="Edit_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Chỉnh sửa @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_edit">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Update()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Modal-->
+<div class="modal fade" id="Delete_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Thông tin đơn vị
+                    <span class="d-block text-muted pt-2 font-size-sm">Đồng ý xóa thông tin đơn vị ???</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="OptionData" asp-action="Delete" method="post">
+                <div class="modal-body">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label>
+                            Code:&nbsp;<b id="code_delete" style="color: #0000FF"></b>
+                            - DisplayName:&nbsp;<b id="displayName_delete" style="color: #0000FF"></b>
+                        </label>
+
+                    </div>
+                    @Html.AntiForgeryToken()
+                    <input hidden id="id_delete" name="id_delete" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/modal.validation.js"></script>
+<script>
+    function Create() {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Systems/OptionData/Create',
+            type: 'GET',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            success: function (data) {
+                $('#frm_create').html(data);
+                CustomDateMask();
+                $('#Create_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+            }
+        })
+    }
+
+    function Store() {
+        var form = document.getElementById('frm_create');
+
+        // Kiểm tra xem form có tồn tại không
+        if (!form) {
+            toastr.error("Không tìm thấy form với id 'frm_create'", "Lỗi!");
+            return;
+        }
+        var fields = [
+            { id: 'Code', message: 'Thông tin không được bỏ trống' },
+            { id: 'DisplayName', message: 'Thông tin không được bỏ trống' },
+            { id: 'Value', message: 'Thông tin không được bỏ trống' }
+        ];
+        if (validateModalFormFields(form, fields)) {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+            const formData = new FormData(form);
+            $.ajax({
+                url: '/Systems/OptionData/Store',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': csrfToken // Gửi token qua header
+                },
+                data: formData,
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    if (data.status === 'success') {
+                        toastr.success(data.message);
+                        location.reload();
+                    } else {
+                        toastr.error(data.message, "Lỗi!");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error("Đã xảy ra lỗi: " + error, "Lỗi!");
+                }
+            })
+        } else {
+            console.log('Form validation failed. Please correct the highlighted fields.');
+        }
+    }
+
+    function Edit(id_edit) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Systems/OptionData/Edit',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Id: id_edit,
+            },
+            success: function (data) {
+                $('#frm_edit').html(data);
+                $('#Edit_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+            }
+        })
+    }
+
+    function Update() {
+        var form = document.getElementById('frm_edit');
+
+        // Kiểm tra xem form có tồn tại không
+        if (!form) {
+            toastr.error("Không tìm thấy form với id 'frm_edit'", "Lỗi!");
+            return;
+        }
+
+        var fields = [
+            { id: 'Code', message: 'Thông tin không được bỏ trống' },
+            { id: 'DisplayName', message: 'Thông tin không được bỏ trống' },
+            { id: 'Value', message: 'Thông tin không được bỏ trống' }
+        ];
+        if (validateModalFormFields(form, fields)) {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+            const formData = new FormData(form);
+            $.ajax({
+                url: '/Systems/OptionData/Update',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': csrfToken // Gửi token qua header
+                },
+                data: formData,
+                dataType: 'JSON',
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    if (data.status === 'success') {
+                        toastr.success(data.message);
+                        location.reload();
+                    } else {
+                        toastr.error(data.message, "Lỗi!");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error("Đã xảy ra lỗi: " + error, "Lỗi!");
+                }
+            })
+        } else {
+            console.log('Form validation failed. Please correct the highlighted fields.');
+        }
+    }   
+
+    function Delete(id, code, displayName) {
+        document.getElementById("id_delete").value = id;
+        document.getElementById("code_delete").innerHTML = code;
+        document.getElementById("displayName_delete").innerHTML = displayName;
+        $('#Delete_Modal').modal('show');
+    }
+</script>

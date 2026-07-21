@@ -1,0 +1,42 @@
+﻿@model DataAccess.Entities.Settings.DanhMucPhongBan
+@using DataAccess.Enums
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Đơn vị: </label>
+            <label class="font-weight-bold">@Model.DanhMucDonVi?.TenDonVi</label>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Tên phòng ban: </label>
+            <span class="font-weight-bold">@Model.TenPhongBan</span>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Mã phòng ban: </label>
+            <span class="font-weight-bold">@Model.MaPhongBan</span>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Loại phòng ban: </label>
+            <span class="font-weight-bold">
+                @switch (Model.LoaiPhongBan)
+                {
+                    case LoaiPhongBan.LuuTru:
+                        <span class="badge badge-info">Lưu trữ</span>
+                        break;
+                    case LoaiPhongBan.SoanThao:
+                        <span class="badge badge-primary">Soạn thảo</span>
+                        break;
+                    case LoaiPhongBan.CongChung:
+                        <span class="badge badge-success">Công chứng</span>
+                        break;
+                }
+            </span>
+        </div>
+    </div>
+</div>

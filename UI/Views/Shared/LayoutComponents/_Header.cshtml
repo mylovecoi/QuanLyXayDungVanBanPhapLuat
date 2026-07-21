@@ -1,0 +1,258 @@
+@using System.Text;
+@{
+    var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+}
+@{
+    var systemInfo = await _systemInfoService.GetSystemInfoAsync();
+    string appName = (systemInfo?.AppName ?? "CƠ SỞ DỮ LIỆU GIÁ")
+                    .Replace("<br />", " ");
+    appName = appName.Normalize(NormalizationForm.FormC);
+    appName = appName.ToUpper();
+}
+<style>
+    .header-top {
+        position: relative !important;
+        background-color: #ffffff !important;
+        background-image: url('@Url.Content("~/FileUpload/Logo/banner-dp.png")') !important;
+        background-size: contain !important;
+        background-position: left center !important;
+        background-repeat: no-repeat !important;
+    }
+    .header-top .topbar {
+        position: absolute !important;
+        right: 25px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        padding: 4px 12px;
+        border-radius: 30px;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        z-index: 10;
+        display: flex !important;
+        align-items: center !important;
+    }
+    @@media (max-width: 991px) {
+        .header-top .topbar {
+            position: relative !important;
+            right: auto !important;
+            top: auto !important;
+            transform: none !important;
+            float: right !important;
+            margin-top: 15px !important;
+            margin-right: 15px !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+        }
+        .header-top .topbar .d-none.d-md-inline {
+            display: none !important; /* Ẩn chữ "Xin chào" trên mobile để tránh chật chội */
+        }
+    }
+    @@media (min-width: 992px) {
+        :root {
+            --header-top-height: 150px !important;
+        }
+    }
+    /* Ngăn hiện tượng dịch chuyển giao diện do thanh cuộn xuất hiện/biến mất */
+    html {
+        overflow-y: scroll !important;
+    }
+
+    /* Chỉ áp dụng các định dạng màu sắc cho thanh Menu ngang trên Desktop */
+    @@media (min-width: 992px) {
+        /* Tùy chỉnh màu nền và màu chữ cho menu header-bottom */
+        .header-bottom {
+            background-color: #1481c1 !important;
+        }
+        .header-bottom .menu-nav > .menu-item > .menu-link .menu-text {
+            color: #ffffff !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .header-bottom .menu-nav > .menu-item > .menu-link .menu-arrow {
+            color: #ffffff !important;
+            opacity: 0.8;
+        }
+        .header-bottom .menu-nav > .menu-item > .menu-link .menu-icon {
+            color: #ffffff !important;
+        }
+        /* Hover & Active menu link styling */
+        .header-bottom .menu-nav > .menu-item:hover > .menu-link,
+        .header-bottom .menu-nav > .menu-item.menu-item-active > .menu-link {
+            background-color: #54c6d4 !important;
+        }
+        .header-bottom .menu-nav > .menu-item:hover > .menu-link .menu-text,
+        .header-bottom .menu-nav > .menu-item.menu-item-active > .menu-link .menu-text {
+            color: #000000 !important;
+        }
+        .header-bottom .menu-nav > .menu-item:hover > .menu-link .menu-arrow,
+        .header-bottom .menu-nav > .menu-item.menu-item-active > .menu-link .menu-arrow {
+            color: #000000 !important;
+        }
+        .header-bottom .menu-nav > .menu-item:hover > .menu-link .menu-icon,
+        .header-bottom .menu-nav > .menu-item.menu-item-active > .menu-link .menu-icon {
+            color: #000000 !important;
+        }
+
+        /* Tùy chỉnh màu nền và màu chữ cho các Menu con (Submenu) khi hover và active */
+        .header-bottom .menu-submenu {
+            background-color: #1481c1 !important; /* Đặt nền mặc định của dropdown là xanh */
+            border: none !important;
+        }
+        .header-bottom .menu-submenu .menu-item .menu-link {
+            background-color: transparent;
+            transition: all 0.3s ease;
+        }
+        .header-bottom .menu-submenu .menu-item .menu-link .menu-text {
+            color: #ffffff !important;
+            font-weight: 500;
+        }
+        .header-bottom .menu-submenu .menu-item .menu-link .menu-arrow {
+            color: #ffffff !important;
+        }
+
+        /* Hiệu ứng hover và active trên menu con */
+        .header-bottom .menu-nav .menu-submenu .menu-item:hover > .menu-link,
+        .header-bottom .menu-nav .menu-submenu .menu-item.menu-item-hover > .menu-link,
+        .header-bottom .menu-nav .menu-submenu .menu-item.menu-item-active > .menu-link,
+        .header-bottom .menu-nav .menu-submenu .menu-item.menu-item-here > .menu-link {
+            background-color: #54c6d4 !important; /* Đặt nền xanh ngọc cho cả hover, active, here */
+        }
+        .header-bottom .menu-nav .menu-submenu .menu-item:hover > .menu-link .menu-text,
+        .header-bottom .menu-nav .menu-submenu .menu-item.menu-item-hover > .menu-link .menu-text,
+        .header-bottom .menu-nav .menu-submenu .menu-item.menu-item-active > .menu-link .menu-text,
+        .header-bottom .menu-nav .menu-submenu .menu-item.menu-item-here > .menu-link .menu-text {
+            color: #000000 !important; /* Đặt màu chữ đen */
+            font-weight: 700 !important;
+        }
+        .header-bottom .menu-nav .menu-submenu .menu-item:hover > .menu-link .menu-arrow,
+        .header-bottom .menu-nav .menu-submenu .menu-item.menu-item-hover > .menu-link .menu-arrow,
+        .header-bottom .menu-nav .menu-submenu .menu-item.menu-item-active > .menu-link .menu-arrow,
+        .header-bottom .menu-nav .menu-submenu .menu-item.menu-item-here > .menu-link .menu-arrow {
+            color: #000000 !important;
+        }
+    }
+
+    /* Áp dụng hiệu ứng màu tương tự khi hover/active trên giao diện Mobile (dưới 992px) */
+    @@media (max-width: 991px) {
+        .header-menu-wrapper .menu-nav .menu-item:hover > .menu-link,
+        .header-menu-wrapper .menu-nav .menu-item.menu-item-active > .menu-link,
+        .header-menu-wrapper .menu-nav .menu-item.menu-item-hover > .menu-link {
+            background-color: #54c6d4 !important;
+        }
+        .header-menu-wrapper .menu-nav .menu-item:hover > .menu-link .menu-text,
+        .header-menu-wrapper .menu-nav .menu-item.menu-item-active > .menu-link .menu-text,
+        .header-menu-wrapper .menu-nav .menu-item.menu-item-hover > .menu-link .menu-text {
+            color: #000000 !important;
+        }
+        .header-menu-wrapper .menu-nav .menu-item:hover > .menu-link .menu-icon,
+        .header-menu-wrapper .menu-nav .menu-item.menu-item-active > .menu-link .menu-icon,
+        .header-menu-wrapper .menu-nav .menu-item.menu-item-hover > .menu-link .menu-icon {
+            color: #000000 !important;
+        }
+        .header-menu-wrapper .menu-nav .menu-item:hover > .menu-link .menu-arrow,
+        .header-menu-wrapper .menu-nav .menu-item.menu-item-active > .menu-link .menu-arrow,
+        .header-menu-wrapper .menu-nav .menu-item.menu-item-hover > .menu-link .menu-arrow {
+            color: #000000 !important;
+        }
+    }
+</style>
+<div id="kt_header" class="header flex-column header-fixed">
+    <!--begin::Top-->
+    <div class="header-top">
+        <div class="container-fluid">
+            <div class="d-none d-lg-flex align-items-center mr-3">
+                @* <a asp-controller="Home" asp-action="Index" class="mr-4">
+                    <img alt="Logo" src="~/FileUpload/Logo/logo-nganh-tu-phap.png" class="max-h-35px" />
+                </a>
+                <h3 class="card-label mb-0 app-name text-white font-weight-bold">@Html.Raw(appName)</h3> *@
+            </div>
+            <!--begin::Topbar-->
+            <div class="topbar">
+                <div class="topbar-item">
+                    <div class="btn btn-icon btn-clean btn-lg mr-1" data-toggle="modal" data-target="#kt_chat_modal">
+                        <span class="svg-icon svg-icon-xl svg-icon-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                    <rect x="0" y="0" width="24" height="24"></rect>
+                                    <path d="M16,15.6315789 L16,12 C16,10.3431458 14.6568542,9 13,9 L6.16183229,9 L6.16183229,5.52631579 C6.16183229,4.13107011 7.29290239,3 8.68814808,3 L20.4776218,3 C21.8728674,3 23.0039375,4.13107011 23.0039375,5.52631579 L23.0039375,13.1052632 L23.0206157,17.786793 C23.0215995,18.0629336 22.7985408,18.2875874 22.5224001,18.2885711 C22.3891754,18.2890457 22.2612702,18.2363324 22.1670655,18.1421277 L19.6565168,15.6315789 L16,15.6315789 Z" fill="#000000"></path>
+                                    <path d="M1.98505595,18 L1.98505595,13 C1.98505595,11.8954305 2.88048645,11 3.98505595,11 L11.9850559,11 C13.0896254,11 13.9850559,11.8954305 13.9850559,13 L13.9850559,18 C13.9850559,19.1045695 13.0896254,20 11.9850559,20 L4.10078614,20 L2.85693427,21.1905292 C2.65744295,21.3814685 2.34093638,21.3745358 2.14999706,21.1750444 C2.06092565,21.0819836 2.01120804,20.958136 2.01120804,20.8293182 L2.01120804,18.32426 C1.99400175,18.2187196 1.98505595,18.1104045 1.98505595,18 Z M6.5,14 C6.22385763,14 6,14.2238576 6,14.5 C6,14.7761424 6.22385763,15 6.5,15 L11.5,15 C11.7761424,15 12,14.7761424 12,14.5 C12,14.2238576 11.7761424,14 11.5,14 L6.5,14 Z M9.5,16 C9.22385763,16 9,16.2238576 9,16.5 C9,16.7761424 9.22385763,17 9.5,17 L11.5,17 C11.7761424,17 12,16.7761424 12,16.5 C12,16.2238576 11.7761424,16 11.5,16 L9.5,16 Z" fill="#000000" opacity="0.3"></path>
+                                </g>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+                @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                {
+                    <div class="topbar-item">
+                        <a asp-controller="Notification" asp-action="Index"
+                           class="btn btn-icon btn-icon-mobile w-auto btn-clean d-flex align-items-center btn-lg px-2">
+                            <span class="svg-icon svg-icon-xl svg-icon-primary">
+                                <svg id="notification-bell" xmlns="http://www.w3.org/2000/svg" width="22px" height="22px" viewBox="0 0 22 22" version="1.1">
+                                    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                        <rect x="0" y="0" width="22" height="22"></rect>
+                                        <path d="M12,22 C13.1045695,22 14,21.1045695 14,20 L10,20 C10,21.1045695 10.8954305,22 12,22 Z M18,16 L18,11 C18,7.6862915 16.209139,5 13,4.26834514 L13,4 C13,3.44771525 12.5522847,3 12,3 C11.4477153,3 11,3.44771525 11,4 L11,4.26834514 C7.790861,5 6,7.6862915 6,11 L6,16 L4,18 L4,19 L20,19 L20,18 L18,16 Z" fill="#000000"></path>
+                                    </g>
+                                </svg>
+                                <span id="notification-badge" class="notification-badge"></span>
+                            </span>
+                        </a>
+                    </div>
+                }
+                <div class="topbar-item">
+                    <div class="btn btn-icon btn-clean btn-dropdown btn-lg mr-1 pulse pulse-primary">
+                        <img class="h-30px w-40px rounded-sm" src="@Url.Content("~/assets/media/svg/flags/220-vietnam.svg")">
+                        <span class="pulse-ring"></span>
+                    </div>
+                </div>
+                <div class="topbar-item">
+                    <div class="btn btn-icon btn-icon-mobile w-auto btn-clean d-flex align-items-center btn-lg px-2 text-nowrap" id="kt_quick_user_toggle">
+                        <span class="text-muted font-weight-bold font-size-base d-none d-md-inline mr-1">Xin chào,</span>
+                        <span class="text-dark-50 font-weight-bolder font-size-base d-none d-md-inline mr-3">
+                            @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
+                            {
+                                <span>@FuntionGlobal.GetSsAdmin(session, "Name")</span>
+                            }
+                            else
+                            {
+                                <span>Guest</span>
+                            }
+                        </span>
+                        <span class="symbol symbol-lg-30 symbol-25 symbol-light-success">
+                            <img src="@Url.Content("~/FileUpload/Avatar/default-user.png")" width="35" height="35" />
+                            <i class="symbol-badge bg-primary"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!--end::Topbar-->
+        </div>
+    </div>
+    <!--end::Top-->
+    <!--begin::Bottom-->
+    <div class="header-bottom">
+        <div class="container-fluid">
+            <div class="header-menu-wrapper header-menu-wrapper-left" id="kt_header_menu_wrapper">
+                <div id="kt_header_menu_mobile_close_btn" class="header-menu-mobile-close">
+                    <span class="svg-icon svg-icon-xl svg-icon-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                                <rect x="0" y="0" width="24" height="24"></rect>
+                                <!-- <path d="M6.70710678,15.7071068 C6.31658249,16.0976311 5.68341751,16.0976311 5.29289322,15.7071068 C4.90236893,15.3165825 4.90236893,14.6834175 5.29289322,14.2928932 L11.2928932,9.29289322 C11.6714722,8.91431428 12.2810586,8.90106866 12.6757246,9.26284586 L18.6757246,14.7628459 C19.0828436,15.1360383 19.1103465,15.7686056 18.7371541,16.1757246 C18.3639617,16.5828436 17.7313944,16.6103465 17.3242754,16.2371541 L12.0300757,11.3841378 L6.70710678,15.7071068 Z" fill="#000000" fill-rule="nonzero" transform="translate(12.000003, 12.7071068) rotate(-45.000002) translate(-12.000003, -12.7071068)"></path>
+                                <path d="M6.70710678,8.70710678 C6.31658249,9.09763107 5.68341751,9.09763107 5.29289322,8.70710678 C4.90236893,8.31658249 4.90236893,7.68341751 5.29289322,7.29289322 L11.2928932,1.29289322 C11.6714722,0.91431428 12.2810586,0.90106866 12.6757246,1.26284586 L18.6757246,6.76284586 C19.0828436,7.13603829 19.1103465,7.7686056 18.7371541,8.17572459 C18.3639617,8.5828436 17.7313944,8.61034651 17.3242754,8.2371541 L12.0300757,3.38413782 L6.70710678,8.70710678 Z" fill="#000000" fill-rule="nonzero" opacity="0.3" transform="translate(12.000003, 6.7071068) rotate(-45.000002) translate(-12.000003, -6.7071068)"></path> -->
+                            </g>
+                        </svg>
+                    </span>
+                </div>
+                <div id="kt_header_menu" class="header-menu header-menu-left header-menu-mobile header-menu-layout-default">
+                    @await Html.PartialAsync("~/Views/Shared/LayoutComponents/_MainMenuNav.cshtml")
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end::Bottom-->
+</div>

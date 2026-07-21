@@ -1,0 +1,76 @@
+@using DataAccess.Entities.Systems;
+@{
+    var groups = ViewData["GroupsPermision"] as List<GroupPermision> ?? new List<GroupPermision>();
+}
+@model DataAccess.Entities.Systems.User
+
+<div class="row">
+    <!-- Username (readonly) -->
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Username: </label>
+            <label class="form-control">@Model.Username</label>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Mật khẩu: </label>
+            <input type="text" class="form-control" id="password_edit" name="password_edit"/>
+        </div>
+    </div>
+    <!-- Tên tài khoản -->
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Tên tài khoản: </label>
+            <input type="text" class="form-control" id="name_edit" name="name_edit" asp-for="Name" />
+        </div>
+    </div>
+
+    <!-- Email -->
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Email: </label>
+            <input type="email" class="form-control" id="email_edit" name="email_edit" asp-for="Email" />
+        </div>
+    </div>
+
+    <!-- Trạng thái -->
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Trạng thái: </label>
+            <select id="status_edit" name="status_edit" class="form-control" asp-for="Status">
+                <!option value="Kích hoạt" @(Model.Status == "Kích hoạt" ? "selected" : "" )>Kích hoạt</!option>
+                <!option value="Chờ kích hoạt" @(Model.Status == "Chờ kích hoạt" ? "selected" : "" )>Chờ kích hoạt</!option>
+                <!option value="Khóa" @(Model.Status == "Khóa" ? "selected" : "" )>Khóa</!option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Nhóm quyền -->
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Nhóm quyền:</label>
+            <select id="group_edit" name="group_edit" class="form-control" asp-for="GroupPermissionId">
+                <option value="">---Chọn---</option>
+                @foreach (var group in groups)
+                {
+                    <option value="@group.Id">@group.Name</option>
+                }
+            </select>
+        </div>
+    </div>
+
+
+
+    <!-- Nội dung hiển thị -->
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Nội dung hiển thị:</label>
+            <select id="content_edit" name="content_edit" class="form-control" asp-for="Content">
+                <!option value="Fixted" @(Model.Content == "Fixted" ? "selected" : "")>Cố định</!option>
+                <!option value="Max" @(Model.Content == "Max" ? "selected" : "")>Tối đa</!option>
+            </select>
+        </div>
+    </div>
+    <input type="hidden" id="id_edit" name="id_edit" class="form-control" asp-for="Id" />
+</div>

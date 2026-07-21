@@ -1,0 +1,26 @@
+@model DataAccess.Entities.DinhGiaHHDV.GiaThiTruongDanhMuc
+
+<input type="hidden" asp-for="Id" />
+<div class="row">
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Tên thông tư:</label>
+            <input type="text" class="form-control" asp-for="TenTT" required />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Thời điểm ban hành thông tư:</label>
+            <input type="date" class="form-control" asp-for="ThoiDiemBanHanhTT" value="@(Model.ThoiDiemBanHanhTT == DateTime.MinValue ? DateTime.Now.ToString("yyyy-MM-dd") : Model.ThoiDiemBanHanhTT.ToString("yyyy-MM-dd"))" required />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Theo dõi:</label>
+            <select class="form-control" asp-for="TheoDoi">
+                <option value="TD">Đang theo dõi</option>
+                <option value="KTD">Dừng theo dõi</option>
+            </select>
+        </div>
+    </div>
+</div>

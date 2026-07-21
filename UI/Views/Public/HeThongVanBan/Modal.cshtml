@@ -1,0 +1,239 @@
+﻿<!--Create-Modal-->
+<div class="modal fade" id="Create_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Thêm mới @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="VanBanPhapLuat" asp-action="Store" method="post" id="frm_create" enctype="multipart/form-data">
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Store()">Thêm mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Edit-Modal-->
+<div class="modal fade" id="Edit_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Chỉnh sửa @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="VanBanPhapLuat" asp-action="Update" method="post" id="frm_edit" enctype="multipart/form-data">
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Update()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete-Modal-->
+<div class="modal fade" id="Delete_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Đồng ý xóa @ViewData["Title"] ?</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="VanBanPhapLuat" asp-action="Delete" method="post" id="frm_delete">
+                <div class="modal-body">
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Số văn bản: </label>
+                            <span id="sovanban_delete"></span>
+                        </div>
+                    </div>
+                    <input hidden id="id_delete" name="id_delete" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--Show-Modal-->
+<div class="modal fade" id="Show_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Quản lý @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="frm_show">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function Create() {
+        $.ajax({
+            url: '/Manages/VanBanPhapLuat/Create',
+            type: 'GET',
+
+            success: function (data) {
+                if (data) {
+                    $('#frm_create').html(data);
+                    $('#Create_Modal').modal('show');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Không thể cập nhật thông tin", "Lỗi!");
+            }
+        });
+    }
+
+    function Store() {
+        var form = document.getElementById('frm_create');
+        if (!form) {
+            console.error('Không tìm thấy thông tin.');
+            return;
+        }
+
+        // Validate the form fields
+        if (validateFormFields(form)) {
+            form.submit();
+        } else {
+            console.log('Form validation failed. Please correct the highlighted fields.');
+        }
+    }
+
+    function Edit(id) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Manages/VanBanPhapLuat/Edit',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Id: id,
+            },
+            success: function (data) {
+                $('#frm_edit').html(data);
+                $('#Edit_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+            }
+        })
+    }
+
+    function Update() {
+        var form = document.getElementById('frm_edit');
+        if (!form) {
+            console.error('Form with id "frm_edit" not found.');
+            return;
+        }
+
+        // Validate the form fields
+        if (validateFormFields(form)) {
+            form.submit();
+        } else {
+            console.log('Form validation failed. Please correct the highlighted fields.');
+        }
+    }
+
+    // Function to validate form fields
+    function validateFormFields(form) {
+        // Define the fields to check along with their respective error messages
+        var fields = [
+            { id: 'NgayBanHanh', message: 'Ngày ban hành không được bỏ trống' },
+            { id: 'NgayApDung', message: 'Ngày áp dụng không được bỏ trống' },
+            { id: 'MoTa', message: 'Mô tả không được bỏ trống' },
+            { id: 'SoVanBan', message: 'Số văn bản không được bỏ trống' }
+        ];
+
+        var isValid = true;
+
+        // Iterate over each field to perform validation
+        fields.forEach(function (field) {
+            var inputElement = form.querySelector('#' + field.id);
+            if (!inputElement) {
+                console.warn('Input element with id "' + field.id + '" not found within form.');
+                return;
+            }
+
+            var errorElement = form.querySelector('#' + field.id + 'Error');
+            if (!errorElement) {
+                // Create the error element if it doesn't exist
+                errorElement = document.createElement('span');
+                errorElement.id = field.id + 'Error';
+                errorElement.className = 'text-danger';
+                inputElement.parentNode.appendChild(errorElement);
+            }
+
+            // Validate the input field
+            if (inputElement.value.trim() === '') {
+                isValid = false;
+                inputElement.style.border = '1px solid red'; // Highlight the field with a red border
+                errorElement.textContent = field.message; // Display the specific error message
+            } else {
+                inputElement.style.border = ''; // Remove the red border if present
+                errorElement.textContent = ''; // Clear the error message if present
+            }
+        });
+
+        return isValid;
+    }
+
+    function Delete(id, sovanban) {
+        $('#sovanban_delete').html(sovanban);
+        $('#id_delete').val(id);
+        $('#Delete_Modal').modal('show');
+    }
+
+    function Show(id) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Public/HeThongVanBan/Show',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Id: id,
+            },
+            success: function (data) {
+                $('#frm_show').html(data);
+                $('#Show_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+            }
+        })
+    }
+</script>

@@ -1,0 +1,202 @@
+@model Services.DTOs.BaoCao12.BaoCao12ResponseDto
+@{
+    Layout = "_LayoutReport";
+    ViewData["Title"] = "Biểu số: 12a/BTP/BTTP/CC";
+    var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+    var donViData = ViewData["DanhMucDonVi"] as List<DataAccess.Entities.Settings.DanhMucDonVi>;
+}
+
+<div style="margin: 15mm 15mm 20mm 20mm;">
+    <div class="card-body">
+        <!-- Header với 3 cột theo mẫu chính thức -->
+        <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: flex-start; margin-bottom:30px">
+            <div class="col-4">
+                <div style=" padding: 10px; height: 120px;">
+                    <div><strong>Biểu số: 12a/BTP/BTTP/CC</strong></div>
+                    <div class="mt-2">Ban hành theo Thông tư số 03/2019/TT-BTP</div>
+                    <div>ngày 20/3/2019</div>
+                    <div class="mt-2"><strong>Ngày nhận báo cáo (BC):</strong></div>
+                    <div>BC 6 tháng: Ngày 06 tháng 6 hàng năm</div>
+                    <div>BC năm: Ngày 07 tháng 11 hàng năm</div>
+                    <div>BC bổ sung chính thức: Ngày 20 tháng 01 năm</div>
+                </div>
+            </div>
+            <div class="col-4" style="text-align:center">
+                <div style="padding: 10px; height: 120px;">
+                    <div style="margin-bottom:2px"><strong>TÌNH HÌNH TỔ CHỨC VÀ HOẠT ĐỘNG</strong></div>
+                    <div style="margin-bottom:2px"><strong>CÔNG CHỨNG</strong></div>
+                    <div class="text-center" style="margin-bottom:2px">(6 tháng, năm)</div>
+                    <div class="mt-3" style="margin-bottom:2px">Kỳ báo cáo:@(Model?.Request.KyBaoCao == DataAccess.Enums.KyBaoCao12.SauThang ? "6 tháng" : "năm")<br></div>
+                    <div>(Từ ngày @(Model?.Request?.NgayBaoCaoTu.ToString("dd") ?? "..") tháng @(Model?.Request?.NgayBaoCaoTu.ToString("MM") ?? "..") năm @(Model?.Request?.NgayBaoCaoTu.ToString("yyyy") ?? "....")</div>
+                    <div>đến ngày @(Model?.Request?.NgayBaoCaoDen.ToString("dd") ?? "..") tháng @(Model?.Request?.NgayBaoCaoDen.ToString("MM") ?? "..") năm @(Model?.Request?.NgayBaoCaoDen.ToString("yyyy") ?? "...."))</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div style="padding: 10px; height: 120px;">
+                    <div style="margin-bottom:2px"><strong>Đơn vị báo cáo:</strong></div>
+                    <div style="margin-bottom:2px">- @(Model?.BaoCao12a?.TenDonVi ?? "Phòng công chứng.../Văn phòng công chứng...")</div>
+                    <div style="margin-bottom:2px"><strong>Đơn vị nhận báo cáo:</strong></div>
+                    <div style="margin-bottom:2px">- @(Model?.Request?.TenDonViNhanBaoCao ?? "Sở Tư pháp")</div>
+                </div>
+            </div>
+        </div>
+        <br />
+        <!-- Bảng báo cáo chính theo mẫu chính thức -->
+
+        <table cellspacing="0" cellpadding="0" border="1" style="border-collapse: collapse; font-size: 14px; width: 95%" id="data_render">
+            <thead>
+                <tr class="text-center">
+                    <th rowspan="4" class="align-middle" style="width: 8%; border: 1px solid #000;">
+                        Số công chứng viên<br>
+                        <em>(người)</em>
+                    </th>
+
+                    <th colspan="5" style="border: 1px solid #000;">Công chứng</th>
+                    <th colspan="4" style="border: 1px solid #000;">Chứng thực</th>
+                    <th rowspan="4" class="align-middle" style="width: 10%; border: 1px solid #000;">
+                        Tổng số tiền nộp vào ngân sách/thuế<br>
+                        <em>(đồng)</em>
+                    </th>
+                </tr>
+                <tr class="text-center">
+                    <th colspan="3" style="border: 1px solid #000;">
+                        Số việc công chứng<br>
+                        <em>(việc)</em>
+                    </th>
+                    <th rowspan="3" class="align-middle" style="border: 1px solid #000;">
+                        Tổng số thu lao công<br>
+                        <em>(đồng)</em>
+                    </th>
+                    <th rowspan="3" class="align-middle" style="border: 1px solid #000;">
+                        Tổng số phí công chứng<br>
+                        <em>(đồng)</em>
+                    </th>
+                    <th colspan="2" style="border: 1px solid #000;">
+                        Chứng thực bản sao<br>
+                    </th>
+                    <th colspan="2" style="border: 1px solid #000;">
+                        Chứng thực chữ ký trong giấy tờ, văn bản<br>
+                    </th>
+                </tr>
+
+                <tr class="text-center">
+                    <th rowspan="2" class="align-middle" style="border: 1px solid #000;">
+                        Tổng số<br>
+                    </th>
+
+                    <th colspan="2" style="border: 1px solid #000;">Chia ra</th>
+
+                    <th rowspan="2" class="align-middle" style="border: 1px solid #000;">
+                        Số bản sao<br>
+                        <em>(bản sao)</em>
+                    </th>
+                    <th rowspan="2" class="align-middle" style="border: 1px solid #000;">
+                        Phí chứng thực bản sao<br>
+                        <em>(đồng)</em>
+                    </th>
+                    <th rowspan="2" class="align-middle" style="border: 1px solid #000;">
+                        Số việc<br>
+                        <em>(việc)</em>
+                    </th>
+                    <th rowspan="2" class="align-middle" style="border: 1px solid #000;">
+                        Phí chứng thực chữ ký<br>
+                        <em>(đồng)</em>
+                    </th>
+                </tr>
+                <tr class="text-center">
+                    <th style="border: 1px solid #000;">
+                        Công chứng hợp đồng, giao dịch
+                    </th>
+                    <th style="border: 1px solid #000;">
+                        Công chứng bản dịch và các loại việc khác
+                    </th>
+                </tr>
+                <tr class="text-center font-weight-bold">
+                    <td style="border: 1px solid #000;">(1)</td>
+                    <td style="border: 1px solid #000;">(2)</td>
+                    <td style="border: 1px solid #000;">(3)</td>
+                    <td style="border: 1px solid #000;">(4)</td>
+                    <td style="border: 1px solid #000;">(5)</td>
+                    <td style="border: 1px solid #000;">(6)</td>
+                    <td style="border: 1px solid #000;">(7)</td>
+                    <td style="border: 1px solid #000;">(8)</td>
+                    <td style="border: 1px solid #000;">(9)</td>
+                    <td style="border: 1px solid #000;">(10)</td>
+                    <td style="border: 1px solid #000;">(11)</td>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model?.BaoCao12a != null)
+                {
+                    var item = Model.BaoCao12a;
+                    <tr>
+                        <td class="text-center" style="border: 1px solid #000;">@item.SoCongChungVien</td>
+                        <td class="text-center" style="border: 1px solid #000;">@item.SoViecCongChung</td>
+                        <td class="text-center" style="border: 1px solid #000;">@item.CongChungHopDong</td>
+                        <td class="text-center" style="border: 1px solid #000;">@item.CongChungBanDich</td>
+                        <td class="text-center" style="border: 1px solid #000;">@item.TongThuLaoCong.ToString("N0")</td>
+                        <td class="text-center" style="border: 1px solid #000;">@item.TongPhiCongChung.ToString("N0")</td>
+                        <td class="text-center" style="border: 1px solid #000;">@item.ChungThucBanSao</td>
+                        <td class="text-center" style="border: 1px solid #000;">@item.PhiChungThucBanSao.ToString("N0")</td>
+                        <td class="text-center" style="border: 1px solid #000;">@item.SoViecChungThucChuKy</td>
+                        <td class="text-center" style="border: 1px solid #000;">@item.PhiChungThucChuKy.ToString("N0")</td>
+                        <td class="text-center" style="border: 1px solid #000;">@item.TongTienNopNganSach.ToString("N0")</td>
+                    </tr>
+                }
+                else
+                {
+                    <tr><td style="text-align:center" colspan="11">Chưa Có Dữ Liệu</td></tr>
+                }
+            </tbody>
+        </table>
+
+        <br />
+        <table cellspacing="0" cellpadding="0" border="0" style="border-collapse: collapse;font-size:14px">
+            <tr style="text-align: center">
+                <td width="45%">
+                    <span style="font-style: italic"></span>
+                    <br /><span style="text-transform: uppercase; font-weight: bold">Người lập biểu</span>
+                    <br /><span style="font-style: italic">(Ký, ghi rõ họ và tên)</span>
+                    <br /><br />
+                    <span style="text-transform: uppercase; font-weight: bold">@(Model?.Request?.NguoiLapBieu ?? "...")</span>
+                </td>
+                <td width="55%">
+                    <span style="font-style: italic; padding-bottom:2px">
+                        ......, ngày ..... tháng ..... năm .......
+                    </span>
+                    <br /><span style="text-transform: uppercase; font-weight: bold">NGƯỜI ĐẠI DIỆN THEO PHÁP LUẬT</span>
+                    <br /><span style="font-style: italic">(Ký, đóng dấu, ghi rõ họ và tên)</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+@section custom_style {
+
+}
+
+@section custom_script {
+    <script>
+        $(document).ready(function() {
+            console.log('Mẫu báo cáo 12a - Biểu số: 12a/BTP/BTTP/CC loaded successfully');
+
+
+
+            // Auto print nếu có query parameter
+            if (window.location.search.includes('print=true')) {
+                setTimeout(() => window.print(), 1000);
+            }
+        });
+
+        // Format numbers khi hover
+        $('.table tbody td').hover(
+            function() {
+                if ($(this).text().trim() && !isNaN($(this).text().replace(/,/g, ''))) {
+                    $(this).attr('title', 'Số liệu: ' + $(this).text());
+                }
+            }
+        );
+    </script>
+}

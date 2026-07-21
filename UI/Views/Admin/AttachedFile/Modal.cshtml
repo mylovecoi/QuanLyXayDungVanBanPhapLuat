@@ -1,0 +1,478 @@
+﻿<!--Create-Modal-->
+<div class="modal fade" id="CreateAttachedFile_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Thông tin giấy tờ đính kèm
+                    <span class="d-block text-muted pt-2 font-size-sm">Thêm mới thông tin giấy tờ đính kèm</span>
+                </h3>
+                <button type="button" class="close" data-target="#CreateAttachedFile_Modal" onclick="closeOnlyChildModal(this)" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row" id="attachedFile_create">
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Mô tả: </label>
+                            <input type="text" id="motaAttachedFileCreate" name="motaAttachedFileCreate" class="form-control" autofocus />
+                        </div>
+                    </div>
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Chọn phương án: </label>
+                            <select class="form-control" onchange="handleUploadOptionChange()" id="uploadOptionSelect" name="uploadOptionSelect">
+                                <option value="true" selected>Chọn tệp từ máy tính</option>
+                                <option value="false">Sử dụng máy scan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-xl-12" id="fileUploadSection" style="display: block;">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Tệp đính kèm:</label>
+                            <input type="file" class="form-control" id="fileUploadAttachedFileCreate" name="fileUploadAttachedFileCreate">
+                        </div>
+                    </div>
+                    <div class="col-xl-12" id="scannerSection" style="display: none;">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Sử dụng máy scan:</label>
+                            <div class="row">
+                                <div class="col-xl-8">
+                                    <div class="form-group">
+                                        <label>Chọn máy scan:</label>
+                                        <select id="scannerSelect" name="scannerSelect" class="form-control">
+                                            <option value="">Đang tải máy scan...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xl-4">
+                                    <div class="form-group">
+                                        <label>Mode:</label>
+                                        <select id="scannerMode" name="scannerMode" class="form-control">
+                                            <option value="false">ADF</option>
+                                            <option value="true">Manual</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xl-2" style="display:none">
+                                    <div class="form-group">
+                                        <label>Số lượng:</label>
+                                        <input type="number" id="pageCountInput" value="1" min="1" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <div class="form-group">
+                                        <label style="visibility: hidden;">_</label>
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-light-primary font-weight-bold w-50 mr-1" onclick="sendScanCommandToAgent()">
+                                                
+                                                <i class="la la-cloud-upload-alt"></i>Scan
+                                            </button>
+                                            <button type="button" class="btn btn-light-warning font-weight-bold w-50 ml-1" onclick="refreshScannerBtn()" 
+                                                    id="btnrefreshScanner">
+                                                <i class="la la-refresh"></i>Refesh
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-xl-12">
+                                    <div class="form-group">
+                                        <label style="font-weight:bold; color:blue">
+                                            File Scan:
+                                            <a id="pdfPreviewLink" href="#" target="_blank" style="display:none;">Xem file PDF</a>
+                                        </label>                                        
+                                        <div id="scanStatus"></div>
+                                        <div id="messageDisplay" class="p-2 mt-4 rounded-md text-white"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-target="#CreateAttachedFile_Modal" onclick="closeOnlyChildModal(this)">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="StoreAttachedFile()">Thêm mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Edit-Modal-->
+<div class="modal fade" id="EditAttachedFile_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Thông tin giấy tờ đính kèm
+                    <span class="d-block text-muted pt-2 font-size-sm">Chỉnh sửa thông tin giấy tờ đính kèm</span>
+                </h3>
+                <button type="button" class="close" data-target="#EditAttachedFile_Modal" onclick="closeOnlyChildModal(this)" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="attachedFile_edit">
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Mô tả: </label>
+                            <input type="text" id="motaAttachedFileEdit" name="motaAttachedFileEdit" class="form-control" autofocus />
+                        </div>
+                    </div>
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Đường dẫn: </label>
+                            <input type="text" id="urlAttachedFileEdit" name="urlAttachedFileEdit" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">
+                                File Upload:
+                                <a id="editAttachedFileLink" href="#" target="_blank" style="display: none; font-weight: bold; color: red; text-decoration: underline;">
+                                    📎 File hiện tại
+                                </a>
+                            </label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="fileUploadAttachedFileEdit" name="fileUploadAttachedFileEdit">
+                                <label class="custom-file-label" for="customFileEdit">Chọn tệp đính kèm</label>
+                            </div>
+                        </div>
+                    </div>
+                    <input hidden id="idUploadAttachedFileEdit" name="idUploadAttachedFileEdit" />
+                    <input hidden id="groupIdUploadAttachedFileEdit" name="groupIdUploadAttachedFileEdit" />
+                    <input hidden id="groupNameUploadAttachedFileEdit" name="groupNameUploadAttachedFileEdit" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-target="#EditAttachedFile_Modal" onclick="closeOnlyChildModal(this)">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="UpdateAttachedFile()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete-Modal-->
+<div class="modal fade" id="DeleteAttachedFile_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Thông tin giấy tờ đính kèm
+                    <span class="d-block text-muted pt-2 font-size-sm">Xóa thông tin giấy tờ đính kèm</span>
+                </h3>
+                <button type="button" class="close" data-target="#DeleteAttachedFile_Modal" onclick="closeOnlyChildModal(this)" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="attachedFile_delete">
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Mô tả: </label>
+                            <label id="motaAttachedFileDelete" name="motaAttachedFileDelete" class="form-control" autofocus />
+                        </div>
+                    </div>
+                    <input hidden id="idAttachedFileDelete" name="idAttachedFileDelete" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-target="#DeleteAttachedFile_Modal" onclick="closeOnlyChildModal(this)">Đóng</button>
+                <button type="button" class="btn btn-danger font-weight-bold" onclick="RemoveAttachedFile()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="scanModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Quét tài liệu</h5>
+            </div>
+            <div class="modal-body">
+                <p id="scanMessage">Đang quét...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="btnScanNext" class="btn btn-warning" onclick="ScanNextBtn()">Quét tiếp</button>
+                <button type="button" id="btnFinishScan" class="btn btn-success" onclick="FinishScanBtn()">Hoàn tất</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function handleUploadOptionChange() {
+        const uploadOptionSelect = $('#uploadOptionSelect');
+        const fileUploadSection = $('#fileUploadSection');
+        const scannerSection = $('#scannerSection');
+
+        const isFileUploadOption = uploadOptionSelect.val() === 'true';
+        if (isFileUploadOption) {
+            fileUploadSection.show();
+            scannerSection.hide();
+        } else {
+            fileUploadSection.hide();
+            scannerSection.show();
+        }
+    }
+
+    var motaCreate = '#motaAttachedFileCreate';
+    var urlCreate = '#urlAttachedFileCreate';
+    var fileUploadCreate = '#fileUploadAttachedFileCreate';
+
+    var motaEdit = '#motaAttachedFileEdit';
+    var urlEdit = '#urlAttachedFileEdit';
+    var fileUploadEdit = '#fileUploadAttachedFileEdit';
+
+    var create_modal = '#CreateAttachedFile_Modal';
+    var edit_modal = '#EditAttachedFile_Modal';  
+
+    function closeOnlyChildModal(button) {
+        var target = $(button).data('target'); // Lấy modal cần đóng
+        $(target).modal('hide'); // Chỉ đóng modal con
+    }
+
+    function ChangeAttachedFile() {
+        var timkiem = $('#txtAttachedFileSearch').val();
+        var pageSize = $('#PageSizeAttachedFileSearch').val();
+        LoadDataAttachedFile(timkiem, pageSize, 1);
+    }
+
+    function ClickPage(pageSelect) {
+        var timkiem = $('#txtAttachedFileSearch').val();
+        var pageSize = $('#PageSizeAttachedFileSearch').val();
+        LoadDataAttachedFile(timkiem, pageSize, pageSelect);
+    }
+
+    function CreateAttachedFile() {
+        $(motaCreate).val('');
+        //$(urlCreate).val('');
+        $(fileUploadCreate).val('');
+        $(create_modal).modal('show');
+        scannedFilePath = null;
+        scannedFileName = null;
+        isScanning = false;
+    }
+
+    // Post data file create => server
+    function StoreAttachedFile() {
+        if (isScanning) {
+            toastr.warning("Hệ thống đang thực hiện scan. Vui lòng chờ hoàn tất trước khi gửi.", "Thông báo!");
+            return; // Dừng lại
+        }
+        showLoadingOverlay();
+        // Lấy token CSRF từ input hidden
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        const uploadOption = $('#uploadOptionSelect').val();
+        var fileInput = document.getElementById("fileUploadAttachedFileCreate");      
+
+        // Tạo FormData và đóng gói dữ liệu cần upload
+        var formData = new FormData();
+        formData.append("MoTa", $(motaCreate).val());
+        //formData.append("Url", $(urlCreate).val());
+        formData.append("GroupId", $('#Id').val())
+        formData.append("TableName", $('#tableName').val())        
+
+        if (uploadOption === 'true') {
+            if (fileInput.files.length > 0) {
+                var file = fileInput.files[0];
+                formData.append("FileUpLoad", file);
+            }
+        }
+        else {            
+            if (scannedFileName && scannedFilePath) {
+                // Gửi đường dẫn file thay vì gửi file thật
+                formData.append("ScannedFileName", scannedFileName);
+                formData.append("ScannedFilePath", scannedFilePath);
+            } else {
+                toastr.error("Chưa có file scan để gửi lên hệ thống.", "Lỗi");
+                hideLoadingOverlay();
+                return;
+            }
+        }
+
+        if ($('#motaAttachedFileCreate').val() != '') {
+            $.ajax({
+                url: '/Manages/AttachedFile/Store',
+                type: 'POST',
+                data: formData,
+                processData: false,  // Không xử lý dữ liệu FormData
+                contentType: false,  // Để trình duyệt tự set Content-Type
+                headers: {
+                    'RequestVerificationToken': csrfToken // Gửi token qua header
+                },
+                success: function (data) {
+                    $(create_modal).modal('hide');
+                    $('#attachedFile_frm').html(data);
+                    $('.modal-backdrop').remove();
+                    //$('body').removeClass('modal-open');
+                    //$('[data-toggle="tooltip"]').tooltip(); // Tooltip Bootstrap
+                    hideLoadingOverlay();
+                    $('.select2basic').select2();
+
+                    scannedFilePath = null;
+                    scannedFileName = null;
+                },
+                error: function (xhr, status, error) {
+                    hideLoadingOverlay();
+                    toastr.error("Không thể cập nhật thông tin", "Lỗi!");
+                }
+            });
+        } else {
+            hideLoadingOverlay();
+            toastr.error("Thông tin không được để trống", "Lỗi!");
+        }
+    }
+
+    function LoadDataAttachedFile(search, pageSize, pageCurrent) {
+        showLoadingOverlay();
+        // Lấy token CSRF từ input hidden
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Manages/AttachedFile/LoadData',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                groupId: $('#Id').val(),
+                TableName: $('#tableName').val(),
+                timKiem: search,
+                pageSize: pageSize,
+                pageCurrent: pageCurrent,
+            },
+            success: function (data) {
+                $('#attachedFile_frm').html(data);
+                hideLoadingOverlay();
+                $('.select2basic').select2();
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Không thể cập nhật thông tin", "Lỗi!");
+            }
+        });
+    }
+
+    // Fetch data file for update
+    function EditAttachedFile(id) {
+        // Lấy token CSRF từ input hidden
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Manages/AttachedFile/Edit',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Id: id
+            },
+            success: function (data) {
+                $(fileUploadEdit).val('');
+                if (data) {
+                    $(motaEdit).val(data.moTa);
+                    $(urlEdit).val(data.url);
+                    $('#idUploadAttachedFileEdit').val(data.id);
+                    if (data.fileName) {
+                        let fileUrl = "/Manages/Download/AttachedFile?id=" + data.id;
+                        $('#editAttachedFileLink').attr("href", fileUrl)
+                            .text("📎 " + data.fileName)  // Thêm icon 📎 cho rõ ràng hơn
+                            .css({ "display": "inline-block", "color": "red", "font-weight": "bold" }); // Hiển thị và làm nổi bật
+                    }
+                    else {
+                        $('#editAttachedFileLink').hide(); // Nếu không có file, ẩn đi
+                    }
+                    $(edit_modal).modal('show');
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Không thể cập nhật thông tin", "Lỗi!");
+            }
+        });
+    }
+
+    // Post data file update => server
+    function UpdateAttachedFile() {
+        showLoadingOverlay();
+        // Lấy token CSRF từ input hidden
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+
+        var fileInput = document.getElementById("fileUploadAttachedFileEdit");
+
+        // Tạo FormData và đóng gói dữ liệu cần upload
+        var formData = new FormData();
+        formData.append("Id", $('#idUploadAttachedFileEdit').val())
+        formData.append("MoTa", $(motaEdit).val());
+        //formData.append("Url", $(urlEdit).val());
+
+        formData.append("GroupId", $('#Id').val())
+        formData.append("TableName", $('#tableName').val())
+        //if (isPublic === 'true') {
+        //    formData.append("Public", true);
+        //}
+        if (fileInput.files.length > 0) {
+            var file = fileInput.files[0];
+            formData.append("FileUpLoad", file);
+        }
+        // debugger
+        $.ajax({
+            url: '/Manages/AttachedFile/Update',
+            type: 'POST',
+            data: formData,
+            processData: false,  // Không xử lý dữ liệu FormData
+            contentType: false,  // Để trình duyệt tự set Content-Type
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            success: function (data) {
+                $(edit_modal).modal('hide');
+                $('#attachedFile_frm').html(data);
+                $('.modal-backdrop').remove();
+                //$('body').removeClass('modal-open');
+                //$('[data-toggle="tooltip"]').tooltip(); // Tooltip Bootstrap
+                hideLoadingOverlay();
+                $('.select2basic').select2();
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Không thể cập nhật thông tin", "Lỗi!");
+            }
+        });
+    }
+
+    function DeleteAttachedFile(id, mota) {
+        $('#idAttachedFileDelete').val(id);
+        $('#motaAttachedFileDelete').html(mota);
+        $('#DeleteAttachedFile_Modal').modal('show');
+    }
+
+    function RemoveAttachedFile() {
+        // Lấy token CSRF từ input hidden
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Manages/AttachedFile/Delete',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Id: $('#idAttachedFileDelete').val(),
+                GroupId: $('#Id').val(),
+                TableName: $('#tableName').val()
+            },
+            beforeSend: function () {
+                showLoadingOverlay();
+            },
+            success: function (data) {
+                if (data) {
+                    $('#attachedFile_frm').html(data);
+                    $('#DeleteAttachedFile_Modal').modal('hide');
+                    $('.modal-backdrop').remove();
+                    $('.select2basic').select2();
+                    hideLoadingOverlay();
+                }
+            },
+            error: function (xhr, status, error) {
+                toastr.error("Không thể cập nhật thông tin", "Lỗi!");
+            }
+        });
+    }
+</script>

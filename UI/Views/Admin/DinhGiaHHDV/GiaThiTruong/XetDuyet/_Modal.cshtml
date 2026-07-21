@@ -1,0 +1,178 @@
+<!--Tra Lai Modal-->
+<div class="modal fade" id="TraLai_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="TraLaiForm" method="post" asp-controller="GiaThiTruongXetDuyet" asp-action="TraLai" onsubmit="SubmitTraLaiForm(event)">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h3 class="card-label">
+                        <b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper()</b>
+                        <span class="d-block text-muted pt-2 font-size-sm">
+                            Trả lại hồ sơ giá thị trường
+                        </span>
+                    </h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="form-group fv-plugins-icon-container">
+                                <label>Số QĐ:</label>
+                                <label class="form-control" id="soqd_tralai" style="font-weight: bold; color: blue;"></label>
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label class="control-label">Lý do trả lại:</label>
+                                <textarea class="form-control" rows="4" id="Lydo_Input" name="Lydo" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="tralaiId" name="hoSoId" type="hidden" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Hủy thao tác</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold">Trả lại hồ sơ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--Duyet Modal-->
+<div class="modal fade" id="Duyet_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="DuyetForm" method="post" asp-controller="GiaThiTruongXetDuyet" asp-action="Duyet" onsubmit="SubmitDuyetForm(event)">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h3 class="card-label">
+                        <b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper()</b>
+                        <span class="d-block text-muted pt-2 font-size-sm">
+                            Duyệt hồ sơ giá thị trường
+                        </span>
+                    </h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p style="color:blue; font-size: 15px;">Bạn có chắc chắn muốn duyệt hồ sơ giá thị trường này?</p>
+                    <div class="form-group">
+                        <label>Số QĐ:</label>
+                        <label class="form-control" id="soqd_duyet" style="font-weight: bold; color: blue;"></label>
+                    </div>
+                    <input id="duyetId" name="hoSoId" type="hidden" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Hủy thao tác</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--Huy Duyet Modal-->
+<div class="modal fade" id="HuyDuyet_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="HuyDuyetForm" method="post" asp-controller="GiaThiTruongXetDuyet" asp-action="HuyDuyet" onsubmit="SubmitHuyDuyetForm(event)">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h3 class="card-label">
+                        <b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper()</b>
+                        <span class="d-block text-muted pt-2 font-size-sm">
+                            Hủy duyệt hồ sơ giá thị trường
+                        </span>
+                    </h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p style="color:red; font-size: 15px;">Bạn có chắc chắn muốn hủy duyệt hồ sơ giá thị trường này? Trạng thái hồ sơ sẽ quay về Chờ duyệt.</p>
+                    <div class="form-group">
+                        <label>Số QĐ:</label>
+                        <label class="form-control" id="soqd_huyduyet" style="font-weight: bold; color: blue;"></label>
+                    </div>
+                    <input id="huyduyetId" name="hoSoId" type="hidden" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Hủy thao tác</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--Cong Bo Modal-->
+<div class="modal fade" id="CongBo_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="CongBoForm" method="post" asp-controller="GiaThiTruongXetDuyet" asp-action="CongBo" onsubmit="SubmitCongBoForm(event)">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h3 class="card-label">
+                        <b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper()</b>
+                        <span class="d-block text-muted pt-2 font-size-sm">
+                            Công bố hồ sơ giá thị trường
+                        </span>
+                    </h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p style="color:blue; font-size: 15px;">Bạn có chắc chắn muốn công bố hồ sơ giá thị trường này công khai?</p>
+                    <div class="form-group">
+                        <label>Số QĐ:</label>
+                        <label class="form-control" id="soqd_congbo" style="font-weight: bold; color: blue;"></label>
+                    </div>
+                    <input id="congboId" name="hoSoId" type="hidden" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Hủy thao tác</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--Huy Cong Bo Modal-->
+<div class="modal fade" id="HuyCongBo_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="HuyCongBoForm" method="post" asp-controller="GiaThiTruongXetDuyet" asp-action="HuyCongBo" onsubmit="SubmitHuyCongBoForm(event)">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h3 class="card-label">
+                        <b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper()</b>
+                        <span class="d-block text-muted pt-2 font-size-sm">
+                            Hủy công bố hồ sơ giá thị trường
+                        </span>
+                    </h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p style="color:red; font-size: 15px;">Bạn có chắc chắn muốn hủy công bố hồ sơ giá thị trường này?</p>
+                    <div class="form-group">
+                        <label>Số QĐ:</label>
+                        <label class="form-control" id="soqd_huycongbo" style="font-weight: bold; color: blue;"></label>
+                    </div>
+                    <input id="huycongboId" name="hoSoId" type="hidden" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Hủy thao tác</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

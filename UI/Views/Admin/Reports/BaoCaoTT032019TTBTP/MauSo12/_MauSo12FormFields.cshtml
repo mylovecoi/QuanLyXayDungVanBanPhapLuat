@@ -1,0 +1,192 @@
+﻿@using DataAccess.Enums
+@using Services.DTOs.BaoCao12
+@using UI.Helper
+@model BaoCao12RequestDto
+
+<div class="row">
+	<!-- Phần chung cho tất cả loại báo cáo -->
+	<div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 form-group">
+		<label class="form-label fs-6 font-weight-boldest" asp-for="NgayBaoCaoTu"></label>
+		<label class="form-label font-weight-boldest">:</label><span class="text-danger"> (*)</span>
+		<input type="date" asp-for="NgayBaoCaoTu" class="form-control" required>
+		<span asp-validation-for="NgayBaoCaoTu" class="text-danger mt-1"></span>
+	</div>
+
+	<div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 form-group">
+		<label class="form-label fs-6 font-weight-boldest" asp-for="NgayBaoCaoDen"></label>
+		<label class="form-label font-weight-boldest">:</label><span class="text-danger"> (*)</span>
+		<input type="date" asp-for="NgayBaoCaoDen" class="form-control" required>
+		<span asp-validation-for="NgayBaoCaoDen" class="text-danger mt-1"></span>
+	</div>
+
+	<div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 form-group">
+		<label class="form-label fs-6 font-weight-boldest" asp-for="KyBaoCao"></label>
+		<label class="form-label font-weight-boldest">:</label><span class="text-danger"> (*)</span>
+		<select class="form-control" asp-for="KyBaoCao" id="KyBaoCao" required>
+			<option value="">-- Chọn kỳ báo cáo --</option>
+			@{
+				var kyBaoCaoList = ViewData["KyBaoCaoList"] as List<SelectListItem>;
+				if (kyBaoCaoList != null && kyBaoCaoList.Any())
+				{
+					foreach (var item in kyBaoCaoList)
+					{
+						if (Model.KyBaoCao.ToString() == item.Value)
+						{
+							<option value="@item.Value" selected>@item.Text</option>
+						}
+						else
+						{
+							<option value="@item.Value">@item.Text</option>
+						}
+					}
+				}
+			}
+		</select>
+		<span asp-validation-for="KyBaoCao" class="text-danger mt-1" id="KyBaoCaoError"></span>
+	</div>
+
+	<div class="col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 form-group">
+		<label class="form-label fs-6 font-weight-boldest" asp-for="NguoiLapBieu"></label>
+		<label class="form-label font-weight-boldest">:</label><span class="text-danger"> (*)</span>
+		<input type="text" asp-for="NguoiLapBieu" class="form-control" id="NguoiLapBieu" placeholder="Nhập tên người lập biểu" required>
+		<span asp-validation-for="NguoiLapBieu" class="text-danger mt-1" id="NguoiLapBieuError"></span>
+	</div>
+
+	<!-- Section cho báo cáo 12b - cần người kiểm tra -->
+	<div id="sectionNguoiKiemTra12" class="col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 form-group" style="display: none;">
+		<label class="form-label fs-6 font-weight-boldest" asp-for="NguoiKiemTra"></label>
+		<label class="form-label font-weight-boldest">:</label><span class="text-danger validation-required"> (*)</span>
+		<input type="text" asp-for="NguoiKiemTra" class="form-control" id="NguoiKiemTra12" placeholder="Nhập tên người kiểm tra">
+		<span asp-validation-for="NguoiKiemTra" class="text-danger mt-1" id="NguoiKiemTra12Error"></span>
+	</div>
+
+	<div id="sectionChucVuNguoiKiemTra12" class="col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 form-group" style="display: none;">
+		<label class="form-label fs-6 font-weight-boldest" asp-for="ChucVuNguoiKiemTra"></label>
+		<label class="form-label font-weight-boldest">:</label><span class="text-danger validation-required"> (*)</span>
+		<input type="text" asp-for="ChucVuNguoiKiemTra" class="form-control" id="ChucVuNguoiKiemTra12" placeholder="Nhập chức vụ người kiểm tra">
+		<span asp-validation-for="ChucVuNguoiKiemTra" class="text-danger mt-1" id="ChucVuNguoiKiemTra12Error"></span>
+	</div>
+
+	<!-- Section cho Giám đốc -->
+	<div id="sectionGiamDoc12" class="col-sm-12 col-md-6 col-lg-6 col-xl-6 col-xxl-6 form-group" style="display: none;">
+		<label class="form-label fs-6 font-weight-boldest" asp-for="GiamDoc"></label>
+		<label class="form-label font-weight-boldest">:</label><span class="text-danger validation-required"> (*)</span>
+		<input type="text" asp-for="GiamDoc" class="form-control" id="GiamDoc12" placeholder="Nhập tên Giám đốc">
+		<span asp-validation-for="GiamDoc" class="text-danger mt-1" id="GiamDoc12Error"></span>
+	</div>
+
+	<!-- Danh mục hợp đồng - riêng cho báo cáo 12 -->
+	<div class="col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 form-group">
+		<label class="form-label fs-6 font-weight-boldest" asp-for="DanhMucHopDongIds"></label>
+		<label class="form-label font-weight-boldest">:</label>
+		<select class="form-control" asp-for="DanhMucHopDongIds" multiple>
+			@{
+				var dmHopDong = ViewData["DanhMucHopDong"] as List<DataAccess.Entities.Settings.DanhMucHopDong>;
+				if (dmHopDong != null && dmHopDong.Any())
+					foreach (var item in dmHopDong)
+					{
+						string backIn = FuntionGlobal.GetBackIn(item.Level);
+						<option value="@item.Id">@Html.Raw(backIn)@item.TenHopDong</option>
+					}
+			}
+		</select>
+		<span asp-validation-for="DanhMucHopDongIds" class="text-danger mt-1"></span>
+	</div>
+
+	<!-- Hidden inputs -->
+	<input type="hidden" asp-for="DonViId" />
+	<input type="hidden" asp-for="NgayBaoCao" />
+	<input type="hidden" asp-for="LoaiBaoCao" id="LoaiBaoCaoHidden" />
+	<input type="hidden" asp-for="TenDonViBaoCao" id="TenDonViBaoCaoHidden" />
+</div>
+
+<script>
+	$(document).ready(function () {
+		SetupSelect2("#KyBaoCao", "-- Chọn kỳ báo cáo --");
+		SetupSelect2("[asp-for='DanhMucHopDongIds']", "-- Chọn danh mục hợp đồng --");
+		
+		// Khởi tạo form theo loại báo cáo hiện tại
+		var currentLoaiBaoCao = $('#LoaiBaoCaoHidden').val();
+		if (currentLoaiBaoCao) {
+			handleLoaiBaoCaoChange(currentLoaiBaoCao);
+		}
+	});
+
+	// Hàm xử lý khi thay đổi loại báo cáo
+	function handleLoaiBaoCaoChange(loaiBaoCao) {
+		// Xóa validation cho tất cả các trường
+		clearAllValidation();
+		
+		// Hiển thị section tương ứng và thêm validation
+		switch (loaiBaoCao) {
+			case '@(LoaiBaoCao12.BaoCao12a)':
+				// 12a: Chỉ cần người lập biểu - không cần các chức danh ký
+				// Ẩn tất cả các section khác
+				$('#sectionNguoiKiemTra12, #sectionChucVuNguoiKiemTra12, #sectionGiamDoc12').hide();
+				break;
+			case '@(LoaiBaoCao12.BaoCao12b)':
+				// 12b: Cần người lập biểu + người kiểm tra + giám đốc
+				$('#sectionNguoiKiemTra12, #sectionChucVuNguoiKiemTra12, #sectionGiamDoc12').show();
+				addValidationToFields(['NguoiKiemTra12', 'ChucVuNguoiKiemTra12', 'GiamDoc12']);
+				break;
+		}
+	}
+
+	function clearAllValidation() {
+		$('.form-control').removeAttr('data-validate').removeClass('is-invalid');
+		$('.text-danger[id$="Error"]').text('');
+	}
+
+	function addValidationToFields(fieldIds) {
+		fieldIds.forEach(function(fieldId) {
+			$('#' + fieldId).attr('data-validate', 'true');
+		});
+	}
+
+
+
+	// Function để validate form fields
+	function validateFormFields() {
+		var isValid = true;
+		
+		// Validate các trường cơ bản luôn cần cho báo cáo 12
+		var basicFields = ['KyBaoCao', 'NguoiLapBieu'];
+		basicFields.forEach(function(fieldId) {
+			if (!validateField(fieldId)) {
+				isValid = false;
+			}
+		});
+		
+		// Validate các trường có attribute data-validate
+		$('[data-validate="true"]').each(function() {
+			if (!validateField(this.id)) {
+				isValid = false;
+			}
+		});
+		
+		return isValid;
+	}
+
+	function validateField(fieldId) {
+		var field = $('#' + fieldId);
+		var errorElement = $('#' + fieldId + 'Error');
+		var value = field.val();
+		
+		if (!value || value.trim() === '') {
+			field.addClass('is-invalid');
+			var label = field.closest('.form-group').find('label').first().text().replace(':', '').replace('*', '').trim();
+			errorElement.text(label + ' không được bỏ trống');
+			return false;
+		} else {
+			field.removeClass('is-invalid');
+			errorElement.text('');
+			return true;
+		}
+	}
+
+	// Export function để sử dụng từ modal
+	window.BaoCao12FormValidation = {
+		validateFormFields: validateFormFields,
+		handleLoaiBaoCaoChange: handleLoaiBaoCaoChange
+	};
+</script>

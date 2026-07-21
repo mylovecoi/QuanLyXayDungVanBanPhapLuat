@@ -1,0 +1,206 @@
+﻿@using UI.ViewModels;
+@using DataAccess.Enums;
+
+@{
+    var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+    int pageSize = (ViewData["PageInfo"] as VMPageInfo)?.PageSize ?? 5;
+    string timKiem = (ViewData["PageInfo"] as VMPageInfo)?.Search ?? "";
+    string sort = (ViewData["PageInfo"] as VMPageInfo)?.Sort ?? "";
+    string role = ViewData["Role"]?.ToString() ?? "";
+    int record_id = 1;
+    Guid? donViId = ViewData["DonViId"] as Guid?;
+    var danhMucDonVis = ViewData["DanhMucDonVis"] as List<DataAccess.Entities.Settings.DanhMucDonVi>;
+    LoaiPhongBan? loaiPhongBan = ViewData["LoaiPhongBan"] as LoaiPhongBan?;
+}
+
+@model IEnumerable<DataAccess.Entities.Settings.DanhMucPhongBan>
+
+@section custom_style {
+}
+
+@section custom_script {
+    <script src="~/js/site.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Khởi tạo Select2 cho dropdown đơn vị
+            SetupSelect2('#DonViId_Select', 'Lựa Chọn Đơn Vị');
+
+            // Đăng ký form lọc
+            HandleRegisterFormFilter('#FilterForm', '#Pagination', '@Url.Action("Index", "DanhMucPhongBan")');
+        });
+
+        function ClickPage(pageSelect) {
+            var current_path_url = '/Settings/DanhMucPhongBan?';
+            var timkiem = 'Search=' + $('#txt_Search').val();
+            var pageSize = '&PageSize=' + $('#PageSize_Search').val();
+            var donViId = '&DonViId=' + $('#DonViId_Select').val();
+            var loaiPhongBan = '&LoaiPhongBan=' + $('#LoaiPhongBan_Select').val();
+            var pageCurrent = '&PageCurrent=' + pageSelect;
+            var url = current_path_url + timkiem + pageSize + donViId + loaiPhongBan + pageCurrent;
+            window.location.href = url;
+        }
+    </script>
+}
+
+<div class="card card-custom">
+    <div class="card-header flex-wrap border-0 pt-6 pb-0">
+        <div class="card-title">
+            <h3 class="card-label">
+                <b>@ViewData["Title"]?.ToString()?.ToUpper()</b>
+                <span class="d-block text-muted pt-2 font-size-sm">
+                    Quản lý @ViewData["Title"]?.ToString()?.ToLower()
+                </span>
+            </h3>
+        </div>
+        <div class="card-toolbar">
+            @if (session != null && FuntionGlobal.CheckPermission(session, role, "Create"))
+            {
+                <button type="button" class="btn btn-primary font-weight-bolder" title="Thêm mới" onclick="Create()">
+                    <i class="la la-plus"></i>Thêm mới
+                </button>
+            }
+        </div>
+    </div>
+    <br />
+    @Html.AntiForgeryToken()
+    <div class="card-body pt-0">
+        <form id="FilterForm">
+            <div class="row">
+                <div class="col-xl-3">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Đơn Vị:</label>
+                        <select class="form-control h-40px" name="DonViId" id="DonViId_Select">
+                            <option value="">--Tất cả--</option>
+                            @if (danhMucDonVis != null && danhMucDonVis.Any())
+                            {
+                                foreach (var item in danhMucDonVis)
+                                {
+                                    string backIn = FuntionGlobal.GetBackIn(item.Level);
+                                    <!option value="@item.Id" @(donViId == item.Id ? "selected" : "")>@Html.Raw(backIn)@item.TenDonVi</!option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xl-3">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Loại Phòng Ban:</label>
+                        <select class="form-control h-40px" name="LoaiPhongBan" id="LoaiPhongBan_Select">
+                            <option value="">--Tất cả--</option>
+                            <!option value="@((int)LoaiPhongBan.LuuTru)" @(loaiPhongBan == LoaiPhongBan.LuuTru ? "selected" : "")>Lưu trữ</!option>
+                            <!option value="@((int)LoaiPhongBan.SoanThao)" @(loaiPhongBan == LoaiPhongBan.SoanThao ? "selected" : "")>Soạn thảo</!option>
+                            <!option value="@((int)LoaiPhongBan.CongChung)" @(loaiPhongBan == LoaiPhongBan.CongChung ? "selected" : "")>Công chứng</!option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-xl-3" style="text-align:left">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Hiển thị</label>
+                        <select class="form-control h-40px" name="PageSize" id="PageSize_Search">
+                            <!option value="5" @(pageSize == 5 ? "selected" : "")>5 thông tin</!option>
+                            <!option value="10" @(pageSize == 10 ? "selected" : "")>10 thông tin</!option>
+                            <!option value="20" @(pageSize == 20 ? "selected" : "")>20 thông tin</!option>
+                            <!option value="50" @(pageSize == 50 ? "selected" : "")>50 thông tin</!option>
+                            <!option value="100" @(pageSize == 100 ? "selected" : "")>100 thông tin</!option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xl-9">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label class="text-blue">Tìm kiếm</label>
+                        <div class="input-group">
+                            <input class="form-control h-40px" name="Search" id="txt_Search" placeholder="Tìm kiếm..." value="@timKiem">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-danger" type="reset"><i class="las la-times-circle"></i></button>
+                            </div>
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit"><i class="las la-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input hidden id="sort_current" name="sort_current" value="@sort" />
+            <input hidden id="PageCurrent" name="PageCurrent" value="@ViewData["PageCurrent"]" />
+        </form>
+        <!--begin: Datatable-->
+        <div class="table-responsive border rounded-lg mb-8">
+            <table class="table table-striped table-hover table-responsive-lg rounded-lg m-0">
+                <thead class="thead-light">
+                    <tr style="text-align:center;" class="table-active">
+                        <th width="5%">#</th>
+                        <th style="font-weight: bold;" width="25%">Tên phòng ban</th>
+                        <th style="font-weight: bold;" width="15%">Mã phòng ban</th>
+                        <th style="font-weight: bold;" width="20%">Đơn vị</th>
+                        <th style="font-weight: bold;" width="25%">Loại phòng ban</th>
+                        <th style="font-weight: bold;" width="10%">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        var pageInfo = ViewData["PageInfo"] as VMPageInfo;
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td style="text-align: center; vertical-align:middle">@(record_id++)</td>
+                                <td style="text-align: left; vertical-align:middle">@item.TenPhongBan</td>
+                                <td style="text-align: left; vertical-align:middle">@item.MaPhongBan</td>
+                                <td style="text-align: left; vertical-align:middle">@(item.DanhMucDonVi?.TenDonVi)</td>
+                                <td style="text-align: center; vertical-align: middle">
+                                    @switch (item.LoaiPhongBan)
+                                    {
+                                        case LoaiPhongBan.LuuTru:
+                                            <span class="label font-weight-bold label-lg label-info label-inline">Lưu trữ</span>
+                                            break;
+                                        case LoaiPhongBan.SoanThao:
+                                            <span class="label font-weight-bold label-lg label-primary label-inline">Soạn thảo</span>
+                                            break;
+                                        case LoaiPhongBan.CongChung:
+                                            <span class="label font-weight-bold label-lg label-success label-inline">Công chứng</span>
+                                            break;
+                                    }
+                                </td>
+                                <td style="text-align: center; vertical-align: middle">
+                                    @if (session != null && FuntionGlobal.CheckPermission(session, role ?? "", "Index"))
+                                    {
+                                        <button type="button" onclick="Show('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Xem chi tiết">
+                                            <i class="icon-lg la la-eye text-primary"></i>
+                                        </button>
+                                    }
+                                    @if (session != null && FuntionGlobal.CheckPermission(session, role ?? "", "Edit"))
+                                    {
+                                        <button type="button" onclick="Edit('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Chỉnh sửa">
+                                            <i class="icon-lg la la-edit text-success"></i>
+                                        </button>
+                                    }
+                                    @if (session != null && FuntionGlobal.CheckPermission(session, role ?? "", "Delete"))
+                                    {
+                                        <button type="button" class="btn btn-sm btn-clean btn-icon" title="Xóa"
+                                                onclick="Delete('@item.Id', '@item.TenPhongBan', '@item.MaPhongBan')">
+                                            <i class="icon-lg la la-trash text-danger"></i>
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td style="text-align:center" colspan="6">Không tìm thấy thông tin!!!</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <!--end: Datatable-->
+        <div id="Pagination">
+            @await Html.PartialAsync("~/Views/Shared/Pagination.cshtml")
+        </div>
+    </div>
+</div>
+@await Html.PartialAsync("~/Views/Admin/Settings/DanhMucDonViSuDung/DanhMucPhongBan/Modal.cshtml")

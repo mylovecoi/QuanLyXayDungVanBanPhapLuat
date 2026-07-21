@@ -1,0 +1,258 @@
+@using DataAccess.Entities.Settings;
+@using DataAccess.Entities.KeKhaiDangKyGia;
+@{
+    Layout = null;
+    var dsdonvi = ViewData["DanhMucDonVi"] as IEnumerable<DanhMucDonVi> ?? new List<DanhMucDonVi>();
+}
+@model DataAccess.Entities.KeKhaiDangKyGia.DoanhNghiep
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] | CSDL Giá Thái Nguyên</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!--begin::Fonts-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,500,600,700" />
+    <!--end::Fonts-->
+    <!--begin::Page Custom Styles(used by this page)-->
+    <link href="~/assets/css/pages/login/classic/login-3.css" rel="stylesheet" type="text/css" />
+    <!--end::Page Custom Styles-->
+    <!--begin::Global Theme Styles(used by all pages)-->
+    <link href="~/assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/plugins/custom/prismjs/prismjs.bundle.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
+    <!--end::Global Theme Styles-->
+    <link rel="shortcut icon" href="~/FileUpload/Logo/logoLife.png" />
+    <style>
+        .form-control {
+            border: 1px solid #E4E6EF !important; /* Light border to match login page */
+            background-color: #ffffff !important;
+            color: #181c32 !important;
+            font-weight: 500 !important;
+        }
+        .form-control:focus {
+            border-color: #3699FF !important;
+            box-shadow: 0 0 0 0.2rem rgba(54, 153, 255, 0.25) !important;
+        }
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #E4E6EF !important;
+            background-color: #ffffff !important;
+            height: auto !important;
+            padding: 0.35rem 0.5rem !important;
+        }
+        label {
+            color: #181c32 !important;
+            font-weight: bold !important;
+        }
+    </style>
+</head>
+<body id="kt_body" class="header-fixed header-mobile-fixed subheader-enabled subheader-fixed aside-enabled aside-fixed aside-minimize-hoverable page-loading">
+    <div class="d-flex flex-column flex-root">
+        <div class="login login-3 login-signin-on d-flex flex-row-fluid" id="kt_login">
+            <div class="d-flex flex-center bgi-size-cover bgi-no-repeat flex-row-fluid" style="background-image: url(/assets/media/bg/bg-3.jpg); padding: 50px 0;">
+                <div class="login-form text-center text-dark p-7 position-relative overflow-hidden"
+                     style="background: rgba(255, 255, 255, 0.75); border-radius: 16px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15); border: 1px solid rgba(255, 255, 255, 0.45); max-width: 1000px; width: 90%;">
+                    <div class="login-signin">
+                        <div class="mb-10">
+                            <h1 style="font-weight: bold; color: black; font-size: 30px;">
+                                ĐĂNG KÝ TÀI KHOẢN DOANH NGHIỆP
+                            </h1>
+                            <p class="text-dark opacity-60 font-weight-bold">Đã có tài khoản? <a asp-controller="Auth" asp-action="Login">Bấm vào đây để đăng nhập</a></p>
+                        </div>
+                        <span class="text-danger" style="font-weight:bold">@Html.ValidationMessage("error")</span>
+                        <form asp-controller="DoanhNghiep" asp-action="Store" method="post" id="kt_login_signin_form" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            <p class="text-left" style="color: blue; font-weight: bold">Thông tin doanh nghiệp</p>
+                            <div class="row text-left">
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label class="font-size-h7 font-weight-bolder text-dark">Tên doanh nghiệp<span class="text-danger">*</span></label>
+                                        <input class="form-control h-auto py-3 px-6 border-0 rounded-lg font-size-h7" type="text" asp-for="TenDoanhNghiep" required id="Tendn" />
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label class="font-size-h7 font-weight-bolder text-dark">Mã số thuế hoặc mã số đăng ký KD<span class="text-danger">*</span></label>
+                                        <input class="form-control h-auto py-3 px-6 border-0 rounded-lg font-size-h7" type="text" asp-for="MaSoThue" required id="MaSoThue" />
+                                        <span asp-validation-for="MaSoThue" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label class="font-size-h7 font-weight-bolder text-dark">Số điện thoại trụ sở chính</label>
+                                        <input class="form-control h-auto py-3 px-6 border-0 rounded-lg font-size-h7" type="tel" asp-for="SoDienThoai" required id="Tel" />
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label class="font-size-h7 font-weight-bolder text-dark">Địa chỉ trụ sở</label>
+                                        <input class="form-control h-auto py-3 px-6 border-0 rounded-lg font-size-h7" type="text" asp-for="DiaChi" required id="Diachi" />
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label class="font-size-h7 font-weight-bolder text-dark">Email<span class="text-danger">*</span></label>
+                                        <input class="form-control h-auto py-3 px-6 border-0 rounded-lg font-size-h7" type="email" asp-for="Email" required id="Email" />
+                                        <span asp-validation-for="Email" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6 text-dark">
+                                    <div class="form-group">
+                                        <label class="font-size-h7 font-weight-bolder text-dark">Giấy đăng ký kinh doanh</label><br />
+                                        <input class="text-dark opacity-60 font-weight-bold" type="file" asp-for="GiayPhepKdUpload" accept=".doc, .pdf, .img" required />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p class="text-left" style="color: blue; font-weight: bold">Thông tin lĩnh vực kinh doanh</p>
+                            @await Html.PartialAsync("~/Views/Admin/KeKhaiDangKyGia/DoanhNghiep/LvKd/Index.cshtml")
+                            <br />
+                            <br />
+                            <p class="text-left" style="color: blue; font-weight: bold">Thông tin đăng nhập</p>
+                            <div class="row text-left">
+                                <div id="listcoquanxetduyet_data" style="display:none"></div>
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label class="font-size-h7 font-weight-bolder text-dark">Tài khoản đăng nhập<span class="text-danger">*</span></label>
+                                        <input class="form-control h-auto py-3 px-6 border-0 rounded-lg font-size-h7" type="text" name="username" id="Username" required />
+                                        <span class="text-danger" data-valmsg-for="username" data-valmsg-replace="true"></span>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label class="font-size-h7 font-weight-bolder text-dark">Mật khẩu<span class="text-danger">*</span></label>
+                                         <div class="input-group">
+                                             <input class="form-control h-auto py-3 px-6 border-0 rounded-lg font-size-h7" type="password" name="password" id="Password" required style="border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; border-right: 0 !important;" />
+                                             <div class="input-group-append">
+                                                 <span class="input-group-text" style="background-color: #ffffff !important; border: 1px solid #E4E6EF !important; border-left: 0 !important; border-top-right-radius: 0.5rem !important; border-bottom-right-radius: 0.5rem !important; border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; height: auto;">
+                                                     <i class="la la-eye icon-lg" style="cursor: pointer;" onmouseover="mouseoverPass();" onmouseout="mouseoutPass();"></i>
+                                                 </span>
+                                             </div>
+                                         </div>
+                                        <span class="text-danger" data-valmsg-for="password" data-valmsg-replace="true"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group text-center mt-10">
+                                <button type="submit" class="btn btn-pill btn-primary font-weight-bold opacity-90 px-15 py-3">Đăng ký</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @await Html.PartialAsync("~/Views/Admin/KeKhaiDangKyGia/DoanhNghiep/LvKd/Modal.cshtml")
+    <!--begin::Global Config(global config for global JS scripts)-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        var KTAppSettings = {
+            "breakpoints": { "sm": 576, "md": 768, "lg": 992, "xl": 1200, "xxl": 1400 },
+            "colors": {
+                "theme": {
+                    "base": { "white": "#ffffff", "primary": "#3699FF", "secondary": "#E5EAEE", "success": "#1BC5BD", "info": "#8950FC", "warning": "#FFA800", "danger": "#F64E60", "light": "#E4E6EF", "dark": "#181C32" },
+                    "light": { "white": "#ffffff", "primary": "#E1F0FF", "secondary": "#EBEDF3", "success": "#C9F7F5", "info": "#EEE5FF", "warning": "#FFF4DE", "danger": "#FFE2E5", "light": "#F3F6F9", "dark": "#D6D6E0" },
+                    "inverse": { "white": "#ffffff", "primary": "#ffffff", "secondary": "#3F4254", "success": "#ffffff", "info": "#ffffff", "warning": "#ffffff", "danger": "#ffffff", "light": "#464E5F", "dark": "#ffffff" }
+                },
+                "gray": {
+                    "gray-100": "#F3F6F9", "gray-200": "#EBEDF3", "gray-300": "#E4E6EF", "gray-400": "#D1D3E0", "gray-500": "#B5B5C3", "gray-600": "#7E8299", "gray-700": "#5E6278", "gray-800": "#3F4254", "gray-900": "#181C32"
+                }
+            }, "font-family": "Nunito Sans"
+        };
+    </script>
+    <script src="~/assets/plugins/global/plugins.bundle.js"></script>
+    <script src="~/assets/plugins/custom/prismjs/prismjs.bundle.js"></script>
+    <script src="~/assets/js/scripts.bundle.js"></script>
+    <script src="~/assets/js/pages/crud/forms/widgets/select2.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 1. Bind submit handler first to ensure AJAX submit is active
+            $('#kt_login_signin_form').on('submit', function(e) {
+                e.preventDefault();
+
+                // 1. Check if LVKD list is empty
+                var rowCount = $('#lvkd_data tbody tr').length;
+                if (rowCount === 0) {
+                    toastr.error("Vui lòng thêm ít nhất một lĩnh vực kinh doanh trước khi đăng ký!", "Lỗi!");
+                    return false;
+                }
+
+                // 2. Validate standard fields
+                if (!$(this).valid()) {
+                    return false;
+                }
+
+                // Check if DonViQuanLyId is selected
+                if ($('#DonViQuanLyId').length) {
+                    var donViQuanLyIdVal = $('#DonViQuanLyId').val();
+                    if (!donViQuanLyIdVal) {
+                        toastr.error("Vui lòng chọn cơ quan quản lý tài khoản!", "Lỗi!");
+                        $('#DonViQuanLyId').focus();
+                        return false;
+                    }
+                }
+
+                // 2.1. Validate Password Format manually on submit
+                var passwordVal = $('#Password').val();
+                var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$/;
+                if (!passwordRegex.test(passwordVal)) {
+                    $('[data-valmsg-for="password"]').text("Mật khẩu phải tối thiểu 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 chữ số và 1 ký tự đặc biệt!");
+                    $('#Password').focus();
+                    return false;
+                } else {
+                    $('[data-valmsg-for="password"]').text("");
+                }
+
+                // 3. Perform AJAX registration to preserve selected file and form fields on backend error
+                var form = $(this);
+                var formData = new FormData(form[0]);
+
+                var btnSubmit = form.find('button[type="submit"]');
+                btnSubmit.addClass('spinner spinner-white spinner-right').attr('disabled', true);
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        btnSubmit.removeClass('spinner spinner-white spinner-right').attr('disabled', false);
+                        if (response.status === 'success') {
+                            var usernameVal = $('#Username').val();
+                            window.location.href = '/Auth/Login?username=' + encodeURIComponent(usernameVal) + '&registered=true';
+                        } else {
+                            toastr.error(response.message, "Lỗi!");
+                        }
+                    },
+                    error: function() {
+                        btnSubmit.removeClass('spinner spinner-white spinner-right').attr('disabled', false);
+                        toastr.error("Có lỗi xảy ra trong quá trình xử lý.", "Lỗi!");
+                    }
+                });
+            });
+
+            // Clear password validation message on typing
+            $('#Password').on('input', function() {
+                $('[data-valmsg-for="password"]').text("");
+            });
+        });
+
+        function mouseoverPass() {
+            var obj = document.getElementById('Password');
+            if (obj) {
+                obj.type = "text";
+            }
+        }
+
+        function mouseoutPass() {
+            var obj = document.getElementById('Password');
+            if (obj) {
+                obj.type = "password";
+            }
+        }
+    </script>
+</body>
+</html>

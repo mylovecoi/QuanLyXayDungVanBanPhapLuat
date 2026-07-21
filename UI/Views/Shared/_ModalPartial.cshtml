@@ -1,0 +1,49 @@
+﻿<div class="modal fade" id="modalCreateOrEdit" tabindex="-1" role="dialog" aria-labelledby="modalCreateOrEdit" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm"><span id="modalCreateOrEdit_Title">Thêm mới</span></span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div id="modalCreateOrEdit_Body">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSelectDmDiaDanh" tabindex="-1" role="dialog" aria-labelledby="modalSelectDmDiaDanh" aria-hidden="true">
+	<div class="modal-dialog " role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 class="card-label">
+					@ViewData["Title"]
+					<span class="d-block text-muted pt-2 font-size-sm"><span id="modalSelectDmDiaDanh_Title">Thêm mới</span> @ViewData["Title"]</span>
+				</h3>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<i aria-hidden="true" class="ki ki-close"></i>
+				</button>
+			</div>
+			<div id="modalSelectDmDiaDanh_Body">
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-12 form-group" id="divLevel1">
+							<label class="form-label text-blue fs-6 font-weight-boldest">Địa Danh Cấp 1</label>
+							<label class="form-label text-blue font-weight-boldest">:</label>
+							<select class="form-control" id="DmDiaDanhCap1_Select">
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+					<button type="button" class="btn btn-primary font-weight-bold" onclick="HandleBtnChooseDiaDanh()">Xác Nhận</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,40 @@
+﻿@using UI.ViewModels;
+
+@model DataAccess.Entities.Systems.GroupPermision
+
+<input hidden asp-for="Id" />
+<input hidden asp-for="Status" />
+@Html.AntiForgeryToken()
+<div class="mb-3 font-weight-bold font-size-lg">
+    <label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin nhóm quyền:</label>
+</div>
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Nhóm quyền:</label>
+            <input class="form-control" asp-for="Name">
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Trạng thái:</label>
+            <select class="form-control" asp-for="Status">
+                <option value="Kích hoạt">Kích hoạt</option>
+                <option value="Dừng kích hoạt">Dừng kích hoạt</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group">
+            <label>Mô tả:</label>
+            <input class="form-control" asp-for="Description">
+        </div>
+    </div>
+</div>
+<div class="mb-3 font-weight-bold font-size-lg">
+    <label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin quyền chi tiết:</label>
+</div>
+<div id="frm_permissions">
+    @await Html.PartialAsync("~/Views/Admin/Systems/GroupPermission/Components/_Permissions.cshtml", Model.Permissions)
+</div>

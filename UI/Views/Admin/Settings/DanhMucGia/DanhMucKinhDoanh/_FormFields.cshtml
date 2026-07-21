@@ -1,0 +1,117 @@
+@using DataAccess.Entities.Settings;
+@model DataAccess.Entities.Settings.DanhMucGia.DanhMucKinhDoanh
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Mã Ngành: </label>
+            <input type="text" class="form-control" asp-for="MaNganh" />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Mã Nghề: </label>
+            <input type="text" class="form-control" asp-for="MaNghe" id="MaNghe" />
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Tên Nghề: </label>
+            <input type="text" class="form-control" asp-for="TenNghe" id="TenNghe" />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Sắp xếp: </label>
+            <input type="number" class="form-control" asp-for="STTSapXep" />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Theo Dõi: </label>
+            <select class="form-control" asp-for="TheoDoi">
+                <option value="TD">Theo dõi</option>
+                <option value="KTD">Khóa</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Role Quyền: </label>
+            <input type="text" class="form-control" asp-for="Role" />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Phân Loại: </label>
+            <select class="form-control" asp-for="PhanLoai">
+                <option value="Group">Nhóm chức năng</option>
+                <option value="Detail">Chức năng</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Loại Giá: </label>
+            <select class="form-control" asp-for="LoaiGia">
+                <option value="KKG">Kê khai giá</option>
+                <option value="DG">Định giá</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Mã BTC: </label>
+            <input type="text" class="form-control" asp-for="MaHH_BTC" />
+        </div>
+    </div>
+
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Đơn vị quản lý: </label>
+            <select class="form-control select2multi" multiple="multiple" id="DonViQuanLyList" name="DonViQuanLyList">
+                @if (ViewData["DonVis"] is List<DanhMucDonVi> donViQuanLy)
+                {
+                    var selectedIds = Model?.DonViQuanLyId?.Split(',') ?? Array.Empty<string>();
+                    foreach (var item in donViQuanLy)
+                    {
+                        if (selectedIds.Contains(item.Id.ToString()))
+                        {
+                            <option value="@item.Id" selected="selected">@item.TenDonVi</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.TenDonVi</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Đơn vị đồng chuyển: </label>
+            <select class="form-control select2multi" multiple="multiple" id="DonViDongChuyenList" name="DonViDongChuyenList">
+                @if (ViewData["DonVis"] is List<DanhMucDonVi> donViDongChuyen)
+                {
+                    var selectedIds = Model?.DonViDongChuyenId?.Split(',') ?? Array.Empty<string>();
+                    foreach (var item in donViDongChuyen)
+                    {
+                        if (selectedIds.Contains(item.Id.ToString()))
+                        {
+                            <option value="@item.Id" selected="selected">@item.TenDonVi</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.TenDonVi</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+    </div>
+
+    <input hidden asp-for="Id" />
+    <input hidden asp-for="Level" />
+    <input hidden asp-for="RoleGoc" />
+</div>

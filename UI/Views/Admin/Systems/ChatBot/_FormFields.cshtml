@@ -1,0 +1,33 @@
+﻿@using DataAccess.Entities.Systems;
+@model DataAccess.Entities.Systems.QuestionAnswer
+
+
+@Html.AntiForgeryToken()
+<div class="row">
+    <input hidden asp-for="Id" />
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Câu hỏi:</label>
+            <input type="text" asp-for="Question" class="form-control" />
+            <span id="QuestionError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="document-editor__toolbarr">
+            <label style="font-weight:bold; color:blue">Câu trả lời:</label>
+            @* <input type="hidden" asp-for="Answer"/>
+            <div class="document-editor__toolbar"></div>
+            <div class="form-control editor" style="height: auto; border: 1px solid #E4E6EF;">
+                @Html.Raw(Model.Answer)
+            </div> *@
+            <textarea  type="hidden" asp-for="Answer" name="Answer" class="form-control"></textarea>
+            <span id="AnswerError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Description:</label>
+            <input type="text" asp-for="Description" class="form-control" />
+        </div>
+    </div>
+</div>

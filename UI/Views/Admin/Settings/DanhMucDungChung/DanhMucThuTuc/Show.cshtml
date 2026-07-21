@@ -1,0 +1,154 @@
+@using DataAccess.Entities.Settings
+@model ThuTucHanhChinh
+@{
+	ViewData["Title"] = "Chi tiết thủ tục hành chính";
+}
+
+<div class="card shadow-sm">
+	<div class="card-header">
+		<h3>Chi tiết thủ tục hành chính</h3>
+	</div>
+	<div class="card-body">
+		<div class="table-responsive">
+			<table class="table table-rounded table-striped border gs-7 gy-5 mb-5">
+				<tbody>
+					<tr>
+						<td width="200">
+							<strong>Mã thủ tục hành chính</strong>
+						</td>
+						<td>
+							@Model.MaThuTuc
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Tên thủ tục hành chính</strong>
+						</td>
+						<td>
+							@Model.TenThuTuc
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Quyết định</strong>
+						</td>
+						<td>
+							<p>Tên quyết định: @Model.TenQuyetDinh</p>
+							<p>Ngày quyết định: @Model.NgayQuyetDinh.ToString("dd/MM/yyyy")</p>
+							<span>File đính kèm:</span>
+							@if (Model.DSFileDinhKem != null && Model.DSFileDinhKem.Any())
+							{
+								<hr class="my-1" style="visibility: hidden" />
+								<ul>
+									@foreach (var file in Model.DSFileDinhKem)
+									{
+										<li>
+											<a href="/Manages/Download/AttachedFile?id=@file.Id">@file.FileName</a>
+										</li>
+									}
+								</ul>
+							}
+							else
+							{
+								<span class="text-danger">Không có</span>
+							}
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Cơ quan thực hiện</strong>
+						</td>
+						<td>
+							@Model.CoQuanThucHien
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Cách thức thực hiện</strong>
+						</td>
+						<td>
+							@Model.CachThucThucHien
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Đối tượng thực hiện</strong>
+						</td>
+						<td>
+							@Model.DoiTuongThucHien
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Trình tự thực hiện</strong>
+						</td>
+						<td>
+							@Html.Raw(Model.TrinhTuThucHien)
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Thời hạn giải quyết</strong>
+						</td>
+						<td>
+							@Model.ThoiHanGiaiQuyet
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Phí</strong>
+						</td>
+						<td>
+							@string.Format("{0:N0} VNĐ", Model.Phi)
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Lệ phí</strong>
+						</td>
+						<td>
+							@string.Format("{0:N0} VNĐ", Model.LePhi)
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Thành phần hồ sơ</strong>
+						</td>
+						<td>
+							@Html.Raw(Model.ThanhPhanHoSo)
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Yêu cầu điều kiện</strong>
+						</td>
+						<td>
+							@Html.Raw(Model.YeuCauDieuKien)
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Căn cứ pháp lý</strong>
+						</td>
+						<td>
+							@Html.Raw(Model.CanCuPhapLy)
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<strong>Kết quả thực hiện</strong>
+						</td>
+						<td>
+							@Html.Raw(Model.KetQuaThucHien)
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div class="card-footer">
+		<a asp-action="Index" asp-controller="DanhMucThuTuc" class="btn p-3 btn-sm btn-primary">
+			<i class="ki-duotone ki-black-left fs-2"></i>Quay lại
+		</a>
+	</div>
+</div>

@@ -1,0 +1,338 @@
+@using DataAccess.Entities.Settings
+@using DataAccess.Entities.DinhGiaHHDV
+
+@{
+    Layout = "_Layout";
+    var listKinhDoanhNganhDG = ViewData["DanhMucKinhDoanhNganhDG"] as IEnumerable<DanhMucKinhDoanh> ?? Enumerable.Empty<DanhMucKinhDoanh>();
+    var listKinhDoanhNgheDG = ViewData["DanhMucKinhDoanhNgheDG"] as IEnumerable<DanhMucKinhDoanh> ?? Enumerable.Empty<DanhMucKinhDoanh>();
+    var listKinhDoanhNganhKKG = ViewData["DanhMucKinhDoanhNganhKKG"] as IEnumerable<DanhMucKinhDoanh> ?? Enumerable.Empty<DanhMucKinhDoanh>();
+    var listKinhDoanhNgheKKG = ViewData["DanhMucKinhDoanhNgheKKG"] as IEnumerable<DanhMucKinhDoanh> ?? Enumerable.Empty<DanhMucKinhDoanh>();
+    var dmGiaThiTruong = ViewData["GiaThiTruongDanhMuc"] as IEnumerable<GiaThiTruongDanhMuc> ?? Enumerable.Empty<GiaThiTruongDanhMuc>();
+}
+
+@section custom_style {
+    <style>
+        .tc-card {
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .tc-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.08);
+            border-color: #3699FF;
+        }
+        .tc-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #3699FF;
+        }
+        .select2-container.is-invalid .select2-selection {
+            border-color: #f64e60 !important;
+        }
+    </style>
+}
+
+@section custom_script {
+    <script src="~/assets/js/pages/crud/forms/widgets/select2.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.select2').select2({
+                width: '100%'
+            });
+        });
+
+        function handleSearchDinhGia() {
+            var maNghe = $('#select_dinhgia').val();
+            var tuNgay = $('#dinhgia_tungay').val();
+            var denNgay = $('#dinhgia_denngay').val();
+            if (maNghe && maNghe !== "") {
+                $('#select_dinhgia').next('.select2-container').removeClass('is-invalid');
+                $('#val_err_dinhgia').addClass('d-none');
+                var baseUrl = '@Url.Action("DinhGia", "BaoCao")';
+                window.location.href = baseUrl + '?MaNghe=' + maNghe + '&TuNgay=' + tuNgay + '&DenNgay=' + denNgay;
+            } else {
+                $('#select_dinhgia').next('.select2-container').addClass('is-invalid');
+                $('#val_err_dinhgia').removeClass('d-none');
+            }
+        }
+
+        function handleSearchKeKhaiGia() {
+            var maNghe = $('#select_kekhaigia').val();
+            var tuNgay = $('#kekhaigia_tungay').val();
+            var denNgay = $('#kekhaigia_denngay').val();
+            if (maNghe && maNghe !== "") {
+                $('#select_kekhaigia').next('.select2-container').removeClass('is-invalid');
+                $('#val_err_kekhaigia').addClass('d-none');
+                var baseUrl = '@Url.Action("KeKhaiDangKyGia", "BaoCao")';
+                window.location.href = baseUrl + '?MaNghe=' + maNghe + '&TuNgay=' + tuNgay + '&DenNgay=' + denNgay;
+            } else {
+                $('#select_kekhaigia').next('.select2-container').addClass('is-invalid');
+                $('#val_err_kekhaigia').removeClass('d-none');
+            }
+        }
+
+        function handleSearchGiaThiTruong() {
+            var thongTuId = $('#select_giathitruong').val();
+            var tuNgay = $('#giathitruong_tungay').val();
+            var denNgay = $('#giathitruong_denngay').val();
+            if (thongTuId && thongTuId !== "") {
+                $('#select_giathitruong').next('.select2-container').removeClass('is-invalid');
+                $('#val_err_giathitruong').addClass('d-none');
+                var baseUrl = '@Url.Action("GiaThiTruong", "BaoCao")';
+                window.location.href = baseUrl + '?thongTuId=' + thongTuId + '&TuNgay=' + tuNgay + '&DenNgay=' + denNgay;
+            } else {
+                $('#select_giathitruong').next('.select2-container').addClass('is-invalid');
+                $('#val_err_giathitruong').removeClass('d-none');
+            }
+        }
+
+        function handleSearchBaoCaoThamDinhGia() {
+            var tuNgay = $('#thamdinhgia_tungay').val();
+            var denNgay = $('#thamdinhgia_denngay').val();
+            var baseUrl = '@Url.Action("ThamDinhGia", "BaoCao")';
+            window.location.href = baseUrl + '?TuNgay=' + tuNgay + '&DenNgay=' + denNgay;
+        }
+    </script>
+}
+
+<div class="card card-custom">
+    <div class="card-header border-0 pt-6 pb-2">
+        <div class="card-title">
+            <h3 class="card-label">
+                BÁO CÁO HỒ SƠ
+                <span class="d-block text-muted pt-2 font-size-sm">Chọn một trong các danh mục chức năng dưới đây để thực hiện báo cáo (Bắt buộc phải chọn danh mục/thông tư)</span>
+            </h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row justify-content-center pt-5">
+            <!-- Dinh Gia -->
+            <div class="col-md-3 mb-5">
+                <div class="card tc-card text-center p-8 bg-light-primary">
+                    <div class="card-body">
+                        <i class="flaticon-business tc-icon text-primary"></i>
+                        <h4 class="card-title font-weight-bold text-dark-75 mb-4">Quản lý Giá</h4>
+                        <p class="text-muted mb-6">Báo cáo thông tin, quyết định về giá hàng hóa, dịch vụ theo danh mục ngành nghề kinh doanh.</p>
+                        <button type="button" class="btn btn-primary font-weight-bolder px-6 py-3" data-toggle="modal" data-target="#ModalDinhGia">
+                            <i class="la la-print"></i> Báo cáo ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ke Khai Dang Ky Gia -->
+            <div class="col-md-3 mb-5">
+                <div class="card tc-card text-center p-8 bg-light-success">
+                    <div class="card-body">
+                        <i class="flaticon-notes tc-icon text-success"></i>
+                        <h4 class="card-title font-weight-bold text-dark-75 mb-4">Kê Khai Đăng Ký Giá</h4>
+                        <p class="text-muted mb-6">Báo cáo các hồ sơ kê khai giá, đăng ký giá của doanh nghiệp theo ngành nghề lĩnh vực quản lý.</p>
+                        <button type="button" class="btn btn-success font-weight-bolder px-6 py-3" data-toggle="modal" data-target="#ModalKeKhaiGia">
+                            <i class="la la-print"></i> Báo cáo ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gia Thi Truong -->
+            <div class="col-md-3 mb-5">
+                <div class="card tc-card text-center p-8 bg-light-warning">
+                    <div class="card-body">
+                        <i class="flaticon-statistics tc-icon text-warning"></i>
+                        <h4 class="card-title font-weight-bold text-dark-75 mb-4">Giá Thị Trường</h4>
+                        <p class="text-muted mb-6">Báo cáo giá thị trường của các nhóm hàng hóa, dịch vụ thiết yếu phục vụ công tác quản lý điều hành.</p>
+                        <button type="button" class="btn btn-warning text-white font-weight-bolder px-6 py-3" data-toggle="modal" data-target="#ModalGiaThiTruong">
+                            <i class="la la-print"></i> Báo cáo ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tham Dinh Gia -->
+            <div class="col-md-3 mb-5">
+                <div class="card tc-card text-center p-8 bg-light-info">
+                    <div class="card-body">
+                        <i class="flaticon-interface-9 tc-icon text-info"></i>
+                        <h4 class="card-title font-weight-bold text-dark-75 mb-4">Thẩm Định Giá</h4>
+                        <p class="text-muted mb-6">Báo cáo kết quả hồ sơ thẩm định giá tài sản của các đơn vị trên địa bàn tỉnh theo thời gian.</p>
+                        <button type="button" class="btn btn-info font-weight-bolder text-white px-6 py-3" data-toggle="modal" data-target="#ModalBaoCaoThamDinhGia">
+                            <i class="la la-print"></i> Báo cáo ngay
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Dinh Gia -->
+<div class="modal fade" id="ModalDinhGia" role="dialog" aria-labelledby="ModalDinhGiaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title font-weight-bold text-primary" id="ModalDinhGiaLabel">Chọn Danh Mục Kinh Doanh & Thời gian (Định Giá)</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="font-weight-bold text-dark">Danh mục ngành nghề kinh doanh <span class="text-danger">*</span></label>
+                    <select class="form-control select2" id="select_dinhgia" required>
+                        <option value="">-- Chọn danh mục --</option>
+                        @foreach (var nganh in listKinhDoanhNganhDG)
+                        {
+                            <optgroup label="@nganh.TenNghe">
+                                @{
+                                    var listNgheTheoNganh = listKinhDoanhNgheDG.Where(t => t.MaNganh == nganh.MaNghe).ToList();
+                                }
+                                @foreach (var nghe in listNgheTheoNganh)
+                                {
+                                    <option value="@nghe.MaNghe">&emsp;@nghe.TenNghe</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                    <div class="text-danger mt-2 font-size-sm d-none" id="val_err_dinhgia">Vui lòng chọn danh mục để thực hiện báo cáo!</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="font-weight-bold text-dark">Từ ngày</label>
+                        <input type="date" class="form-control" id="dinhgia_tungay" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="font-weight-bold text-dark">Đến ngày</label>
+                        <input type="date" class="form-control" id="dinhgia_denngay" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="handleSearchDinhGia()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ke Khai Dang Ky Gia -->
+<div class="modal fade" id="ModalKeKhaiGia" role="dialog" aria-labelledby="ModalKeKhaiGiaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title font-weight-bold text-success" id="ModalKeKhaiGiaLabel">Chọn Danh Mục Kinh Doanh & Thời gian (Kê Khai)</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="font-weight-bold text-dark">Danh mục ngành nghề kinh doanh <span class="text-danger">*</span></label>
+                    <select class="form-control select2" id="select_kekhaigia" required>
+                        <option value="">-- Chọn danh mục --</option>
+                        @foreach (var nganh in listKinhDoanhNganhKKG)
+                        {
+                            <optgroup label="@nganh.TenNghe">
+                                @{
+                                    var listNgheTheoNganh = listKinhDoanhNgheKKG.Where(t => t.MaNganh == nganh.MaNghe).ToList();
+                                }
+                                @foreach (var nghe in listNgheTheoNganh)
+                                {
+                                    <option value="@nghe.MaNghe">&emsp;@nghe.TenNghe</option>
+                                }
+                            </optgroup>
+                        }
+                    </select>
+                    <div class="text-danger mt-2 font-size-sm d-none" id="val_err_kekhaigia">Vui lòng chọn danh mục để thực hiện báo cáo!</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="font-weight-bold text-dark">Từ ngày</label>
+                        <input type="date" class="form-control" id="kekhaigia_tungay" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="font-weight-bold text-dark">Đến ngày</label>
+                        <input type="date" class="form-control" id="kekhaigia_denngay" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-success font-weight-bold" onclick="handleSearchKeKhaiGia()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Gia Thi Truong -->
+<div class="modal fade" id="ModalGiaThiTruong" role="dialog" aria-labelledby="ModalGiaThiTruongLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title font-weight-bold text-warning" id="ModalGiaThiTruongLabel">Chọn Thông Tư/Danh Mục & Thời gian Giá Thị Trường</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="font-weight-bold text-dark">Danh sách Thông tư/Danh mục <span class="text-danger">*</span></label>
+                    <select class="form-control select2" id="select_giathitruong" required>
+                        <option value="">-- Chọn thông tư danh mục --</option>
+                        @foreach (var item in dmGiaThiTruong)
+                        {
+                            <option value="@item.Id">@item.TenTT</option>
+                        }
+                    </select>
+                    <div class="text-danger mt-2 font-size-sm d-none" id="val_err_giathitruong">Vui lòng chọn thông tư danh mục để thực hiện báo cáo!</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="font-weight-bold text-dark">Từ ngày</label>
+                        <input type="date" class="form-control" id="giathitruong_tungay" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="font-weight-bold text-dark">Đến ngày</label>
+                        <input type="date" class="form-control" id="giathitruong_denngay" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-warning text-white font-weight-bold" onclick="handleSearchGiaThiTruong()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Bao Cao Tham Dinh Gia -->
+<div class="modal fade" id="ModalBaoCaoThamDinhGia" role="dialog" aria-labelledby="ModalBaoCaoThamDinhGiaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title font-weight-bold text-info" id="ModalBaoCaoThamDinhGiaLabel">Chọn Khoảng Thời Gian Báo Cáo Thẩm Định Giá</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="font-weight-bold text-dark">Từ ngày</label>
+                        <input type="date" class="form-control" id="thamdinhgia_tungay" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label class="font-weight-bold text-dark">Đến ngày</label>
+                        <input type="date" class="form-control" id="thamdinhgia_denngay" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-info text-white font-weight-bold" onclick="handleSearchBaoCaoThamDinhGia()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>

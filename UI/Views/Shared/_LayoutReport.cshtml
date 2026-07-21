@@ -1,0 +1,339 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>@ViewData["Title"] | LifeSoft</title>
+    <link rel="shortcut icon" href="~/FileUpload/Logo/Icon_Life.png"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito+Sans:300,400,500,600,700" />
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+
+    <link rel="stylesheet" href="~/assets/css/style.report.css" /> 
+
+    <!-- Bootstrap CSS (phiên bản mới nhất) -->   
+    <script src="~/assets/js/jquery.report.js"></script>
+   
+    <script src="~/assets/js/bootstrap.reports.js"></script>
+   
+    <script src="~/assets/js/ex.excel.js"></script>
+    <script src="~/assets/js/ex.doc.js"></script>
+
+    <style type="text/css">
+        .checkbox {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            border: 1px solid #333;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            color: #000;
+            text-decoration: none;
+            line-height: 20px;
+            opacity: 1;
+        }
+
+        body {  
+            font: normal 14px/16px time, serif;
+            overflow-x: hidden; /* Ẩn thanh cuộn ngang */
+            width: 100%;
+        }
+
+        table, p {
+            width: 98%;
+            margin: auto;
+        }
+
+            table tr td:first-child {
+                text-align: center;
+                /*  border: 1px solid black; */ /* Thêm đường viền */
+            }
+
+            table tr th {
+                text-align: center;
+            }
+
+        td, th {
+            padding: 5px;
+        }
+
+        p {
+            padding: 3px;
+        }
+
+        @@media print {
+            .in {
+                display: none !important;
+            }
+
+            #myBtn {
+                display: none !important;
+            }
+        }
+
+        #fixNav {
+            /*background: #f7f7f7;*/
+            /*background: #1a1a27;*/
+            width: 100%;
+            height: 30px;
+            display: block;
+            /*box-shadow: 0px 2px 2px rgba(0,0,0,0.5);*/ /*Đổ bóng cho menu*/
+            position: fixed; /*Cho menu cố định 1 vị trí với top và left*/
+            top: 0; /*Nằm trên cùng*/
+            left: 0; /*Nằm sát bên trái*/
+            z-index: 100000; /*Hiển thị lớp trên cùng*/
+            opacity: 0;
+        }
+
+            #fixNav:hover {
+                opacity: 1;
+            }
+
+            #fixNav ul {
+                margin: 0;
+                padding: 0;
+            }
+                #fixNav ul li {
+                    list-style: none inside;
+                    width: auto;
+                    float: left;
+                    line-height: 35px; /*Cho text canh giữa menu*/
+                    color: #fff;
+                    padding: 0;
+                    margin-left: 10px;
+                    margin-top: 5px;
+                    position: relative;
+                }
+                    #fixNav ul li a {
+                        text-transform: uppercase;
+                        white-space: nowrap; /*Cho chữ trong menu không bị wrap*/
+                        padding: 0 10px;
+                        color: #fff;
+                        display: block;
+                        font-size: 0.8em;
+                        text-decoration: none;
+                    }
+
+        #myBtn {
+            display: none;
+            position: fixed;
+            bottom: 50px;
+            right: 30px;
+            justify-content: center;
+            align-items: center;
+            width: 25px;
+            height: 25px;
+            z-index: 100;
+            font-size: 40px;
+            border: none;
+            outline: none;
+            background-color: transparent;
+            cursor: pointer;
+            padding: 10px;
+            color: black;
+            /*border-radius: 4px ;*/
+            border-radius: 0.42rem !important;
+        }
+
+            #myBtn:hover {
+                color: #3699FF;
+            }
+    @RenderSection("custom_style", required: false)
+    </style>
+</head>
+<body style="font-size:16px;">
+    <input hidden=hidden id="title" name="title" value="@ViewData["Title"]" />
+    <div class="in">
+        <nav id="fixNav">
+            <ul>
+                <li>
+                    <button type="button" class="btn btn-success" onclick="window.print()">
+                        <i class="fas fa-print"></i>&ensp;Print
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="btn btn-primary" onclick="exportDataToDocx()">
+                        <i class="far fa-file-word"></i>&ensp;Export Doc
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="btn btn-primary" onclick="exportTableToXlsx()">
+                        <i class="far fa-file-excel"></i>&ensp;Export Excel
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div id="data" style="position: relative; margin-top: 5px; margin-bottom:5px;">
+        @RenderBody()
+    </div>
+
+    <button onclick="topFunction()" id="myBtn" title="Di chuyển lên đầu trang" style="display: none;">
+        <span class="svg-icon svg-icon-primary svg-icon-2x">
+            <!--begin::Svg Icon | path:C:\wamp64\www\keenthemes\themes\metronic\theme\html\demo1\dist/../src/media/svg/icons\Navigation\Angle-double-up.svg-->
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+                <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <polygon points="0 0 24 0 24 24 0 24" />
+                    <path d="M8.2928955,10.2071068 C7.90237121,9.81658249 7.90237121,9.18341751 8.2928955,8.79289322 C8.6834198,8.40236893 9.31658478,8.40236893 9.70710907,8.79289322 L15.7071091,14.7928932 C16.085688,15.1714722 16.0989336,15.7810586 15.7371564,16.1757246 L10.2371564,22.1757246 C9.86396402,22.5828436 9.23139665,22.6103465 8.82427766,22.2371541 C8.41715867,21.8639617 8.38965574,21.2313944 8.76284815,20.8242754 L13.6158645,15.5300757 L8.2928955,10.2071068 Z" fill="#000000" fill-rule="nonzero" transform="translate(12.000003, 15.500003) scale(-1, 1) rotate(-90.000000) translate(-12.000003, -15.500003) " />
+                    <path d="M6.70710678,12.2071104 C6.31658249,12.5976347 5.68341751,12.5976347 5.29289322,12.2071104 C4.90236893,11.8165861 4.90236893,11.1834211 5.29289322,10.7928968 L11.2928932,4.79289682 C11.6714722,4.41431789 12.2810586,4.40107226 12.6757246,4.76284946 L18.6757246,10.2628495 C19.0828436,10.6360419 19.1103465,11.2686092 18.7371541,11.6757282 C18.3639617,12.0828472 17.7313944,12.1103502 17.3242754,11.7371577 L12.0300757,6.88414142 L6.70710678,12.2071104 Z" fill="#000000" fill-rule="nonzero" opacity="0.3" transform="translate(12.000003, 8.500003) scale(-1, 1) rotate(-360.000000) translate(-12.000003, -8.500003) " />
+                </g>
+            </svg><!--end::Svg Icon-->
+        </span>
+
+    </button>
+    <script>
+        function exportDataToDocx() {
+            var sourceHTML = document.getElementById("data").innerHTML;
+            var source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+            var fileDownload = document.createElement("a");
+            document.body.appendChild(fileDownload);
+            fileDownload.href = source;
+            fileDownload.download = $('#title').val() + '.doc';
+            fileDownload.click();
+            document.body.removeChild(fileDownload);
+        }
+
+        async function exportTableToXlsx() {
+            const table = document.getElementById('data_render');
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Sheet1');
+
+            const processedCells = new Set();
+            const columnWidths = [];
+
+            // Hàm chuyển đổi chuỗi định dạng "#.##0,00" thành số
+            function parseFormattedStringToNumber(value) {
+                if (typeof value === "string") {
+                    // Loại bỏ dấu chấm phân cách nghìn và thay dấu phẩy bằng dấu chấm
+                    return parseFloat(value.replace(/\./g, "").replace(",", "."));
+                }
+                return value;
+            }
+
+            Array.from(table.rows).forEach((row, rowIndex) => {
+                let colOffset = 0;
+
+                Array.from(row.cells).forEach((cell, cellIndex) => {
+                    let excelRow = rowIndex + 1;
+                    let excelCol = cellIndex + 1 + colOffset;
+
+                    while (processedCells.has(`${excelRow}:${excelCol}`)) {
+                        excelCol++;
+                        colOffset++;
+                    }
+
+                    const rowSpan = parseInt(cell.rowSpan, 10) || 1;
+                    const colSpan = parseInt(cell.colSpan, 10) || 1;
+
+                    const excelCell = worksheet.getCell(excelRow, excelCol);
+                    let cellValue = cell.innerText.trim();
+
+                    // Chuyển đổi giá trị nếu là chuỗi
+                    const numericValue = parseFormattedStringToNumber(cellValue);
+
+                    if (!isNaN(numericValue)) {
+                        excelCell.value = numericValue; // Gán giá trị số
+
+                        // Kiểm tra nếu là số nguyên thì không cần định dạng phần thập phân
+                        if (Number.isInteger(numericValue)) {
+                            excelCell.numFmt = "#,##0"; // Định dạng số nguyên
+                        } else {
+                            // Kiểm tra nếu có phần thập phân
+                            const decimalPart = numericValue.toString().split('.')[1];
+                            if (decimalPart && decimalPart.length === 1) {
+                                excelCell.numFmt = "#,##0.00"; // Định dạng số với 2 chữ số thập phân
+                            } else {
+                                excelCell.numFmt = "#,##0.00"; // Định dạng số với 2 chữ số thập phân
+                            }
+                        }
+                    } else {
+                        // Nếu không phải số, gán giá trị ban đầu
+                        excelCell.value = cellValue;
+                    }
+
+                    columnWidths[excelCol - 1] = Math.max(
+                        columnWidths[excelCol - 1] || 0,
+                        cellValue.length
+                    );
+
+                    const computedStyle = window.getComputedStyle(cell);
+                    const textAlign = computedStyle.textAlign || 'left';
+                    const verticalAlign = computedStyle.verticalAlign || 'middle';
+
+                    excelCell.alignment = {
+                        horizontal: textAlign === 'start' ? 'left' : textAlign === 'end' ? 'right' : textAlign,
+                        vertical: verticalAlign === 'baseline' ? 'middle' : verticalAlign,
+                        wrapText: true,
+                    };
+
+                    excelCell.font = {
+                        name: 'Times New Roman',
+                        size: 12,
+                    };
+
+                    const hasBorder = computedStyle.borderStyle !== 'none' && computedStyle.borderWidth !== '0px';
+                    if (hasBorder) {
+                        excelCell.border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' },
+                        };
+                    }
+
+                    if (rowSpan > 1 || colSpan > 1) {
+                        const endRow = excelRow + rowSpan - 1;
+                        const endCol = excelCol + colSpan - 1;
+
+                        worksheet.mergeCells(excelRow, excelCol, endRow, endCol);
+
+                        for (let r = excelRow; r <= endRow; r++) {
+                            for (let c = excelCol; c <= endCol; c++) {
+                                processedCells.add(`${r}:${c}`);
+                            }
+                        }
+                    } else {
+                        processedCells.add(`${excelRow}:${excelCol}`);
+                    }
+                });
+            });
+
+            worksheet.columns = columnWidths.map((width) => ({ width: width + 2 }));
+
+            const title = document.getElementById('title').value || 'ExportedFile';
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title}.xlsx`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        //Get the button
+        var mybutton = document.getElementById("myBtn");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function () { scrollFunction() };
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                document.getElementById("myBtn").style.display = 'block';
+            } else {
+                document.getElementById("myBtn").style.display = 'none';
+            }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+    </script>
+    @RenderSection("custom_script", required: false)
+
+</body>
+</html>

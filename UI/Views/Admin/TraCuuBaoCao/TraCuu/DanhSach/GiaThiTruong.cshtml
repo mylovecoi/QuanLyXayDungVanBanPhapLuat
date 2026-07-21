@@ -1,0 +1,130 @@
+@model IEnumerable<DataAccess.Entities.DinhGiaHHDV.GiaThiTruongCt>
+
+@{
+    Layout = "_Layout";
+    Guid thongTuId = ViewData["ThongTuId"] is Guid guid ? guid : Guid.Empty;
+    string tenTT = ViewData["TenTT"] as string ?? "";
+    string tuNgay = ViewData["TuNgay"] as string ?? "";
+    string denNgay = ViewData["DenNgay"] as string ?? "";
+    string soQd = ViewData["SoQd"] as string ?? "";
+    string moTa = ViewData["MoTa"] as string ?? "";
+    var parentMap = ViewData["ParentMap"] as Dictionary<string, DataAccess.Entities.DinhGiaHHDV.GiaThiTruong> ?? new Dictionary<string, DataAccess.Entities.DinhGiaHHDV.GiaThiTruong>();
+    int stt = 1;
+}
+
+@section custom_style {
+}
+
+@section custom_script {
+    <script>
+        function handlePrint() {
+            var url = '@Url.Action("PrintGiaThiTruong", "TraCuu")' + 
+                      '?thongTuId=' + encodeURIComponent($('input[name="thongTuId"]').val() || '') +
+                      '&TuNgay=' + encodeURIComponent($('input[name="TuNgay"]').val() || '') +
+                      '&DenNgay=' + encodeURIComponent($('input[name="DenNgay"]').val() || '') +
+                      '&SoQd=' + encodeURIComponent($('input[name="SoQd"]').val() || '') +
+                      '&MoTa=' + encodeURIComponent($('input[name="MoTa"]').val() || '') +
+                      '&MaHoSo=' + encodeURIComponent($('input[name="MaHoSo"]').val() || '');
+            window.open(url, '_blank');
+        }
+    </script>
+}
+
+<div class="card card-custom">
+    <div class="card-header border-0 pt-6 pb-2">
+        <div class="card-title">
+            <h3 class="card-label">
+                TRA CỨU CHI TIẾT HỒ SƠ GIÁ THỊ TRƯỜNG: <span class="text-warning">@tenTT</span>
+                <span class="d-block text-muted pt-2 font-size-sm">Nhập các điều kiện lọc để tìm kiếm chi tiết hồ sơ giá thị trường</span>
+            </h3>
+        </div>
+        <div class="card-toolbar">
+            <a href="@Url.Action("Index", "TraCuu")" class="btn btn-light-danger font-weight-bold">
+                <i class="la la-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Form Search -->
+        <form method="get" action="@Url.Action("GiaThiTruong", "TraCuu")" class="mb-8">
+            <input type="hidden" name="thongTuId" value="@thongTuId" />
+            <input type="hidden" name="MaHoSo" value="@ViewData["MaHoSo"]" />
+            <div class="row">
+                <div class="col-md-3 form-group">
+                    <label class="font-weight-bold">Từ ngày</label>
+                    <input type="date" class="form-control" name="TuNgay" value="@tuNgay" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label class="font-weight-bold">Đến ngày</label>
+                    <input type="date" class="form-control" name="DenNgay" value="@denNgay" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label class="font-weight-bold">Số quyết định</label>
+                    <input type="text" class="form-control" name="SoQd" placeholder="Nhập số quyết định..." value="@soQd" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label class="font-weight-bold">Mô tả/Ghi chú</label>
+                    <input type="text" class="form-control" name="MoTa" placeholder="Nhập mô tả/ghi chú..." value="@moTa" />
+                </div>
+            </div>
+            <div class="row justify-content-end">
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-warning text-white font-weight-bold px-6">
+                        <i class="la la-search"></i> Tìm kiếm
+                    </button>
+                    <button type="button" class="btn btn-info font-weight-bold px-6" onclick="handlePrint()">
+                        <i class="la la-print"></i> In trang
+                    </button>
+                    <a href="@Url.Action("GiaThiTruong", "TraCuu", new { thongTuId = thongTuId })" class="btn btn-secondary font-weight-bold px-6">
+                        <i class="la la-sync"></i> Reset
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <!-- Table Results -->
+        <div class="table-responsive border rounded-lg">
+            <table class="table table-striped table-hover table-bordered m-0">
+                <thead class="thead-light">
+                    <tr class="text-center font-weight-bold">
+                        <th width="5%">#</th>
+                        <th>Số quyết định</th>
+                        <th>Thời điểm</th>
+                        <th>Tên hàng hóa/dịch vụ</th>
+                        <th>Đặc điểm kỹ thuật</th>
+                        <th>Đơn vị tính</th>
+                        <th>Giá báo cáo</th>
+                        <th>Giá kỳ này</th>
+                        <th>Nguồn thông tin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            parentMap.TryGetValue(item.MaHoSo ?? "", out var parent);
+                            <tr>
+                                <td class="text-center">@(stt++)</td>
+                                <td>@(parent?.SoQd ?? "")</td>
+                                <td class="text-center">@(parent?.Thoidiem.ToString("dd/MM/yyyy") ?? "")</td>
+                                <td>@item.TenHhDv</td>
+                                <td>@item.DacDiemKt</td>
+                                <td class="text-center">@item.DonViTinh</td>
+                                <td class="text-right">@item.GiaBaoCao.ToString("#,##0")</td>
+                                <td class="text-right text-warning font-weight-bold">@item.GiaKyNay.ToString("#,##0")</td>
+                                <td>@item.NguonThongTin</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted">Không tìm thấy chi tiết hồ sơ giá thị trường phù hợp.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

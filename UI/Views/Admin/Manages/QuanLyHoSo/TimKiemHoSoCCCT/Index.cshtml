@@ -1,0 +1,203 @@
+﻿@using Services.DTOs.Manages.ThongTinHoSo;
+@model VMPageInfoWithData<DataAccess.Entities.Manages.ThongTinHoSo.HoSoCCCT>
+@{
+	ViewData["PageInfo"] = Model;
+	var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+	string role = ViewData["Role"] as string ?? "";
+	var filter = ViewData["Filter"] as HoSoFilter;
+}
+
+<div class="card card-custom">
+	<div class="card-header flex-wrap border-0 pt-6 pb-0">
+		<div class="card-title">
+			<h3 class="card-label">
+				<b>@FuntionGlobal.CapitalizeAll(ViewData["Title"]?.ToString()).ToUpper() CÔNG CHỨNG - CHỨNG THỰC </b>
+				<span class="d-block text-muted pt-2 font-size-sm">
+					Quản lý @ViewData["Title"] Công Chứng - Chứng Thực
+				</span>
+			</h3>
+		</div>
+	</div>
+	<div class="card-body pt-0">
+		<hr />
+		<form id="FilterForm">
+			<div class="row">
+				<div class="col-xl-3">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="font-weight:bold; color:blue" class="">Năm:</label>
+						<select class="form-control h-40px" name="Year" id="TargetYear_Select">
+							@for (int year = DateTime.Now.Year - 5; year <= DateTime.Now.Year; year++)
+							{
+								<!option value="@year" @(filter?.TargetYear == year ? "selected" : "")>Năm @year</!option>
+							}
+						</select>
+					</div>
+				</div>
+				<div class="col-xl-3">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="font-weight:bold; color:blue" class="">Đơn Vị:</label>
+						<select class="form-control h-40px" name="DonViId" id="DanhMucDonVi_Select">
+							@{
+								var dmDonVi = ViewData["DanhMucDonVi"] as List<DataAccess.Entities.Settings.DanhMucDonVi>;
+								if (dmDonVi != null && dmDonVi.Any())
+									foreach (var item in dmDonVi)
+									{
+										string backIn = FuntionGlobal.GetBackIn(item.Level);
+										bool selected = filter?.DonViId == item.Id;
+										<option value="@item.Id" selected="@selected">
+											@Html.Raw(backIn)
+											@item.TenDonVi
+										</option>
+									}
+							}
+						</select>
+					</div>
+				</div>
+				<div class="col-xl-3">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="font-weight:bold; color:blue" class="">Danh Mục Nghiệp Vụ:</label>
+						<select class="form-control h-40px" name="LoaiHopDong" id="LoaiHopDong_Select">
+							<option value="">Lựa Chọn Nghiệp Vụ</option>
+							@{
+								var dmDiaDanhsLevel0 = ViewData["DanhMucHopDong"] as List<DataAccess.Entities.Settings.DanhMucHopDong>;
+								if (dmDiaDanhsLevel0 != null && dmDiaDanhsLevel0.Any())
+								{
+									<option value="">Lựa Chọn Nghiệp Vụ</option>
+									foreach (var item in dmDiaDanhsLevel0)
+									{
+										string backIn = FuntionGlobal.GetBackIn(item.Level);
+										bool selected = filter?.LoaiHopDong == item.Id;
+										<option value="@item.Id" selected="@selected">
+											@Html.Raw(backIn)@item.TenHopDong
+											@(item.ParentId == null || item.ParentId == Guid.Empty ? string.Format("(Hợp Đồng {0})", @item.IsCC ? "Công Chứng" : "Chứng Thực") : "")
+										</option>
+									}
+								}
+							}
+						</select>
+					</div>
+				</div>
+				<div class="col-xl-3">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="font-weight:bold; color:blue" class="">Phương Thức Công Chứng:</label>
+						<select class="form-control h-40px" name="LoaiCongChung" id="LoaiCongChung_Select">
+							<option value="">Lựa Chọn Loại Công Chứng</option>
+							<!option value="True" @(filter?.LoaiCongChung == true ? "selected" : "")>Công Chứng Bản Giấy</!option>
+							<!option value="False" @(filter?.LoaiCongChung == false ? "selected" : "")>Công Chứng Điện Tử</!option>
+						</select>
+					</div>
+				</div>
+
+				<div class="col-xl-3">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="color:blue; font-weight:bold">Ngày Yêu Cầu Từ: </label>
+						<input class="form-control DateTimePicker" id="NgayYeuCauTu_DateTimePicker" name="NgayYeuCauTu" data-ignore-if-default="true"
+							   value="@(filter?.NgayYeuCauTu is DateTime ngayYeuCauTu ? FuntionGlobal.ConvertDateToISO(ngayYeuCauTu) : "")" />
+					</div>
+				</div>
+
+				<div class="col-xl-3">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="color:blue; font-weight:bold">Ngày Yêu Cầu Đến: </label>
+						<input class="form-control DateTimePicker" id="NgayYeuCauDen_DateTimePicker" name="NgayYeuCauDen" data-ignore-if-default="true"
+							   value="@(filter?.NgayYeuCauDen is DateTime ngayYeuCauDen ? FuntionGlobal.ConvertDateToISO(ngayYeuCauDen) : "")" />
+					</div>
+				</div>
+
+				<div class="col-xl-3">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="color:blue; font-weight:bold">Ngày Công Chứng Từ: </label>
+						<input class="form-control DateTimePicker" id="NgayCongChungTu_DateTimePicker" name="NgayCongChungTu" data-ignore-if-default="true"
+							   value="@(filter?.NgayCongChungTu is DateTime ngayCongChungTu ? FuntionGlobal.ConvertDateToISO(ngayCongChungTu) : "")" />
+					</div>
+				</div>
+
+				<div class="col-xl-3">
+					<div class="form-group fv-plugins-icon-container">
+						<label style="color:blue; font-weight:bold">Ngày Công Chứng Đến: </label>
+						<input class="form-control DateTimePicker" id="NgayCongChungDen_DateTimePicker" name="NgayCongChungDen" data-ignore-if-default="true"
+							   value="@(filter?.NgayCongChungDen is DateTime ngayCongChungDen ? FuntionGlobal.ConvertDateToISO(ngayCongChungDen) : "")" />
+					</div>
+				</div>
+
+				<div class="col-xl-12 text-center">
+					<button class="btn btn-secondary btn-pill font-weight-bold mr-1" type="reset">
+						<i class="las la-sync-alt"></i>
+						<span class="font-weight-boldest">Nhập Lại</span>
+					</button>
+					<button class="btn btn-primary btn-pill font-weight-bold ml-1" type="submit">
+						<i class="las la-search"></i>
+						<span class="font-weight-boldest">Tìm Kiếm</span>
+					</button>
+				</div>
+			</div>
+			<hr />
+			<div class="row">
+				<div class="col-xl-3" style="text-align:left">
+					<div class="form-group fv-plugins-icon-container">
+						<label class="text-blue">Hiển thị</label>
+						<select class="form-control h-40px" name="PageSize" id="PageSize_Select">
+							<!option value="5" @(filter?.PageSize == 5 ? "selected" : "")>5 thông tin</!option>
+							<!option value="10" @(filter?.PageSize == 10 ? "selected" : "")>10 thông tin</!option>
+							<!option value="20" @(filter?.PageSize == 20 ? "selected" : "")>20 thông tin</!option>
+							<!option value="50" @(filter?.PageSize == 50 ? "selected" : "")>50 thông tin</!option>
+							<!option value="100" @(filter?.PageSize == 100 ? "selected" : "")> 100 thông tin</!option>
+						</select>
+					</div>
+				</div>
+				<div class="col-xl-9">
+					<div class="form-group fv-plugins-icon-container">
+						<label class="text-blue">Tìm Kiếm</label>
+						<input class="form-control h-40px" name="Search" id="Search_Input" placeholder="Tìm kiếm..." value="@filter?.Search">
+					</div>
+				</div>
+			</div>
+			<input hidden id="sort_current" name="sort_current" value="@Model.Sort" />
+			<input hidden id="PageCurrent" name="PageCurrent" value="@Model.PageCurrent" />
+		</form>
+		<!--begin: Datatable-->
+		<div class="table-responsive border rounded-lg mb-8">
+			@await Html.PartialAsync("~/Views/Admin/Manages/QuanLyHoSo/TimKiemHoSoCCCT/_DataTable.cshtml", Model.Data)
+		</div>
+		<!--end: Datatable-->
+		<div id="Pagination">
+			@await Html.PartialAsync("~/Views/Shared/Pagination.cshtml")
+		</div>
+	</div>
+</div>
+
+@section custom_style {
+
+}
+
+@section custom_script {
+	@* page *@
+	<script src="~/js/site.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.vi.min.js"></script>
+
+	@* lib *@
+
+	<script>
+		$(document).ready(function () {
+			// Setup Select2
+			SetupSelect2('#TargetYear_Select', '', { enableSearch: false, enableClear: false });
+			SetupSelect2('#DanhMucDonVi_Select', 'Lựa Chọn Đơn Vị Làm Việc', { enableSearch: true, enableClear: true });
+			SetupSelect2('#LoaiHopDong_Select', 'Lựa Chọn Nghiệp Vụ', { enableSearch: true, enableClear: true });
+			SetupSelect2('#LoaiCongChung_Select', 'Lựa Chọn Loại Công Chứng', { enableSearch: false, enableClear: true });
+
+			// Setup Datepicker
+			$('.DateTimePicker').each((index, item) => {
+				const $el = $(item);
+				const elementId = $el.attr("id");
+				SetupDatepicker(`#${elementId}`,'' , {
+					format: 'yyyy-mm-dd',
+					enableClear: false,
+				});
+			});
+
+			// Setup FormAction
+			HandleRegisterFormFilter('#FilterForm', '#Pagination', '@Url.Action("Index", "TimKiemHoSoCCCT")');
+
+		});
+	</script>
+}

@@ -1,0 +1,13 @@
+[Start Sync] mahs: DG_260715412610, maNghe: NuocSach
+[Info] rowKeys count: 5
+[Info] detailType: DataAccess.Entities.DinhGiaHHDV.ChiTiet.ChiTietNuocSach
+[Info] headerRow is not null
+[Prop Match] Col 0 (STT) -> STTSapXep
+[Prop Match] Col 1 (Đối tượng sử dụng) -> DoiTuongSuDung
+[Prop Match] Col 2 (Tỷ trọng tiêu thụ) -> TyTrongTieuThu
+[Prop Match] Col 3 (Sản lượng) -> SanLuong
+[Prop Match] Col 4 (Thuế suất) -> ThueSuat
+[Prop Match] Col 5 (Đơn giá chưa thuế) -> DonGia1
+[Prop Match] Col 6 (Đơn giá có thuế) -> DonGia2
+[Prop Match] Col 7 (Đơn vị tính) -> DonViTinh
+[Info] parsed listDetails count: 4

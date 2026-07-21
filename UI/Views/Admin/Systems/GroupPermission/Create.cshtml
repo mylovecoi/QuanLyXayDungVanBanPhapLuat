@@ -1,0 +1,38 @@
+﻿@model DataAccess.Entities.Systems.GroupPermision
+@section custom_style {
+
+}
+@section custom_script{
+}
+<div class="card card-custom">
+    <div class="card-header ribbon ribbon-top ribbon-ver">
+        <div class="card-title">
+            <h3 class="card-label">
+                <b>@ViewData["Title"]?.ToString()?.ToUpper()</b>
+                <span class="d-block text-muted pt-2 font-size-sm">
+                    Thêm mới @ViewData["Title"]?.ToString()?.ToLower()
+                </span>
+            </h3>
+        </div>
+    </div>
+    <!--begin::Form-->
+    <form asp-controller="GroupPermission" asp-action="Store" method="post">
+        <div class="card-body">
+            @await Html.PartialAsync("~/Views/Admin/Systems/GroupPermission/Components/_FormFields.cshtml")
+        </div>
+        <div class="card-footer" style="text-align:center">
+            <a asp-controller="GroupPermission" asp-action="Index" class="btn btn-danger">
+                <i class="la la-reply"></i>Quay lại
+            </a>&ensp;
+            <button type="reset" class="btn btn-secondary"><i class="la la-refresh"></i>Nhập lại</button>&ensp;
+            <button type="submit" class="btn btn-primary mr-2"><i class="la la-check"></i>Hoàn Thành</button>
+        </div>
+    </form>
+    <!--end::Form-->
+</div>
+@await Html.PartialAsync("~/Views/Admin/Systems/GroupPermission/Components/_Modal.cshtml")
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

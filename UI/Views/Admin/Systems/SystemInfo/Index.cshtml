@@ -1,0 +1,68 @@
+﻿@model DataAccess.Entities.Systems.SystemInfo
+
+<div class="card card-custom">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="card-label">
+                @ViewData["Title"]
+                <span class="d-block text-muted pt-2 font-size-sm">
+                    Quản lý @ViewData["Title"]
+                </span>
+            </h3>
+        </div>
+    </div>
+    <!--begin::Form-->
+    <form asp-controller="SystemInfo" asp-action="SaveChange" method="post">
+        @Html.AntiForgeryToken()
+        <div class="card-body">
+            <div class="row">
+                <input hidden asp-for="Id" />
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">AppName:</label>
+                        <input type="text" asp-for="AppName" class="form-control" autofocus />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Copyright:</label>
+                        <input type="text" asp-for="Copyright" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">MfgDate:</label>
+                        <input type="date" asp-for="MfgDate" class="form-control" onkeydown="return false;" />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">ExpDate:</label>
+                        <input type="date" asp-for="ExpDate" class="form-control" onkeydown="return false;" />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">LoginLock:</label>
+                        <input type="number" asp-for="LoginLock" class="form-control" />
+                    </div>
+                </div>
+                <div class="col-xl-6">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label style="font-weight:bold; color:blue">Train:</label>
+                        <select class="form-control" asp-for="Train">
+                            <option value="true">Kích hoạt</option>
+                            <option value="false">Vô hiệu hoá</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer" style="text-align:center">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-danger"><i class="la la-reply"></i>Quay lại</a>&ensp;
+            <button type="reset" class="btn btn-secondary"><i class="la la-refresh"></i>Nhập lại</button>&ensp;
+            <button type="submit" class="btn btn-primary mr-2"><i class="la la-check"></i>Cập nhật</button>
+        </div>
+    </form>
+    <!--end::Form-->
+</div>

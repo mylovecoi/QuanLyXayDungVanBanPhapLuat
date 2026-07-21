@@ -1,0 +1,386 @@
+@model DataAccess.Entities.DinhGiaHHDV.GiaThiTruongTongHop
+@using DataAccess.Entities.Settings
+@using DataAccess.Entities.DinhGiaHHDV
+
+@{
+    var dmDonVi = ViewData["DanhMucDonVi"] as DanhMucDonVi;
+    var dmThongTu = ViewData["DanhMucThongTu"] as GiaThiTruongDanhMuc;
+}
+
+<input hidden asp-for="ChiTietExcel" id="CodeExcel" />
+
+<div class="mb-3 font-weight-bold font-size-lg">
+    <label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin hồ sơ</label>
+</div>
+
+<div class="row mb-5">
+    <div class="col-xl-3">
+        <label class="font-weight-bold">Đơn vị báo cáo:</label>
+        <span class="form-control-plaintext font-weight-bolder text-primary">@dmDonVi?.TenDonVi</span>
+    </div>
+    <div class="col-xl-3">
+        <label class="font-weight-bold">Danh mục áp dụng:</label>
+        <span class="form-control-plaintext font-weight-bolder text-primary">@dmThongTu?.TenTT</span>
+    </div>
+    <div class="col-xl-3">
+        <label class="font-weight-bold">Tháng:</label>
+        <span class="form-control-plaintext font-weight-bolder text-primary">Tháng @Model.Thang</span>
+    </div>
+    <div class="col-xl-3">
+        <label class="font-weight-bold">Năm:</label>
+        <span class="form-control-plaintext font-weight-bolder text-primary">Năm @Model.Nam</span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Số báo cáo: <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" asp-for="SoBc" required />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Ngày báo cáo: <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" asp-for="NgayBc" required value="@Model.NgayBc.ToString("yyyy-MM-dd")" />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Ngày chốt báo cáo: <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" asp-for="NgayChotBc" required value="@Model.NgayChotBc.ToString("yyyy-MM-dd")" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div class="form-group">
+            <label>Ghi chú / Nội dung:</label>
+            <textarea class="form-control" asp-for="GhiChu" rows="2"></textarea>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3 font-weight-bold font-size-lg mt-5">
+    <label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin chi tiết giá hàng hóa dịch vụ tổng hợp</label>
+</div>
+
+<div class="card card-custom" style="border: 1px solid #60aee4;">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <span id="save-status" class="text-muted me-3"></span>
+                <button id="btn-import-excel" type="button" class="btn btn-info btn-sm me-2">
+                    <i class="fas fa-file-excel"></i> Nhận file Excel
+                </button>
+                <button id="btn-export-excel" type="button" class="btn btn-success btn-sm me-2">
+                    <i class="fas fa-download"></i> Xuất file Excel
+                </button>
+                <input type="file" id="file-import-excel" accept=".xls,.xlsx,.xlsm" style="display: none;" />
+            </div>
+        </div>
+        <!-- SheetJS for Excel Support (.xls, .xlsx, .xlsm) -->
+        <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+        <script>
+            let currentWorkbook = null;
+            window.univerAPIInstance = null;
+
+            function convertSheetJsToUniver(worksheet, fromRow, toRow) {
+                if (!worksheet || !worksheet['!ref']) return null;
+                const range = XLSX.utils.decode_range(worksheet['!ref']);
+                
+                let startRow = range.s.r;
+                let endRow = range.e.r;
+                
+                if (fromRow && fromRow > 0) startRow = Math.max(range.s.r, fromRow - 1);
+                if (toRow && toRow > 0) endRow = Math.min(range.e.r, toRow - 1);
+
+                const cellData = {};
+                const stylesDict = {};
+
+                function getStyleId(bold, italic) {
+                    const key = `style_b${bold ? 1 : 0}_i${italic ? 1 : 0}`;
+                    if (!stylesDict[key]) {
+                        stylesDict[key] = {
+                            bl: bold ? 1 : 0,
+                            it: italic ? 1 : 0,
+                            vt: 2,
+                            tb: 3
+                        };
+                    }
+                    return key;
+                }
+
+                for (let r = startRow; r <= endRow; r++) {
+                    const univerR = r - startRow;
+                    cellData[univerR] = {};
+                    for (let c = range.s.c; c <= range.e.c; c++) {
+                        const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
+                        const cell = worksheet[cellAddress];
+                        if (cell) {
+                            let isBold = false;
+                            let isItalic = false;
+                            
+                            if (cell.s && cell.s.font) {
+                                if (cell.s.font.bold || cell.s.font.b) isBold = true;
+                                if (cell.s.font.italic || cell.s.font.i) isItalic = true;
+                            }
+                            
+                            if (cell.r && Array.isArray(cell.r)) {
+                                cell.r.forEach(run => {
+                                    if (run.font) {
+                                        if (run.font.b || run.font.bold) isBold = true;
+                                        if (run.font.i || run.font.italic) isItalic = true;
+                                    }
+                                });
+                            }
+
+                            const styleId = getStyleId(isBold, isItalic);
+
+                            cellData[univerR][c] = {
+                                v: (cell.v !== undefined ? cell.v : "").toString(),
+                                s: styleId
+                            };
+                        }
+                    }
+                }
+
+                const merges = [];
+                if (worksheet['!merges']) {
+                    worksheet['!merges'].forEach(m => {
+                        const startR = m.s.r - startRow;
+                        const endR = m.e.r - startRow;
+                        if (startR >= 0 && endR <= (endRow - startRow)) {
+                            merges.push({
+                                startRow: startR,
+                                endRow: endR,
+                                startColumn: m.s.c,
+                                endColumn: m.e.c
+                            });
+                        }
+                    });
+                }
+
+                const actualRowCount = Math.max(0, endRow - startRow + 1);
+                const colCount = range.e.c + 1;
+                return {
+                    id: 'imported_' + Date.now(),
+                    name: 'Bảng giá nhập khẩu',
+                    sheetOrder: ['sheet1'],
+                    styles: stylesDict,
+                    sheets: {
+                        'sheet1': {
+                            id: 'sheet1',
+                            name: 'Sheet1',
+                            cellData: cellData,
+                            mergeData: merges,
+                            rowCount: Math.max(actualRowCount + 20, 50),
+                            columnCount: Math.max(colCount + 5, 15),
+                            columnData: {
+                                "0": { "w": 60 },
+                                "1": { "w": 150 },
+                                "2": { "w": 250 },
+                                "3": { "w": 150 },
+                                "4": { "w": 100 },
+                                "5": { "w": 100 },
+                                "6": { "w": 150 },
+                                "7": { "w": 150 }
+                            },
+                            rowData: (() => {
+                                const rd = { "0": { "h": 80 } };
+                                const totalRows = Math.max(actualRowCount + 20, 50);
+                                for (let r = 1; r < totalRows; r++) {
+                                    rd[r.toString()] = { "ia": 1 };
+                                }
+                                return rd;
+                            })()
+                        }
+                    },
+                    locale: 'vi-VN'
+                };
+            }
+
+            function handleExcelFileSelect(file, $statusTxt) {
+                const reader = new FileReader();
+                if ($statusTxt) $statusTxt.text("Đang tải file...");
+                reader.onload = (e) => {
+                    try {
+                        if ($statusTxt) $statusTxt.text("Đang đọc danh sách sheet...");
+                        const data = new Uint8Array(e.target.result);
+                        currentWorkbook = XLSX.read(data, { type: 'array', cellStyles: true });
+                        
+                        const $select = $('#excel-sheet-select');
+                        $select.empty();
+                        currentWorkbook.SheetNames.forEach(name => {
+                            $select.append(`<option value="${name}">${name}</option>`);
+                        });
+                        
+                        $('#excel-row-from').val('');
+                        $('#excel-row-to').val('');
+                        
+                        $('#modal-excel-options').modal('show');
+                        if ($statusTxt) $statusTxt.text("");
+                    } catch (err) {
+                        console.error("Lỗi đọc Excel", err);
+                        alert("Lỗi khi đọc file Excel: " + err.message);
+                        if ($statusTxt) $statusTxt.text("");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            function exportToExcel() {
+                try {
+                    const activeWorkbook = window.univerAPIInstance;
+                    const workbook = activeWorkbook ? activeWorkbook.getActiveWorkbook() : null;
+                    if (!workbook) {
+                        alert("Không tìm thấy dữ liệu bảng tính để xuất!");
+                        return;
+                    }
+                    const data = workbook.save();
+                    const sheets = data.sheets;
+                    if (!sheets) return;
+
+                    const wb = XLSX.utils.book_new();
+
+                    for (const sheetId in sheets) {
+                        const sheet = sheets[sheetId];
+                        const cellData = sheet.cellData;
+                        const sheetName = sheet.name || sheetId;
+
+                        let maxRow = 0;
+                        let maxCol = 0;
+                        for (const rKey in cellData) {
+                            const r = parseInt(rKey);
+                            if (r > maxRow) maxRow = r;
+                            const row = cellData[rKey];
+                            for (const cKey in row) {
+                                const c = parseInt(cKey);
+                                if (c > maxCol) maxCol = c;
+                            }
+                        }
+
+                        const aoa = [];
+                        for (let r = 0; r <= maxRow; r++) {
+                            const rowArr = [];
+                            const univerRow = cellData[r];
+                            for (let c = 0; c <= maxCol; c++) {
+                                let val = "";
+                                if (univerRow && univerRow[c]) {
+                                    val = univerRow[c].v !== undefined ? univerRow[c].v : "";
+                                }
+                                rowArr.push(val);
+                            }
+                            aoa.push(rowArr);
+                        }
+
+                        const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+                        if (sheet.mergeData && Array.isArray(sheet.mergeData)) {
+                            ws['!merges'] = sheet.mergeData.map(m => ({
+                                s: { r: m.startRow, c: m.startColumn },
+                                e: { r: m.endRow, c: m.endColumn }
+                            }));
+                        }
+
+                        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                    }
+
+                    XLSX.writeFile(wb, `BangGiaChiTietTongHop.xlsx`);
+                } catch (err) {
+                    console.error("Lỗi xuất file Excel", err);
+                    alert("Có lỗi xảy ra khi xuất file Excel: " + err.message);
+                }
+            }
+
+            window.addEventListener('load', function() {
+                if (typeof jQuery === 'undefined') return;
+                const $ = jQuery;
+
+                $('#btn-export-excel').off('click').on('click', exportToExcel);
+
+                $('#btn-confirm-import').off('click').on('click', function() {
+                    if (!currentWorkbook) {
+                        alert("Không tìm thấy dữ liệu Excel. Vui lòng chọn file lại.");
+                        return;
+                    }
+                    
+                    const sheetName = $('#excel-sheet-select').val();
+                    const fromRow = $('#excel-row-from').val() ? parseInt($('#excel-row-from').val()) : 0;
+                    const toRow = $('#excel-row-to').val() ? parseInt($('#excel-row-to').val()) : 0;
+                    
+                    const worksheet = currentWorkbook.Sheets[sheetName];
+                    const univerData = convertSheetJsToUniver(worksheet, fromRow, toRow);
+                    
+                    if (univerData) {
+                        if (window.univerAPIInstance) {
+                            try {
+                                window.univerAPIInstance.createWorkbook(univerData);
+                                if (window.autoFitAllRows) {
+                                    window.autoFitAllRows();
+                                }
+                                $('#save-status').text("Nhận dữ liệu từ sheet [" + sheetName + "] thành công!");
+                                setTimeout(() => $('#save-status').text(""), 3000);
+                            } catch (e) {
+                                console.error(e);
+                                alert("Lỗi khi đổ dữ liệu vào bảng: " + e.message);
+                            }
+                        } else {
+                            alert("Hệ thống bảng tính chưa sẵn sàng. Vui lòng thử lại sau giây lát.");
+                        }
+                    } else {
+                        alert("Không thể chuyển đổi dữ liệu từ sheet này.");
+                    }
+                    
+                    $('#modal-excel-options').modal('hide');
+                });
+            });
+        </script>
+        <style>
+            #app-univer {
+                width: 100%;
+                height: 600px;
+            }
+        </style>
+        <div id="app-univer" data-mahs="@Model.MaHoSo" style="width: 100%; height: 70vh; border: 1px solid #ccc; border-radius: 4px;"></div>
+    </div>
+</div>
+
+<!-- Modal chọn Sheet và Dòng -->
+<div class="modal fade" id="modal-excel-options" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true" style="z-index: 9999;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Tùy chọn nhập Excel</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Chọn Sheet:</label>
+                    <select id="excel-sheet-select" class="form-control"></select>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Từ dòng:</label>
+                            <input type="number" id="excel-row-from" class="form-control" placeholder="Ví dụ: 1" min="1" />
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Đến dòng:</label>
+                            <input type="number" id="excel-row-to" class="form-control" placeholder="Để trống nếu lấy hết" min="1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy bỏ</button>
+                <button type="button" id="btn-confirm-import" class="btn btn-primary">Nhận dữ liệu</button>
+            </div>
+        </div>
+    </div>
+</div>

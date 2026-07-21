@@ -1,0 +1,129 @@
+@using UI.ViewModels;
+@using DataAccess.Entities.KeKhaiDangKyGia;
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@model List<KeKhaiDangKyGia>
+
+@{
+    var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+    string role = ViewData["Role"] as string ?? "KeKhaiDangKyGia";
+    var pageInfo = ViewData["PageInfo"] as VMPageInfoWithData<KeKhaiDangKyGia>;
+    int pageCurrent = pageInfo?.PageCurrent ?? 1;
+    int pageSize = pageInfo?.PageSize ?? 10;
+}
+
+<table class="table table-striped table-hover table-responsive-lg rounded-lg">
+    <thead>
+        <tr style="text-align:center;" class="table-active">
+            <th style="font-weight: bold;" width="5%">STT</th>
+            <th style="font-weight: bold;">Doanh nghiệp</th>
+            <th style="font-weight: bold;">@Html.DisplayNameFor(x => x.First().SoQd)</th>
+            <th style="font-weight: bold;">@Html.DisplayNameFor(x => x.First().NgayQd)</th>
+            <th style="font-weight: bold;">@Html.DisplayNameFor(x => x.First().NgayThucHien)</th>
+            <th style="font-weight: bold;">@Html.DisplayNameFor(x => x.First().TrangThai)</th>
+            <th style="font-weight: bold;" width="10%">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            int stt = (pageCurrent - 1) * pageSize + 1;
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td style="text-align: center; vertical-align: middle">@stt</td>
+                    <td style="vertical-align: middle">@item.DoanhNghiepQuanLy?.TenDoanhNghiep</td>
+                    <td style="font-weight: bold; vertical-align: middle">@item.SoQd</td>
+                    <td style="text-align: center; vertical-align: middle">@item.NgayQd.ToString("dd/MM/yyyy")</td>
+                    <td style="text-align: center; vertical-align: middle">@item.NgayThucHien.ToString("dd/MM/yyyy")</td>
+                    <td style="text-align: center; vertical-align: middle">
+                        @{
+                            string labelText = "";
+                            string labelClass = "label label-lg label-inline font-weight-bolder";
+                            if (item.TrangThai == "CC")
+                            {
+                                labelText = "Chờ chuyển";
+                                labelClass += " label-info";
+                            }
+                            else if (item.TrangThai == "CD")
+                            {
+                                labelText = "Chờ duyệt";
+                                labelClass += " label-warning";
+                            }
+                            else if (item.TrangThai == "DD")
+                            {
+                                labelText = "Đã duyệt";
+                                labelClass += " label-success";
+                            }
+                            else if (item.TrangThai == "BTL")
+                            {
+                                labelText = "Bị trả lại";
+                                labelClass += " label-danger";
+                            }
+                            else if (item.TrangThai == "CB")
+                            {
+                                labelText = "Công bộ";
+                                labelClass += " label-success";
+                            }
+                            else if (item.TrangThai == "HCB")
+                            {
+                                labelText = "Hủy công bố";
+                                labelClass += " label-danger";
+                            }
+                            else
+                            {
+                                labelText = item.TrangThai;
+                                labelClass += " label-primary";
+                            }
+                        }
+                        <span class="@labelClass">@labelText</span>
+                    </td>
+                    <td class="text-center" style="vertical-align: middle">
+                        <a href="/KeKhaiDangKyGia/Show?id=@item.Id" class="btn btn-sm btn-clean btn-icon" title="Xem chi tiết" target="_blank">
+                            <i class="icon-lg la la-eye text-success"></i>
+                        </a>
+                        @if (item.TrangThai == "CC" || item.TrangThai == "BTL")
+                        {
+                            if (session != null && FuntionGlobal.CheckPermission(session, role, "Edit"))
+                            {
+                                <a href="/KeKhaiDangKyGia/Edit?id=@item.Id" class="btn btn-sm btn-clean btn-icon" title="Chỉnh sửa">
+                                    <i class="icon-lg la la-edit text-success"></i>
+                                </a>
+                            }
+                        }
+                        @if (item.TrangThai == "CC" || item.TrangThai == "BTL")
+                        {
+                            if (session != null && FuntionGlobal.CheckPermission(session, role, "Edit"))
+                            {
+                                <button type="button" class="btn btn-sm btn-clean btn-icon" title="Chuyển" onclick="HandleConfirmChuyen('@item.Id', '@item.SoQd')">
+                                    <i class="icon-lg la la-mail-forward text-warning"></i>
+                                </button>
+                            }
+                        }
+                        @if (item.TrangThai == "BTL")
+                        {
+                            <button type="button" class="btn btn-sm btn-clean btn-icon" title="Lý do trả lại" onclick="HandleShowModelLyDoTraLai('@item.MaHoSo', '@item.SoQd', '@item.LyDo')">
+                                <i class="icon-lg la la-file text-danger"></i>
+                            </button>
+                        }
+                        @if (item.TrangThai == "CC")
+                        {
+                            if (session != null && FuntionGlobal.CheckPermission(session, role, "Delete"))
+                            {
+                                <button type="button" class="btn btn-sm btn-clean btn-icon" title="Xóa" onclick="Delete('@item.Id', '@item.SoQd')">
+                                    <i class="icon-lg la la-trash text-danger"></i>
+                                </button>
+                            }
+                        }
+                    </td>
+                </tr>
+                stt++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td style="text-align:center" colspan="7">Không tìm thấy thông tin!!!</td>
+            </tr>
+        }
+    </tbody>
+</table>

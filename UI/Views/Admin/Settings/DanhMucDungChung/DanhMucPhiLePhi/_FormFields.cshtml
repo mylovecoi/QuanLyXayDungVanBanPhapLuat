@@ -1,0 +1,80 @@
+@model DataAccess.Entities.Settings.DanhMucPhiLePhi
+
+<div class="row">
+    <div class="col-xl-9">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Loại nghiệp vụ: </label>
+            <select class="form-control select2basic" style="width:100%" asp-for="LoaiHopDongId" asp-items='ViewData["DanhMucHopDong"] as List<SelectListItem>'></select>
+        </div>
+    </div>
+    <div class="col-xl-3">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Phân loại: </label>
+            <select class="form-control select2basic" style="width:100%" asp-for="PhanLoaiId" asp-items='ViewData["PhanLoaiPhiLePhi"] as List<SelectListItem>'></select>
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Mô tả: </label>
+            <input type="text" class="form-control" asp-for="MoTa" />
+            <span asp-validation-for="MoTa" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Phí cố định: </label>
+            <input type="text" class="form-control money-decimal-mask" asp-for="strPhiCoDinh" />
+            <input hidden class="form-control" asp-for="PhiCoDinh" />
+            <span asp-validation-for="PhiCoDinh" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Tỷ lệ khi vượt mức (%): </label>
+            <input type="text" class="form-control money-decimal-mask" asp-for="strTyLeVuotMuc" />
+            <input hidden class="form-control" asp-for="TyLeVuotMuc" />
+            <span asp-validation-for="TyLeVuotMuc" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Số lượng tối đa: </label>
+            <input type="number" class="form-control" asp-for="SoLuongToiDa" />
+            <span asp-validation-for="SoLuongToiDa" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Phí tối đa: </label>
+            <input type="text" class="form-control money-decimal-mask" asp-for="strPhiToiDa" />
+            <input hidden class="form-control" asp-for="PhiToiDa" />
+            <span asp-validation-for="PhiToiDa" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Ngưỡng vượt mức: </label>
+            <input type="text" class="form-control money-decimal-mask" asp-for="strNguongVuotMuc" />
+            <input hidden class="form-control" asp-for="NguongVuotMuc" />
+            <span asp-validation-for="NguongVuotMuc" class="text-danger"></span>
+        </div>
+    </div>
+@{
+    var donViTinhs = ViewData["DonViTinhs"] as IEnumerable<DataAccess.Entities.Settings.DanhMucDonViTinh> ?? new List<DataAccess.Entities.Settings.DanhMucDonViTinh>();
+}
+
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Đơn vị tính: </label>
+            <select class="form-control select2multi" asp-for="DonViTinh">
+                <option value="">-- Chọn đơn vị tính --</option>
+                @foreach (var item in donViTinhs)
+                {
+                    <!option value="@item.MaDonViTinh" @(Model.DonViTinh == item.MaDonViTinh ? "selected" : "")>@item.TenDonViTinh</!option>
+                }
+            </select>
+            <span asp-validation-for="DonViTinh" class="text-danger"></span>
+        </div>
+    </div>
+    <input hidden asp-for="Id" />
+</div>

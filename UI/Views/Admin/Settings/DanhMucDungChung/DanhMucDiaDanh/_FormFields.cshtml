@@ -1,0 +1,30 @@
+﻿@using DataAccess.Entities.Systems;
+
+@model DataAccess.Entities.Settings.DanhMucDiaDanh
+
+<div class="row">
+    @if (Model.DiaDanhCapTrenId != Guid.Empty)
+    {
+        <div class="col-xl-12">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Địa danh chủ quản: </label>
+                <label class="form-control">@Model.TenDiaDanhChuQuan</label>
+            </div>
+        </div>
+    }
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Tên địa danh: </label>
+            <input type="text" class="form-control" asp-for="TenDiaDanh" />
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Sắp xếp: </label>
+            <input type="number" class="form-control" asp-for="STTSapXep" />
+        </div>
+    </div>
+    <input hidden asp-for="Id" />
+    <input hidden asp-for="Level" />
+    <input hidden asp-for="DiaDanhCapTrenId" />
+</div>

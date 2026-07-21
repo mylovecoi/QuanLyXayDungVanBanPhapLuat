@@ -1,0 +1,74 @@
+@model IEnumerable<DataAccess.Entities.KeKhaiDangKyGia.KeKhaiDangKyGiaCt>
+
+@{
+    Layout = "_LayoutReport";
+    string tenNghe = ViewData["TenNghe"] as string ?? "";
+    string tuNgay = ViewData["TuNgay"] as string ?? "";
+    string denNgay = ViewData["DenNgay"] as string ?? "";
+    string soQd = ViewData["SoQd"] as string ?? "";
+    string moTa = ViewData["MoTa"] as string ?? "";
+    var parentMap = ViewData["ParentMap"] as Dictionary<string, DataAccess.Entities.KeKhaiDangKyGia.KeKhaiDangKyGia> ?? new Dictionary<string, DataAccess.Entities.KeKhaiDangKyGia.KeKhaiDangKyGia>();
+    int stt = 1;
+}
+
+<div style="margin: 15mm 15mm 20mm 20mm;">
+    <div class="card-body">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h2 style="font-weight: bold; text-transform: uppercase;">KẾT QUẢ TRA CỨU CHI TIẾT HỒ SƠ KÊ KHAI ĐĂNG KÝ GIÁ</h2>
+            <h4 style="font-style: italic;">Danh mục: @tenNghe</h4>
+            @if (!string.IsNullOrEmpty(tuNgay) || !string.IsNullOrEmpty(denNgay) || !string.IsNullOrEmpty(soQd) || !string.IsNullOrEmpty(moTa))
+            {
+                <p style="font-style: italic; font-size: 13px; margin: 5px 0;">
+                    Điều kiện lọc: 
+                    @(string.IsNullOrEmpty(tuNgay) ? "" : "Từ ngày: " + DateTime.Parse(tuNgay).ToString("dd/MM/yyyy") + "  ")
+                    @(string.IsNullOrEmpty(denNgay) ? "" : "Đến ngày: " + DateTime.Parse(denNgay).ToString("dd/MM/yyyy") + "  ")
+                    @(string.IsNullOrEmpty(soQd) ? "" : "Số quyết định: " + soQd + "  ")
+                    @(string.IsNullOrEmpty(moTa) ? "" : "Từ khóa: " + moTa)
+                </p>
+            }
+            <p>Ngày in: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+        </div>
+
+        <table cellspacing="0" cellpadding="5" border="1" style="border-collapse: collapse; font-size: 14px; width: 100%;" id="data_render">
+            <thead>
+                <tr style="text-align: center; font-weight: bold; background-color: #f2f2f2;">
+                    <th width="5%">#</th>
+                    <th>Số quyết định</th>
+                    <th>Ngày áp dụng</th>
+                    <th>Doanh nghiệp quản lý</th>
+                    <th>Tên hàng hóa/dịch vụ</th>
+                    <th>Quy cách chất lượng</th>
+                    <th>Đơn vị tính</th>
+                    <th>Giá liền kề</th>
+                    <th>Giá kê khai</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        parentMap.TryGetValue(item.MaHoSo ?? "", out var parent);
+                        <tr>
+                            <td style="text-align: center;">@(stt++)</td>
+                            <td>@(parent?.SoQd ?? "")</td>
+                            <td style="text-align: center;">@(parent?.NgayThucHien.ToString("dd/MM/yyyy") ?? "")</td>
+                            <td>@(parent?.DoanhNghiepQuanLy?.TenDoanhNghiep ?? "")</td>
+                            <td>@item.TenDvCungUng</td>
+                            <td>@item.QuyCachChatLuong</td>
+                            <td style="text-align: center;">@item.DonViTinh</td>
+                            <td style="text-align: right;">@item.MucGiaKeKhaiLk.ToString("#,##0")</td>
+                            <td style="text-align: right; font-weight: bold;">@item.MucGiaKeKhai.ToString("#,##0")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" style="text-align: center; font-style: italic;">Không tìm thấy chi tiết hồ sơ kê khai giá phù hợp.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

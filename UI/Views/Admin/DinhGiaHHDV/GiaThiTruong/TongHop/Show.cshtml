@@ -1,0 +1,241 @@
+@using Newtonsoft.Json.Linq
+@using System.Reflection
+@model DataAccess.Entities.DinhGiaHHDV.GiaThiTruongTongHop
+@{
+    Layout = "_LayoutReport";
+    var donVi = ViewData["DanhMucDonVi"] as DataAccess.Entities.Settings.DanhMucDonVi;
+    var dmThongTu = ViewData["DanhMucThongTu"] as DataAccess.Entities.DinhGiaHHDV.GiaThiTruongDanhMuc;
+
+    JObject? excelData = null;
+    JToken? cellData = null;
+    JObject? styles = null;
+    int maxCol = 0;
+    List<int> rowIndices = new List<int>();
+    var mergeLookup = new Dictionary<string, (bool isParent, bool isChild, int rowSpan, int colSpan)>();
+
+    var spreadsheetJson = Model.ChiTietExcel;
+    if (!string.IsNullOrEmpty(spreadsheetJson))
+    {
+        try
+        {
+            excelData = JObject.Parse(spreadsheetJson);
+            styles = excelData["styles"] as JObject;
+            var sheets = excelData["sheets"] as JObject;
+            var firstSheet = sheets?.Properties()?.FirstOrDefault()?.Value as JObject;
+            cellData = firstSheet?["cellData"];
+            
+            // Build merge cell lookup dictionary
+            var mergeData = firstSheet?["mergeData"] as JArray;
+            if (mergeData != null)
+            {
+                foreach (var m in mergeData)
+                {
+                    int sR = m["startRow"]?.Value<int>() ?? 0;
+                    int eR = m["endRow"]?.Value<int>() ?? 0;
+                    int sC = m["startColumn"]?.Value<int>() ?? 0;
+                    int eC = m["endColumn"]?.Value<int>() ?? 0;
+
+                    int rSpan = eR - sR + 1;
+                    int cSpan = eC - sC + 1;
+
+                    for (int r = sR; r <= eR; r++)
+                    {
+                        for (int c = sC; c <= eC; c++)
+                        {
+                            string key = $"{r}_{c}";
+                            if (r == sR && c == sC)
+                            {
+                                mergeLookup[key] = (true, false, rSpan, cSpan);
+                            }
+                            else
+                            {
+                                mergeLookup[key] = (false, true, 0, 0);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (cellData != null)
+            {
+                foreach (var rowProp in cellData.Children<JProperty>())
+                {
+                    if (int.TryParse(rowProp.Name, out int rIdx))
+                    {
+                        rowIndices.Add(rIdx);
+                        var colProps = rowProp.Value as JObject;
+                        if (colProps != null)
+                        {
+                            foreach (var colProp in colProps.Properties())
+                            {
+                                if (int.TryParse(colProp.Name, out int cIdx))
+                                {
+                                    if (cIdx > maxCol)
+                                    {
+                                        maxCol = cIdx;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                rowIndices.Sort();
+            }
+        }
+        catch { }
+    }
+}
+
+<div style="padding: 20px 30px;">
+<p style="text-align: center; font-weight: bold; font-size: 26px; text-transform: uppercase;">THÔNG TIN HỒ SƠ TỔNG HỢP BÁO CÁO GIÁ THỊ TRƯỜNG</p>
+<table style="width: 100%; border: none; font: normal 16px Times, serif; margin-bottom: 20px;">
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Đơn vị báo cáo:</td>
+        <td>@(donVi?.TenDonVi ?? "")</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Danh mục áp dụng:</td>
+        <td>@dmThongTu?.TenTT</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Tháng / Năm:</td>
+        <td>Tháng @Model.Thang / Năm @Model.Nam</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Số báo cáo / Ngày báo cáo:</td>
+        <td>@Model.SoBc @(Model.NgayBc != DateTime.MinValue ? " - " + Model.NgayBc.ToString("dd/MM/yyyy") : "")</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Ngày chốt báo cáo:</td>
+        <td>@(Model.NgayChotBc != DateTime.MinValue ? Model.NgayChotBc.ToString("dd/MM/yyyy") : "")</td>
+    </tr>
+    <tr>
+        <td style="width: 25%; font-weight: bold; text-align: left">Ghi chú:</td>
+        <td>@Model.GhiChu</td>
+    </tr>
+</table>
+
+<p style="color: blue; text-decoration-line: underline; font-weight: bold; font-size: 18px;">Thông tin hồ sơ chi tiết</p><br/>
+<div style="width: 100%; overflow-x: auto; margin-bottom: 20px;">
+<table cellspacing="0" cellpadding="5" border="1" style="width: 100%; border-collapse: collapse; font: normal 14px Times, serif;" id="data_render">
+    @if (cellData != null && rowIndices.Any())
+    {
+        var headerRowIdx = rowIndices.FirstOrDefault();
+        <tbody>
+            @foreach (var r in rowIndices)
+            {
+                <tr>
+                    @for (int c = 0; c <= maxCol; c++)
+                    {
+                        string cellKey = $"{r}_{c}";
+                        bool skipCell = false;
+                        int rowSpan = 1;
+                        int colSpan = 1;
+
+                        if (mergeLookup.TryGetValue(cellKey, out var mergeInfo))
+                        {
+                            if (mergeInfo.isChild)
+                            {
+                                skipCell = true;
+                            }
+                            else if (mergeInfo.isParent)
+                            {
+                                rowSpan = mergeInfo.rowSpan;
+                                colSpan = mergeInfo.colSpan;
+                            }
+                        }
+
+                        if (!skipCell)
+                        {
+                            var cell = cellData[r.ToString()]?[c.ToString()];
+                            var cellVal = cell?["v"]?.ToString() ?? "";
+                            
+                            var styleKey = cell?["s"]?.ToString();
+                            JObject? style = null;
+                            if (!string.IsNullOrEmpty(styleKey) && styles != null)
+                            {
+                                style = styles[styleKey] as JObject;
+                            }
+
+                            string align = "";
+                            if (style != null && style["ht"] != null)
+                            {
+                                var ht = style["ht"]?.ToString() ?? "";
+                                if (ht == "1") align = "text-align: left;";
+                                else if (ht == "2") align = "text-align: center;";
+                                else if (ht == "3") align = "text-align: right;";
+                            }
+                            
+                            if (string.IsNullOrEmpty(align) && double.TryParse(cellVal, out _))
+                            {
+                                align = "text-align: right;";
+                            }
+                            
+                            string weight = "";
+                            if (style != null && style["bl"] != null && style["bl"]?.ToString() == "1")
+                            {
+                                weight = "font-weight: bold;";
+                            }
+                            
+                            string fontStyle = "";
+                            if (style != null && style["it"] != null && style["it"]?.ToString() == "1")
+                            {
+                                fontStyle = "font-style: italic;";
+                            }
+
+                            if (r == headerRowIdx)
+                            {
+                                <th rowspan="@rowSpan" colspan="@colSpan" style="background-color: #f2f2f2; text-align: center; @align @weight @fontStyle">@cellVal</th>
+                            }
+                            else
+                            {
+                                <td rowspan="@rowSpan" colspan="@colSpan" style="@align @weight @fontStyle">@cellVal</td>
+                            }
+                        }
+                    }
+                </tr>
+            }
+        </tbody>
+    }
+    else if (ViewData["Details"] is IEnumerable<DataAccess.Entities.DinhGiaHHDV.GiaThiTruongTongHopCt> details && details.Any())
+    {
+        <thead>
+            <tr style="text-align:center; background-color: #f2f2f2;">
+                <th width="5%">#</th>
+                <th width="15%">Mã HHDV</th>
+                <th>Tên hàng hóa dịch vụ</th>
+                <th>Đặc điểm kỹ thuật</th>
+                <th width="10%">Đơn vị tính</th>
+                <th width="15%">Giá bình quân kỳ trước</th>
+                <th width="15%">Giá bình quân kỳ này</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int idx = 1;
+            }
+            @foreach (var item in details)
+            {
+                <tr>
+                    <td style="text-align: center;">@(idx++)</td>
+                    <td style="text-align: center; font-weight: bold;">@item.MaHhDv</td>
+                    <td>@item.TenHhDv</td>
+                    <td>@item.DacDiemKt</td>
+                    <td style="text-align: center;">@item.DonViTinh</td>
+                    <td style="text-align: right; font-weight: bold;">@item.GiaKyTruoc.ToString("N0")</td>
+                    <td style="text-align: right; font-weight: bold; color: blue;">@item.GiaKyNay.ToString("N0")</td>
+                </tr>
+            }
+        </tbody>
+    }
+    else
+    {
+        <tbody>
+            <tr>
+                <td style="text-align: center; color: gray;">Không có dữ liệu chi tiết.</td>
+            </tr>
+        </tbody>
+    }
+</table>
+</div>
+</div>

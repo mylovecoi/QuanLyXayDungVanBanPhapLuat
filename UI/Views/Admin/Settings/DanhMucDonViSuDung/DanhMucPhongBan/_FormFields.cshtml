@@ -1,0 +1,68 @@
+﻿@model DataAccess.Entities.Settings.DanhMucPhongBan
+<div class="modal-body">
+    @Html.AntiForgeryToken()
+    <input hidden asp-for="Id" />
+    <div class="row">
+        <div class="col-xl-6">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Đơn vị <span class="text-danger">*</span></label>
+                <select class="form-control w-100" asp-for="DanhMucDonViId" id="DanhMucDonViId">
+                    <option value="">-- Chọn đơn vị --</option>
+                    @foreach (var item in ViewData["DanhMucDonVis"] as List<DataAccess.Entities.Settings.DanhMucDonVi>)
+                    {
+                        if (Model?.DanhMucDonViId == item.Id)
+                        {
+                            <option value="@item.Id" selected>@item.TenDonVi</option>
+                        }
+                        else
+                        {
+                            <option value="@item.Id">@item.TenDonVi</option>
+                        }
+                    }
+                </select>
+                <span id="DanhMucDonViIdError" class="text-danger"></span>
+                <span asp-validation-for="DanhMucDonViId" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Tên phòng ban <span class="text-danger">*</span></label>
+                <input class="form-control" asp-for="TenPhongBan" placeholder="Nhập tên phòng ban" autofocus />
+                <span id="TenPhongBanError" class="text-danger"></span>
+                <span asp-validation-for="TenPhongBan" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Mã phòng ban <span class="text-danger">*</span></label>
+                <input class="form-control" asp-for="MaPhongBan" placeholder="Nhập mã phòng ban" />
+                <span id="MaPhongBanError" class="text-danger"></span>
+                <span asp-validation-for="MaPhongBan" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Loại phòng ban <span class="text-danger">*</span></label>
+                <select class="form-control w-100" asp-for="LoaiPhongBan" id="LoaiPhongBan">
+                    <option value="@DataAccess.Enums.LoaiPhongBan.LuuTru">Lưu trữ</option>
+                    <option value="@DataAccess.Enums.LoaiPhongBan.SoanThao">Soạn thảo</option>
+                    <option value="@DataAccess.Enums.LoaiPhongBan.CongChung">Công chứng</option>
+                </select>
+                <span id="LoaiPhongBanError" class="text-danger"></span>
+                <span asp-validation-for="LoaiPhongBan" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Khởi tạo Select2 cho dropdown đơn vị
+        $("#DanhMucDonViId").select2({
+            placeholder: "Chọn đơn vị",
+            allowClear: true,
+            dropdownParent: $('#DanhMucDonViId').closest('.modal'),
+            width: '100%' // Đảm bảo select2 có chiều rộng đầy đủ
+        });
+    });
+</script>

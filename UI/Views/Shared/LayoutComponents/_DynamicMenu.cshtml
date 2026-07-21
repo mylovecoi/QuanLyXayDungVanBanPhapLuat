@@ -1,0 +1,194 @@
+@using Newtonsoft.Json;
+@using DataAccess.Entities.Systems;
+
+<style>
+    .menu-text-scroll {
+        display: inline-block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+    .menu-link:hover .menu-text-scroll {
+        text-overflow: clip !important;
+        overflow: visible !important;
+        animation: marquee 10s linear infinite;
+    }
+    @@keyframes marquee {
+        0% { transform: translate3d(0, 0, 0); }
+        50% { transform: translate3d(-50%, 0, 0); }
+        100% { transform: translate3d(0, 0, 0); }
+    }
+
+    /* Custom Scrollbar for Submenus */
+    .menu-submenu {
+        scrollbar-width: thin !important;
+        scrollbar-color: rgba(108, 114, 147, 0.4) transparent !important;
+    }
+
+    .menu-submenu::-webkit-scrollbar {
+        width: 6px !important;
+        height: 6px !important;
+    }
+
+    .menu-submenu::-webkit-scrollbar-button {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    .menu-submenu::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.02) !important;
+        border-radius: 10px !important;
+    }
+
+    .menu-submenu::-webkit-scrollbar-thumb {
+        background: rgba(108, 114, 147, 0.35) !important; /* Elegant slate grey */
+        border-radius: 10px !important;
+        transition: background 0.3s ease;
+    }
+
+    .menu-submenu::-webkit-scrollbar-thumb:hover {
+        background: #1b6ec2 !important; /* Beautiful primary blue on hover */
+    }
+
+    /* Reset cumulative indentation for nested submenus in aside menu */
+    .aside-menu .menu-nav .menu-submenu,
+    .aside-menu .menu-nav .menu-subnav {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+    }
+
+    /* Force all nested submenu item links to have the same left padding */
+    .aside-menu .menu-nav .menu-item .menu-submenu .menu-item > .menu-link,
+    .header-menu .menu-nav .menu-item .menu-submenu .menu-item > .menu-link {
+        padding-left: 25px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* Ensure bullets are visible and styled consistently */
+    .aside-menu .menu-nav .menu-bullet,
+    .header-menu .menu-nav .menu-bullet {
+        display: inline-flex !important;
+        width: 15px !important;
+        margin-right: 8px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+    }
+
+    .aside-menu .menu-nav .menu-item .menu-submenu .menu-item > .menu-link .menu-text,
+    .header-menu .menu-nav .menu-item .menu-submenu .menu-item > .menu-link .menu-text {
+        padding-left: 0 !important;
+        margin-left: 0 !important;
+    }
+</style>
+
+@{
+    var session = HttpContextAccessor?.HttpContext?.Session;
+    IEnumerable<Permission> Menu = Enumerable.Empty<Permission>();
+    if (session != null)
+    {
+        var sessionData = session.GetString("Permissions");
+        if (!string.IsNullOrEmpty(sessionData))
+        {
+            Menu = JsonConvert.DeserializeObject<IEnumerable<Permission>>(sessionData) ?? Enumerable.Empty<Permission>();
+        }
+    }
+}
+
+@functions {
+    string SubmenuClasses(int level) =>
+        level == 0
+            ? "menu-submenu menu-submenu-classic menu-submenu-left"
+            : "menu-submenu menu-submenu-classic menu-submenu-right";
+
+    string ItemToggle(int level) => "hover";
+
+    string ItemClasses(int level) =>
+        level == 0
+            ? "menu-item menu-item-submenu menu-item-rel"
+            : "menu-item menu-item-submenu";
+
+    async Task RenderMenuItems(IEnumerable<Permission> items, Guid? RoleActionGroupId = null, int level = 0)
+    {
+        var subItems = items.Where(i => i.Level == level).ToList();
+        if (level != 0)
+        {
+            subItems = subItems.Where(t => t.RoleActionGroupId == RoleActionGroupId).ToList();
+        }
+        if (subItems.Any())
+        {
+            foreach (var item in subItems)
+            {
+                if (item.PhanLoai == "Group")
+                {
+                    string iconClass = !string.IsNullOrEmpty(item.Icon) ? item.Icon : "fas fa-list";
+
+                    var hasChildGroups = items.Any(i => i.Level == level + 1 && i.RoleActionGroupId == item.RoleActionId && i.PhanLoai == "Group");
+
+                    @:<li class="@ItemClasses(level)" aria-haspopup="true" data-menu-toggle="@ItemToggle(level)" id="@item.MenuActive">
+                        @:     <a class="menu-link menu-toggle" style="display: flex; align-items: center; overflow: hidden; width: 100%;">
+                                    if (level == 0)
+                                    {
+                                        @:<i class="menu-icon @iconClass mr-2"></i>
+                                    }
+                                    else
+                                    {
+                                        @:<i class="menu-bullet menu-bullet-dot"><span></span></i>
+                                    }
+                             @:         <span class="menu-text menu-text-scroll" style="flex: 1; min-width: 0;" title="@item.Title?.Trim()">@item.Title?.Trim()</span>
+                            //@:         <i class="menu-arrow"></i>
+                                    if (level == 0)
+                                    {
+                                        @:<i class="menu-arrow"></i>
+                                    }
+                                    else
+                                    {
+                                        @:<i class="menu-arrow la la-angle-right"></i>
+                                    } // thêm icon hiển thị menu dropdown
+                        @:     </a>
+                        @:     <div class="@SubmenuClasses(level)" @(level >= 2 || (level == 1 && !hasChildGroups) ? Html.Raw("style=\"max-height: 40vh; overflow-y: auto; overflow-x: hidden; padding-bottom: 30px;\"") : null)>
+                            @:         <ul class="menu-subnav">
+                                await RenderMenuItems(items, item.RoleActionId, level + 1);
+                            @:         </ul>
+                        @:     </div>
+                    @:</li>
+                }
+                else
+                {
+                    if (level == 0)
+                    {
+                        @:<li class="menu-item menu-item-submenu menu-item-rel" aria-haspopup="true" data-menu-toggle="hover" id="@item.MenuActive">
+                        @:     <a href="@Url.Action(
+                                    item.Action,
+                                    item.Controller,
+                                    string.IsNullOrEmpty(item.Parameter) ? null : new {MaNghe = item.Parameter}
+                                    )" class="menu-link" style="display: flex; align-items: center; overflow: hidden; width: 100%;">
+                                 @:         <span class="menu-text menu-text-scroll" style="flex: 1; min-width: 0;" title="@item.Title?.Trim()">@item.Title?.Trim()</span>
+                            @:     </a>
+                        @:</li>
+                    }
+                    else
+                    {
+                        @:<li class="menu-item" aria-haspopup="true" id="@item.MenuActive">
+                            @:<a href="@Url.Action(
+                                item.Action,
+                                item.Controller,
+                                string.IsNullOrEmpty(item.Parameter) ? null : new {MaNghe = item.Parameter}
+                                )" class="menu-link" style="display: flex; align-items: center; overflow: hidden; width: 100%;">
+                                @:      <i class="menu-bullet menu-bullet-dot"><span></span></i>
+                                 @:      <span class="menu-text menu-text-scroll" style="flex: 1; min-width: 0;" title="@item.Title?.Trim()">@item.Title?.Trim()</span>
+                            @:</a>
+                        @:</li>
+                    }
+                }
+            }
+        }
+    }
+}
+
+@{
+    await RenderMenuItems(Menu);
+}

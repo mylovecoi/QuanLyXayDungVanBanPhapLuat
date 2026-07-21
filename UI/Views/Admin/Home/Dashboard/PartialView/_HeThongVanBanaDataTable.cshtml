@@ -1,0 +1,47 @@
+﻿@model List<DataAccess.Entities.Manages.AttachedFile>
+<table class="table table-sm table-head-custom table-head-bg table-borderless table-vertical-center">
+	<thead class="">
+		<tr class="text-left text-uppercase">
+			<th style="min-width: 100px" class="text-center">
+				<span class="text-dark-75">Ngày Ban Hành</span>
+			</th>
+			<th style="min-width: 100px" class="text-center">
+				<span class="text-dark-75">Ngày Áp dụng</span>
+			</th>
+			<th style="min-width: 100px" class="text-center">
+				<span class="text-dark-75">Số Văn Bản</span>
+			</th>
+			<th style="min-width: 100px" class="text-center">
+				<span class="text-dark-75">Mô Tả</span>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		@if (Model != null && Model.Any())
+		{
+			foreach (var item in Model)
+			{
+				<tr>
+					<td>
+						<span class="text-dark-75 text-center font-weight-bolder d-block font-size-lg">
+							@FuntionGlobal.ConvertDateToStr(item.NgayBanHanh)
+						</span>
+					</td>
+					<td>
+						<span class="text-dark-75 text-center font-weight-bolder d-block font-size-lg">
+							@FuntionGlobal.ConvertDateToStr(item.NgayApDung)
+						</span>
+					</td>
+					<td>
+						<a href="/Manages/Download/AttachedFile?id=@item.Id" target="_blank" class="text-dark-75 text-center text-hover-primary font-weight-bolder d-block font-size-lg">@item.SoVanBan</a>
+					</td>
+					<td style="max-width: 250px;">
+						<span class="text-dark-75 font-weight-bolder d-block font-size-lg text-truncate">
+							@item.MoTa
+						</span>
+					</td>
+				</tr>
+			}
+		}
+	</tbody>
+</table>

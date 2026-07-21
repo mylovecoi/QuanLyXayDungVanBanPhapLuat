@@ -1,0 +1,31 @@
+@model DataAccess.Entities.ThamDinhGia.ThamDinhGiaHoiDongCt
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="HoiDongId" value="@(Model.HoiDongId == Guid.Empty ? ViewData["HoiDongId"] : Model.HoiDongId)" />
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">STT sắp xếp:</label>
+            <input type="text" class="form-control" asp-for="STTSapXep" required />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Họ và tên:</label>
+            <input type="text" class="form-control" asp-for="HoTen" required />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Chức vụ:</label>
+            <input type="text" class="form-control" asp-for="ChucVu" required />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:black">Vai trò:</label>
+            <input type="text" class="form-control" asp-for="VaiTro" required />
+        </div>
+    </div>
+</div>

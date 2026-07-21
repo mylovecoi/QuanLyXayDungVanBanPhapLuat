@@ -1,0 +1,466 @@
+﻿@using Services.DTOs.BaoCaoKhac
+@model BaoCaoSuDungLaoDongResponse
+@{
+	Layout = null;
+	ViewData["Title"] = "Sổ theo dõi việc sử dụng lao động";
+
+	var errorMessage = ViewData["ErrorMessage"] as string;
+	if (!string.IsNullOrEmpty(errorMessage))
+	{
+		<div class="alert alert-danger">@errorMessage</div>
+		return;
+	}
+
+	if (Model == null)
+	{
+		<div class="alert alert-warning">Không có dữ liệu để hiển thị báo cáo.</div>
+		return;
+	}
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Sổ theo dõi việc sử dụng lao động</title>
+	<style>
+		body {
+			font-family: 'Times New Roman', serif;
+			font-size: 14pt;
+			line-height: 1.5;
+			margin: 0;
+			background: #000;
+			color: #000;
+		}
+
+		.document {
+			width: 297mm;
+			min-width: 297mm;
+			margin: 0 auto;
+			background: white;
+			min-height: 210mm;
+			box-sizing: border-box;
+			padding: 1.25cm 2cm 1cm 2cm;
+		}
+
+		.header-form {
+			float: right;
+			text-align: center;
+			border: 1px solid #000;
+			width: 229.5pt;
+		}
+
+		.form-number {
+			font-size: 14pt;
+			font-weight: normal;
+		}
+
+		.form-note {
+			font-size: 10pt;
+			font-style: italic;
+			color: #000;
+		}
+
+		.country-header {
+			text-align: center;
+			font-weight: bold;
+			font-size: 14pt;
+			padding-top: 15px;
+		}
+
+		.independence {
+			text-align: center;
+			font-weight: bold;
+			font-size: 14pt;
+			text-decoration: underline;
+		}
+
+		.main-title {
+			text-align: center;
+			font-weight: bold;
+			font-size: 16pt;
+			margin: 120px 0 0;
+			letter-spacing: 1px;
+		}
+
+		.info-block {
+			display: inline-block;
+			text-align: left;
+			margin: 30px auto;
+		}
+
+		.info-container {
+			text-align: center;
+			margin: 30px 0;
+		}
+
+		.info-block p {
+			margin: 5px 0;
+			white-space: nowrap;
+		}
+
+		.info-block .italic {
+			font-style: italic;
+			font-weight: normal;
+		}
+
+		.section-title {
+			font-weight: bold;
+			font-size: 13pt;
+			margin: 30px 0 20px 0;
+			text-indent: 36pt;
+		}
+
+		.data-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 20px 0;
+			font-size: 13pt;
+		}
+
+			.data-table th,
+			.data-table td {
+				border: 1px solid #000;
+				padding: 8px;
+				text-align: center;
+				vertical-align: top;
+				overflow-wrap: break-word;
+				hyphens: auto;
+			}
+
+			.data-table th {
+				font-weight: bold;
+			}
+
+		.summary-container {
+			display: flex;
+			align-items: flex-start;
+			margin: 30px 0;
+			font-size: 13pt;
+		}
+
+		.summary-left {
+			font-style: italic;
+			flex-shrink: 0;
+			margin-right: 20px;
+			text-indent: 36pt;
+		}
+
+			.summary-left p {
+				margin: 8px 0;
+			}
+
+		.summary-right {
+			text-align: left;
+			flex: 1;
+		}
+
+			.summary-right p {
+				margin: 8px 0;
+			}
+
+		.signature-block {
+			display: flex;
+			justify-content: flex-end;
+			font-size: 13pt;
+			margin-right: 100px;
+		}
+
+		.signature-content {
+			text-align: center;
+			min-width: fit-content;
+		}
+
+		.date-signature {
+			font-style: italic;
+		}
+
+		.signature-title {
+			font-weight: bold;
+			margin: 5px 0;
+		}
+
+		.signature-note {
+			font-style: italic;
+		}
+
+		.page-break {
+			page-break-before: always;
+		}
+
+		.no-print {
+			background: #007bff;
+			color: white;
+			padding: 10px 15px;
+			border-radius: 5px;
+			cursor: pointer;
+			float: left;
+			margin-bottom: 20px;
+			box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+			font-family: Arial, sans-serif;
+		}
+
+		@@media print {
+			@@page {
+				size: A4 landscape;
+				margin: 1.25cm 2cm 1cm 2cm;
+			}
+
+			.no-print {
+				display: none !important;
+			}
+
+			body {
+				background: white;
+			}
+
+			.document {
+				padding: 0;
+				margin: 0;
+			}
+		}
+	</style>
+	<link href="~/assets/plugins/custom/toastr/toastr.min.css" rel="stylesheet" />
+</head>
+
+<body>
+	<div class="document">
+		<!-- Button Tải File - Float Top trong Document -->
+		<div id="downloadButton" class="no-print">
+			Tải file Word
+		</div>
+		<!-- Header Form -->
+		<div class="header-form">
+			<div class="form-number">TP-CC-36</div>
+			<div class="form-note">(Ban hành kèm theo Thông tư số 05/2025/TT-BTP)</div>
+		</div>
+
+		<!-- Country Header -->
+		<div class="country-header" style="clear: both;">
+			CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+		</div>
+
+		<!-- Independence -->
+		<div class="independence">
+			Độc lập - Tự do - Hạnh phúc
+		</div>
+
+		<!-- Main Title -->
+		<div class="main-title">
+			SỔ THEO DÕI VIỆC SỬ DỤNG LAO ĐỘNG
+		</div>
+
+		<!-- Organization and Book Info -->
+		<div class="info-container">
+			<div class="info-block">
+				<p><strong>Tên tổ chức hành nghề công chứng:</strong> @Model.ThongTinToChuc.TenToChuc</p>
+				<p><strong>Tỉnh (thành phố):</strong> @Model.ThongTinToChuc.TinhThanhPho</p>
+				<div style="height: 80px;"></div>
+				<p>Quyển số: @Model.ThongTinToChuc.QuyenSo</p>
+				<p class="italic">Mở Sổ ngày @Model.ThongTinToChuc.NgayMoSo.ToString("dd") tháng @Model.ThongTinToChuc.NgayMoSo.ToString("MM") năm @Model.ThongTinToChuc.NgayMoSo.ToString("yyyy")</p>
+				<p class="italic">Khóa Sổ ngày @Model.ThongTinToChuc.NgayKhoaSo.ToString("dd") tháng @Model.ThongTinToChuc.NgayKhoaSo.ToString("MM") năm @Model.ThongTinToChuc.NgayKhoaSo.ToString("yyyy")</p>
+			</div>
+		</div>
+
+		<!-- Page Break -->
+		<div class="page-break"></div>
+
+		<!-- Section 1: Công chứng viên -->
+		<div class="section-title">
+			1. Đối với công chứng viên
+		</div>
+
+		<table class="data-table">
+			<thead>
+				<tr>
+					<th rowspan="2">STT</th>
+					<th rowspan="2">Họ tên</th>
+					<th rowspan="2">Ngày tháng năm sinh</th>
+					<th rowspan="2">Giới tính</th>
+					<th rowspan="2">Trình độ chuyên môn</th>
+					<th rowspan="2">Số, ngày ban hành Quyết định bổ nhiệm công chứng viên</th>
+					<th rowspan="2">Số, ngày ban hành Quyết định cấp Thẻ công chứng viên; số Thẻ công chứng viên</th>
+					<th rowspan="2">Chức vụ (nếu có)</th>
+					<th rowspan="2">Mức phí bảo hiểm trách nhiệm nghề nghiệp đã mua</th>
+					<th rowspan="2">Số tiền bảo hiểm xã hội đã nộp</th>
+					<th rowspan="2">Số tiền bảo hiểm y tế đã nộp</th>
+					<th rowspan="2">Ghi chú</th>
+				</tr>
+			</thead>
+			<tbody>
+				@if (Model.DanhSachCongChungVien != null && Model.DanhSachCongChungVien.Any())
+				{
+					@for (int i = 0; i < Model.DanhSachCongChungVien.Count; i++)
+					{
+						var ccv = Model.DanhSachCongChungVien[i];
+						<tr>
+							<td>@(i + 1)</td>
+							<td>@ccv.TenCanBo</td>
+							<td>@(ccv.NgaySinh?.ToString("dd/MM/yyyy") ?? "")</td>
+							<td>@(ccv.GioiTinh ? "Nữ" : "Nam")</td>
+							<td>@ccv.TrinhDoChuyenMon</td>
+							<td>@(ccv.SoQuyetDinhBoNhiem ?? "") @(ccv.NgayQuyetDinhBoNhiem != null ? $" ngày {ccv.NgayQuyetDinhBoNhiem?.ToString("dd/MM/yyyy")}" : "")</td>
+							<td>@(ccv.SoQuyetDinhCapThe ?? "") @(ccv.NgayQuyetDinhCapThe != null ? $" ngày {ccv.NgayQuyetDinhCapThe?.ToString("dd/MM/yyyy")}" : "")@(!string.IsNullOrEmpty(ccv.SoTheCongChungVien) ? $"; Số thẻ: {ccv.SoTheCongChungVien}" : "")</td>
+							<td>@(ccv.ChucVu ?? "")</td>
+							<td>@(ccv.MucPhiBaoHiemTrachNhiem?.ToString("N0") ?? "0") VNĐ</td>
+							<td>@ccv.SoTienBHXH.ToString("N0") VNĐ</td>
+							<td>@ccv.SoTienBHYT.ToString("N0") VNĐ</td>
+							<td>@(ccv.GhiChu ?? "")</td>
+						</tr>
+					}
+				}
+				else
+				{
+					<tr>
+						<td colspan="12" class="text-center text-muted py-4">
+							<i>Chưa có dữ liệu công chứng viên</i>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+
+		<!-- Page Break -->
+		<div class="page-break"></div>
+
+		<!-- Section 2: Nhân viên nghiệp vụ, nhân viên khác -->
+		<div class="section-title">
+			2. Đối với nhân viên nghiệp vụ, nhân viên khác
+		</div>
+
+		<table class="data-table">
+			<thead>
+				<tr>
+					<th>STT</th>
+					<th>Họ tên</th>
+					<th>Ngày tháng năm sinh</th>
+					<th>Giới tính</th>
+					<th>Trình độ chuyên môn</th>
+					<th>Vị trí việc làm</th>
+					<th>Ngày được tuyển dụng/Số, ngày ký kết hợp đồng lao động</th>
+					<th>Số tiền bảo hiểm xã hội đã nộp</th>
+					<th>Số tiền bảo hiểm y tế đã nộp</th>
+					<th>Ghi chú</th>
+				</tr>
+			</thead>
+			<tbody>
+				@if (Model.DanhSachNhanVien != null && Model.DanhSachNhanVien.Any())
+				{
+					@for (int i = 0; i < Model.DanhSachNhanVien.Count; i++)
+					{
+						var nv = Model.DanhSachNhanVien[i];
+						<tr>
+							<td>@(i + 1)</td>
+							<td>@nv.TenCanBo</td>
+							<td>@(nv.NgaySinh?.ToString("dd/MM/yyyy") ?? "")</td>
+							<td>@(nv.GioiTinh ? "Nữ" : "Nam")</td>
+							<td>@nv.TrinhDoChuyenMon</td>
+							<td>@(nv.ViTriViecLam ?? "")</td>
+							<td>@(nv.NgayTuyenDung?.ToString("dd/MM/yyyy") ?? "")@(!string.IsNullOrEmpty(nv.SoHopDongLaoDong) ? $"/{nv.SoHopDongLaoDong}" : "")@(nv.NgayKyHopDongLaoDong != null ? $" ngày {nv.NgayKyHopDongLaoDong?.ToString("dd/MM/yyyy")}" : "")</td>
+							<td>@nv.SoTienBHXH.ToString("N0") VNĐ</td>
+							<td>@nv.SoTienBHYT.ToString("N0") VNĐ</td>
+							<td>@(nv.GhiChu ?? "")</td>
+						</tr>
+					}
+				}
+				else
+				{
+					<tr>
+						<td colspan="10" class="text-center text-muted py-4">
+							<i>Chưa có dữ liệu nhân viên</i>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+
+		<!-- Page Break -->
+		<div class="page-break"></div>
+
+		<!-- Summary -->
+		<div class="summary-container">
+			<div class="summary-left">
+				<p>Ngày @Model.ThongKe.NgayBaoCao.ToString("dd/MM/yyyy"):</p>
+			</div>
+			<div class="summary-right">
+				<p>- Tổng số lao động: @Model.ThongKe.TongSoLaoDong (trong đó số công chứng viên: @Model.ThongKe.SoCongChungVien; nhân viên nghiệp vụ: @Model.ThongKe.SoNhanVienNghiepVu; nhân viên khác: @Model.ThongKe.SoNhanVienKhac)</p>
+				<p>- Tổng số hợp đồng lao động đã ký kết trong năm: @Model.ThongKe.TongSoHopDongDaKy (trong đó đã chấm dứt: @Model.ThongKe.SoHopDongDaChamDut; đang thực hiện: @Model.ThongKe.SoHopDongDangThucHien)</p>
+				<p>- Tổng số tiền mua bảo hiểm trách nhiệm nghề nghiệp cho công chứng viên: @Model.ThongKe.TongTienBaoHiemTrachNhiem.ToString("N0") VNĐ</p>
+				<p>- Tổng số tiền bảo hiểm xã hội đã nộp của cả năm: @Model.ThongKe.TongTienBHXH.ToString("N0") VNĐ</p>
+				<p>- Tổng số tiền bảo hiểm y tế đã nộp của cả năm: @Model.ThongKe.TongTienBHYT.ToString("N0") VNĐ</p>
+			</div>
+		</div>
+
+		<!-- Signature Block -->
+		<div class="signature-block">
+			<div class="signature-content">
+				<div class="date-signature">
+					<em>@Model.ThongKe.DiaDanh, ngày @Model.ThongKe.NgayBaoCao.ToString("dd") tháng @Model.ThongKe.NgayBaoCao.ToString("MM") năm @Model.ThongKe.NgayBaoCao.ToString("yyyy")</em>
+				</div>
+				<div class="signature-title">
+					<strong>TRƯỞNG TỔ CHỨC HÀNH NGHỀ CÔNG CHỨNG</strong>
+				</div>
+				<div class="signature-note">
+					<em>(ký, ghi rõ họ tên và đóng dấu)</em>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- jQuery và JavaScript để xử lý download -->
+	<script src="/lib/jquery/dist/jquery.min.js"></script>
+	<script src="~/assets/plugins/custom/toastr/toastr.min.js"></script>
+	<script>
+		$(function () {
+			// Cấu hình toastr
+			toastr.options = {
+				positionClass: "toast-top-center"
+			};
+
+			// Dữ liệu từ ViewBag
+			const requestData = @Html.Raw(Json.Serialize(ViewBag.RequestData ?? new { }));
+
+			$('#downloadButton').on('click', function () {
+				const $btn = $(this);
+
+				// Disable button khi đang xử lý
+				$btn.text('Đang tạo file...').prop('disabled', true);
+
+				$.ajax({
+					url: '@Url.Action("DownloadReport", "BaoCaoSuDungLaoDong")',
+					method: 'POST',
+					data: JSON.stringify(requestData),
+					contentType: 'application/json',
+					xhrFields: { responseType: 'blob' }
+				})
+				.done(function (blob) {
+					const url = window.URL.createObjectURL(blob);
+					const a = document.createElement('a');
+					const fileName = 'BaoCao_SuDungLaoDong_' +
+						new Date().toISOString().slice(0, 19).replace(/[:-]/g, '') + '.docx';
+
+					a.href = url;
+					a.download = fileName;
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+					window.URL.revokeObjectURL(url);
+
+					toastr.success('File đã được tải xuống!', 'Thành công');
+				})
+				.fail(function () {
+					toastr.error('Không thể tải xuống file. Vui lòng thử lại sau.', 'Lỗi');
+				})
+				.always(function () {
+					// Khôi phục lại button sau khi request hoàn tất
+					$btn.text('Tải file Word').prop('disabled', false);
+				});
+			});
+		});
+	</script>
+
+
+</body>
+
+</html>

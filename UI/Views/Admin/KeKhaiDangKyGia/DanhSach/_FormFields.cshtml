@@ -1,0 +1,447 @@
+@using DataAccess.Entities.KeKhaiDangKyGia
+@model KeKhaiDangKyGia
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="DoanhNghiepQuanLyId" />
+<input type="hidden" asp-for="MaNghe" />
+<input type="hidden" asp-for="MaHoSo" />
+<input type="hidden" asp-for="DonViDongChuyenId" />
+<input type="hidden" asp-for="ChiTietExcel" id="CodeExcel" />
+<input type="hidden" id="tableName" name="TableName" value="KeKhaiDangKyGia" />
+
+<div class="mb-3 font-weight-bold font-size-lg">
+    <label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin hồ sơ</label>
+</div>
+@{
+    var dn = ViewData["DoanhNghiep"] as DoanhNghiep;
+}
+<div class="row">
+    <div class="col-xl-12">
+        <div class="form-group">
+            <label style="font-weight: bold;">Doanh nghiệp</label>
+            <input type="text" class="form-control" value="@dn?.TenDoanhNghiep" readonly disabled />
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label style="font-weight: bold;">Số quyết định <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" asp-for="SoQd" placeholder="Nhập số quyết định" required />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label style="font-weight: bold;">Ngày quyết định<span class="text-danger">*</span></label>
+            <input type="date" class="form-control" asp-for="NgayQd" value="@(Model.NgayQd == DateTime.MinValue ? DateTime.Now.ToString("yyyy-MM-dd") : Model.NgayQd.ToString("yyyy-MM-dd"))" required />
+        </div>
+    </div>
+    @{
+        bool hasModelLk = ViewData["HasModelLk"] as bool? ?? false;
+    }
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label style="font-weight: bold;">Số quyết định liền kề @(hasModelLk ? Html.Raw("<span class=\"text-danger\">*</span>") : Html.Raw(""))</label>
+            <input type="text" class="form-control" asp-for="SoQdLk" placeholder="Nhập số quyết định" required="@hasModelLk" />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label style="font-weight: bold;">Ngày áp dụng quyết định liền kề @(hasModelLk ? Html.Raw("<span class=\"text-danger\">*</span>") : Html.Raw(""))</label>
+            <input type="date" class="form-control" asp-for="NgayQdLk" value="@(Model.NgayQdLk == DateTime.MinValue ? (hasModelLk ? DateTime.Now.ToString("yyyy-MM-dd") : "") : Model.NgayQdLk.ToString("yyyy-MM-dd"))" required="@hasModelLk" />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label style="font-weight: bold;">Ngày thực hiện <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" asp-for="NgayThucHien" value="@(Model.NgayThucHien == DateTime.MinValue ? DateTime.Now.ToString("yyyy-MM-dd") : Model.NgayThucHien.ToString("yyyy-MM-dd"))" required />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label style="font-weight: bold;">Thứ thực hiện <span class="text-danger">*</span></label>
+            <select class="form-control" id="ThoiGianThucHien_DayOfWeek">
+                <option value="2">Thứ Hai</option>
+                <option value="3">Thứ Ba</option>
+                <option value="4">Thứ Tư</option>
+                <option value="5">Thứ Năm</option>
+                <option value="6">Thứ Sáu</option>
+                <option value="7">Thứ Bảy</option>
+                <option value="8">Chủ Nhật</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label style="font-weight: bold;">Giờ thực hiện <span class="text-danger">*</span></label>
+            <input type="time" class="form-control" id="ThoiGianThucHien_Time" required />
+        </div>
+    </div>
+    <input type="hidden" asp-for="ThoiGianThucHien" id="ThoiGianThucHien" />
+</div>
+<div class="row">
+    <div class="col-xl-12">
+        <div class="form-group">
+            <label style="font-weight: bold;">Các yếu tố chi phí cấu thành giá (đối với kê khai lần đầu); phân tích nguyên nhân, nêu rõ biến động của các yếu tố hình thành giá tác động làm tăng hoặc giảm giá (đối với kê khai lại).</label>
+            <textarea class="form-control" asp-for="YtCauThanhGia" rows="2" placeholder="Nhập các yếu tố chi phí cấu thành giá (đối với kê khai lần đầu); phân tích nguyên nhân, nêu rõ biến động của các yếu tố hình thành giá tác động làm tăng hoặc giảm giá (đối với kê khai lại)."></textarea>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xl-12">
+        <div class="form-group">
+            <label style="font-weight: bold;">Các trường hợp ưu đãi, giảm giá; điều kiện áp dụng giá (nếu có).</label>
+            <textarea class="form-control" asp-for="ThyDgGadGia" rows="2" placeholder="Nhập các trường hợp ưu đãi, giảm giá; điều kiện áp dụng giá (nếu có)."></textarea>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xl-12">
+        <div class="form-group">
+            <label style="font-weight: bold;">Ghi chú</label>
+            <textarea class="form-control" asp-for="GhiChu" rows="2" placeholder="Nhập ghi chú hoặc mô tả ngắn gọn"></textarea>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3 font-weight-bold font-size-lg mt-5">
+    <label style="color: blue; text-decoration-line: underline; font-weight: bold">Giấy Tờ Kèm Theo:</label>
+    <button type="button" class="btn btn-link" onclick="HandleShowHideFrom(this, '#frmThongTinGiayToiKemTheo')" style="font-style:italic">Hiển thị</button>
+</div>
+<div id="frmThongTinGiayToiKemTheo" style="display: none">
+    <div class="row">
+        <div class="col-12" id="attachedFile_frm">
+            @await Html.PartialAsync("~/Views/Admin/AttachedFile/Index.cshtml", Model!.AttachedFiles)
+        </div>
+    </div>
+</div>
+
+<div class="mb-3 font-weight-bold font-size-lg">
+    <label style="color: blue; text-decoration-line: underline; font-weight: bold">Thông tin hồ sơ chi tiết</label>
+</div>
+<div class="card card-custom" style="border: 1px solid #60aee4;">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <span id="save-status" class="text-muted me-3"></span>
+                <button id="btn-import-excel" type="button" class="btn btn-info btn-sm me-2">
+                    <i class="fas fa-file-excel"></i> Nhận file Excel
+                </button>
+                <button id="btn-export-excel" type="button" class="btn btn-success btn-sm me-2">
+                    <i class="fas fa-download"></i> Xuất file Excel
+                </button>
+                <input type="file" id="file-import-excel" accept=".xls,.xlsx,.xlsm" style="display: none;" />
+            </div>
+        </div>
+        <!-- SheetJS for Excel Support (.xls, .xlsx, .xlsm) -->
+        <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+        <script>
+            let currentWorkbook = null;
+            window.univerAPIInstance = null;
+
+            function convertSheetJsToUniver(worksheet, fromRow, toRow) {
+                if (!worksheet || !worksheet['!ref']) return null;
+                const range = XLSX.utils.decode_range(worksheet['!ref']);
+                
+                let startRow = range.s.r;
+                let endRow = range.e.r;
+                
+                if (fromRow && fromRow > 0) startRow = Math.max(range.s.r, fromRow - 1);
+                if (toRow && toRow > 0) endRow = Math.min(range.e.r, toRow - 1);
+
+                const cellData = {};
+                const stylesDict = {};
+
+                function getStyleId(bold, italic) {
+                    const key = `style_b${bold ? 1 : 0}_i${italic ? 1 : 0}`;
+                    if (!stylesDict[key]) {
+                        stylesDict[key] = {
+                            bl: bold ? 1 : 0,
+                            it: italic ? 1 : 0,
+                            vt: 2,
+                            tb: 3
+                        };
+                    }
+                    return key;
+                }
+
+                for (let r = startRow; r <= endRow; r++) {
+                    const univerR = r - startRow;
+                    cellData[univerR] = {};
+                    for (let c = range.s.c; c <= range.e.c; c++) {
+                        const cellAddress = XLSX.utils.encode_cell({ r: r, c: c });
+                        const cell = worksheet[cellAddress];
+                        if (cell) {
+                            let isBold = false;
+                            let isItalic = false;
+
+                            if (cell.s && cell.s.font) {
+                                isBold = !!cell.s.font.bold;
+                                isItalic = !!cell.s.font.italic;
+                            }
+
+                            const styleId = getStyleId(isBold, isItalic);
+                            const val = cell.v !== undefined ? cell.v : '';
+                            cellData[univerR][c - range.s.c] = {
+                                v: val,
+                                s: styleId
+                            };
+                        }
+                    }
+                }
+
+                const totalRows = (endRow - startRow) + 1;
+                const totalCols = (range.e.c - range.s.c) + 1;
+
+                const columnData = {};
+                for (let c = 0; c < totalCols; c++) {
+                    columnData[c] = { w: 180 };
+                }
+
+                return {
+                    id: "sheet1",
+                    name: "Sheet1",
+                    rowCount: Math.Max(totalRows + 20, 50),
+                    columnCount: totalCols,
+                    cellData: cellData,
+                    columnData: columnData,
+                    rowData: {
+                        "0": { h: 30 }
+                    }
+                };
+            }
+
+            function handleExcelFileSelect(file, $statusTxt) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        $statusTxt.text("Đang đọc file Excel...");
+                        const data = new Uint8Array(e.target.result);
+                        currentWorkbook = XLSX.read(data, { type: 'array' });
+
+                        const $sheetSelect = $('#excel-sheet-select');
+                        $sheetSelect.empty();
+                        currentWorkbook.SheetNames.forEach((name) => {
+                            $sheetSelect.append(new Option(name, name));
+                        });
+
+                        $('#excel-row-from').val(1);
+                        $('#excel-row-to').val('');
+                        $('#modal-excel-options').modal('show');
+                        $statusTxt.text("");
+                    } catch (err) {
+                        console.error(err);
+                        $statusTxt.text("Lỗi đọc file Excel!");
+                        toastr.error("Không thể đọc file Excel này.");
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            }
+
+            $(document).ready(function () {
+                function updateThoiGianThucHien() {
+                    const dateVal = $('#NgayThucHien').val();
+                    if (!dateVal) return;
+                    const timeVal = $('#ThoiGianThucHien_Time').val() || "00:00";
+                    
+                    const date = new Date(dateVal);
+                    const targetDayOfWeek = parseInt($('#ThoiGianThucHien_DayOfWeek').val());
+                    
+                    const jsTargetDay = targetDayOfWeek === 8 ? 0 : targetDayOfWeek - 1;
+                    const currentDay = date.getDay();
+                    
+                    const diff = jsTargetDay - currentDay;
+                    date.setDate(date.getDate() + diff);
+                    
+                    const yyyy = date.getFullYear();
+                    const mm = String(date.getMonth() + 1).padStart(2, '0');
+                    const dd = String(date.getDate()).padStart(2, '0');
+                    const adjustedDateStr = `${yyyy}-${mm}-${dd}`;
+                    
+                    $('#NgayThucHien').val(adjustedDateStr);
+                    $('#ThoiGianThucHien').val(`${adjustedDateStr}T${timeVal}:00`);
+                }
+
+                $('#NgayThucHien').on('change', function () {
+                    const dateVal = $(this).val();
+                    if (!dateVal) return;
+                    const date = new Date(dateVal);
+                    const jsDay = date.getDay();
+                    const targetDayOfWeek = jsDay === 0 ? 8 : jsDay + 1;
+                    $('#ThoiGianThucHien_DayOfWeek').val(targetDayOfWeek);
+                    updateThoiGianThucHien();
+                });
+
+                $('#ThoiGianThucHien_DayOfWeek, #ThoiGianThucHien_Time').on('change', function () {
+                    updateThoiGianThucHien();
+                });
+
+                const initialDateTimeStr = '@Model.ThoiGianThucHien.ToString("yyyy-MM-ddTHH:mm:ss")';
+                if (initialDateTimeStr && initialDateTimeStr !== '0001-01-01T00:00:00') {
+                    const initialDate = new Date(initialDateTimeStr);
+                    const jsDay = initialDate.getDay();
+                    const targetDayOfWeek = jsDay === 0 ? 8 : jsDay + 1;
+                    $('#ThoiGianThucHien_DayOfWeek').val(targetDayOfWeek);
+                    
+                    const hours = String(initialDate.getHours()).padStart(2, '0');
+                    const minutes = String(initialDate.getMinutes()).padStart(2, '0');
+                    $('#ThoiGianThucHien_Time').val(`${hours}:${minutes}`);
+                    $('#ThoiGianThucHien').val(initialDateTimeStr);
+                } else {
+                    const now = new Date();
+                    const jsDay = now.getDay();
+                    const targetDayOfWeek = jsDay === 0 ? 8 : jsDay + 1;
+                    $('#ThoiGianThucHien_DayOfWeek').val(targetDayOfWeek);
+                    $('#ThoiGianThucHien_Time').val("08:00");
+                    updateThoiGianThucHien();
+                }
+
+                $('#btn-confirm-import').on('click', function () {
+                    const sheetName = $('#excel-sheet-select').val();
+                    const fromRow = parseInt($('#excel-row-from').val()) || 1;
+                    const toRow = parseInt($('#excel-row-to').val()) || null;
+
+                    if (!currentWorkbook || !sheetName) return;
+
+                    const worksheet = currentWorkbook.Sheets[sheetName];
+                    const univerSheetData = convertSheetJsToUniver(worksheet, fromRow, toRow);
+
+                    if (univerSheetData) {
+                        const univerAPI = window.univerAPIInstance || window.parent.univerAPIInstance;
+                        if (univerAPI) {
+                            const activeWorkbook = univerAPI.getActiveWorkbook();
+                            if (activeWorkbook) {
+                                const activeSheet = activeWorkbook.getActiveSheet();
+                                if (activeSheet) {
+                                    activeSheet.setCellData(univerSheetData.cellData);
+                                    const autofit = window.autoFitAllRows || window.parent.autoFitAllRows;
+                                    if (autofit) {
+                                        autofit();
+                                    }
+                                    toastr.success("Nhập dữ liệu Excel thành công!");
+                                }
+                            }
+                        }
+                    }
+                    $('#modal-excel-options').modal('hide');
+                });
+
+                $('#btn-export-excel').on('click', function () {
+                    try {
+                        const univerAPI = window.univerAPIInstance || window.parent.univerAPIInstance;
+                        if (!univerAPI) {
+                            toastr.error("Không tìm thấy Univer API");
+                            return;
+                        }
+                        const workbook = univerAPI.getActiveWorkbook();
+                        if (!workbook) {
+                            toastr.error("Không tìm thấy dữ liệu bảng tính!");
+                            return;
+                        }
+                        const data = workbook.save();
+                        const sheets = data.sheets;
+                        if (!sheets) return;
+
+                        const wb = XLSX.utils.book_new();
+
+                        for (const sheetId in sheets) {
+                            const sheet = sheets[sheetId];
+                            const cellData = sheet.cellData;
+                            const sheetName = sheet.name || sheetId;
+
+                            let maxRow = 0;
+                            let maxCol = 0;
+                            for (const rKey in cellData) {
+                                const r = parseInt(rKey);
+                                if (r > maxRow) maxRow = r;
+                                const row = cellData[rKey];
+                                for (const cKey in row) {
+                                    const c = parseInt(cKey);
+                                    if (c > maxCol) maxCol = c;
+                                }
+                            }
+
+                            const aoa = [];
+                            for (let r = 0; r <= maxRow; r++) {
+                                const rowArr = [];
+                                const univerRow = cellData[r];
+                                for (let c = 0; c <= maxCol; c++) {
+                                    let val = "";
+                                    if (univerRow && univerRow[c]) {
+                                        val = univerRow[c].v !== undefined ? univerRow[c].v : "";
+                                    }
+                                    rowArr.push(val);
+                                }
+                                aoa.push(rowArr);
+                            }
+
+                            const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+                            if (sheet.mergeData && Array.isArray(sheet.mergeData)) {
+                                ws['!merges'] = sheet.mergeData.map(m => ({
+                                    s: { r: m.startRow, c: m.startColumn },
+                                    e: { r: m.endRow, c: m.endColumn }
+                                }));
+                            }
+
+                            XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                        }
+
+                        XLSX.writeFile(wb, "KeKhaiDangKyGia.xlsx");
+                        toastr.success("Xuất file Excel thành công!");
+                    } catch (err) {
+                        console.error("Lỗi xuất file Excel", err);
+                        toastr.error("Có lỗi xảy ra khi xuất file Excel: " + err.message);
+                    }
+                });
+            });
+        </script>
+        <style>
+            #app-univer {
+                width: 100%;
+                height: 700px;
+            }
+        </style>
+        <div id="app-univer" data-mahs="@Model.MaHoSo" style="width: 100%; height: 85vh; border: 1px solid #ccc; border-radius: 4px;"></div>
+    </div>
+</div>
+
+<!-- Modal chọn Sheet và Dòng -->
+<div class="modal fade" id="modal-excel-options" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true" style="z-index: 9999;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Tùy chọn nhập Excel</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Chọn Sheet:</label>
+                    <select id="excel-sheet-select" class="form-control"></select>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Từ dòng:</label>
+                            <input type="number" id="excel-row-from" class="form-control" placeholder="Ví dụ: 1" min="1" />
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label>Đến dòng:</label>
+                            <input type="number" id="excel-row-to" class="form-control" placeholder="Để trống nếu lấy hết" min="1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy bỏ</button>
+                <button type="button" id="btn-confirm-import" class="btn btn-primary">Nhận dữ liệu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+

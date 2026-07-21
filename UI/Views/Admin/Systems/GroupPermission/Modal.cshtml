@@ -1,0 +1,84 @@
+@using DataAccess.Entities.Systems;
+@{
+    var useGroups = ViewData["UseGroups"] as List<OptionData> ?? new List<OptionData>();
+}
+
+<!--Create-Modal-->
+<div class="modal fade" id="Create_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    <b>@ViewData["Title"]?.ToString()?.ToUpper()</b>
+                    <span class="d-block text-muted pt-2 font-size-sm">
+                        Thêm mới @ViewData["Title"]?.ToString()?.ToLower()
+                    </span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="GroupPermission" asp-action="Create" method="post">
+                <div class="modal-body">
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Nhóm quyền: </label>
+                            <select id="group_create" name="group_create" class="form-control">
+                                @foreach (var item in useGroups)
+                                {
+                                    <option value="@item.Value">@item.DisplayName</option>
+                                }
+                            </select>
+                        </div>
+                        @Html.AntiForgeryToken()
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary font-weight-bold">Thêm mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--Delete-Modal-->
+<div class="modal fade" id="Delete_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Xóa @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="GroupPermission" asp-action="Delete" method="post">
+                <div class="modal-body">
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Nhóm quyền: </label>
+                            <label class="form-control" id="name_delete" name="name_delete"></label>
+                        </div>
+                        <input hidden id="id_delete" name="id_delete" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Xóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function Create() {
+        $('#Create_Modal').modal('show');
+    }
+    function Delete(id, name) {
+        document.getElementById("id_delete").value = id;
+        document.getElementById("name_delete").innerHTML = name;
+        $('#Delete_Modal').modal('show');
+    }
+</script>

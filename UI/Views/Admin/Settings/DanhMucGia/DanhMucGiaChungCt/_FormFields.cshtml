@@ -1,0 +1,25 @@
+@model DataAccess.Entities.Settings.DanhMucGia.DanhMucGiaChungCt
+
+<input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="DanhMucGiaChungId" />
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Số thứ tự sắp xếp:</label>
+            <input type="number" class="form-control" asp-for="STTSapXep" required />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Mã chi tiết: <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" asp-for="MaChiTiet" required />
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Tên chi tiết: <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" asp-for="TenChiTiet" required />
+        </div>
+    </div>
+</div>

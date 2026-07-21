@@ -1,0 +1,102 @@
+﻿@model List<DataAccess.Entities.Settings.DanhMucHopDong>
+@{
+    var session = HttpContextAccessor?.HttpContext?.Session ?? null;
+    string role = ViewData["Role"] as string ?? "";
+}
+<table class="table table-striped table-hover table-responsive-lg rounded-lg m-0">
+    <thead class="thead-light">
+        <tr style="text-align:center;" class="table-active">
+            <th width="5%">#</th>
+            <th width="10%" style="font-weight: bold;">Mã Nghiệp Vụ</th>
+            <th width="17%" style="font-weight: bold;">Tên Nghiệp Vụ</th>
+            <th width="10%" style="font-weight: bold;">@Html.DisplayNameFor(x => x.First().IsCC)</th>
+            <th width="27%" style="font-weight: bold;">@Html.DisplayNameFor(x => x.First().DanhSachOption)</th>
+            <th width="10%" style="font-weight: bold;">@Html.DisplayNameFor(x => x.First().TrangThai)</th>
+            <th width="13%" style="font-weight: bold;">@Html.DisplayNameFor(x => x.First().MoTa)</th>
+            <th width="8%" style="font-weight: bold;">Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Count() > 0)
+        {
+            @foreach (var item in Model)
+            {
+                var backin = FuntionGlobal.GetBackIn(item.Level);
+                <tr class="@(FuntionGlobal.GetClassTable(item.Level + 1))">
+                    <td class="text-center" style="vertical-align: middle">
+                        @Html.Raw(backin)
+                        @item.STTSapXep
+                    </td>
+                    <td class="text-center text-nowrap text-primary font-weight-boldest" style="vertical-align: middle">
+                        @Html.Raw(backin)
+                        @item.MaHopDong
+                    </td>
+                    <td class="text-left" style="vertical-align: middle">
+                        <div class="row">
+                            <div class="col-2"></div>
+                            <div class="col-10 text-nowrap">
+                                @Html.Raw(backin)
+                                @item.TenHopDong
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center text-nowrap" style="vertical-align: middle">
+                        @Html.Raw(backin)
+                        @(item.IsCC ? "Công chứng" : "Chứng thực")
+                    </td>
+                    <td class="text-left" style="vertical-align: middle">
+                        <div class="row">
+                            <div class="col-2"></div>
+                            <div class="col-10">
+                                @item.LoaiGiayTo
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center text-nowrap" style="vertical-align: middle">
+                        @Html.Raw(backin)
+                        <span class="label label-@(item.TrangThai ? "primary" : "danger") label-inline font-weight-bolder mr-2">
+                            @(item.TrangThai ? "Đang" : "Không") Hoạt Động
+                        </span>
+                    </td>
+                    <td style="vertical-align: middle">@item.MoTa</td>
+                    <td class="text-center text-nowrap" style="vertical-align: middle">
+                        @Html.Raw(backin)
+                        @if (session != null && FuntionGlobal.CheckPermission(session, role, "Create"))
+                        {
+                            if (!item.ParentId.HasValue)
+                            {
+                                <button type="button" onclick="HandleShowModel('modalCreateOrEdit','@Url.Action("Create","DanhMucNghiepVu", new {ParentId = item.Id})', 'Thêm mới Danh mục hóa đơn')" class="btn btn-sm btn-clean btn-icon">
+                                    <i class="icon-lg la la-plus text-primary"></i>
+                                </button>
+                            }
+                        }
+                        @if (session != null && FuntionGlobal.CheckPermission(session, role, "Edit"))
+                        {
+                            <button type="button" onclick="HandleShowModel('modalCreateOrEdit','@Url.Action("Edit","DanhMucNghiepVu", new {DanhMucId = item.Id})', 'Chỉnh sửa')" class="btn btn-sm btn-clean btn-icon" title="Chỉnh sửa">
+                                <i class="icon-lg la la-edit text-success"></i>
+                            </button>
+                        }
+                        @if (session != null && FuntionGlobal.CheckPermission(session, role, "Delete"))
+                        {
+                            <button type="button" class="btn btn-sm btn-clean btn-icon" title="Xóa" onclick="HandleConfirmDelteRow('@item.Id')">
+                                <i class="icon-lg la la-trash text-danger"></i>
+                            </button>
+                        }
+                        @if (item.ParentId.HasValue)
+                        {
+                            <button type="button" onclick="HandleShowModel('modalCreateOrEdit','@Url.Action("ManageFields","DanhMucNghiepVu", new {danhMucId = item.Id})', 'Quản lý các trường nhập động cho loại hợp đồng này')" class="btn btn-sm btn-clean btn-icon" title="Thiết lập trường nhập">
+                                <i class="la la-ellipsis-h text-primary"></i>
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td style="text-align:center" colspan="8">Không tìm thấy thông tin!!!</td>
+            </tr>
+        }
+    </tbody>
+</table>

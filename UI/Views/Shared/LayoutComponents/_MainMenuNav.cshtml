@@ -1,0 +1,10 @@
+<ul class="menu-nav">
+    <li class="menu-item" aria-haspopup="true" id="dashboard">
+        <a asp-controller="Home" asp-action="Index" class="menu-link">
+            <i class="menu-icon fas fa-tachometer-alt mr-2"></i>
+            <span class="menu-text">Trang chủ</span>
+        </a>
+    </li>
+
+    @await Html.PartialAsync("~/Views/Shared/LayoutComponents/_DynamicMenu.cshtml")
+</ul>

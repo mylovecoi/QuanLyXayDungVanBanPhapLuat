@@ -1,0 +1,332 @@
+<!--Edit Modal-->
+<div class="modal fade" id="Edit_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    <b>@ViewData["Title"]?.ToString()?.ToUpper()</b>
+                    <span class="d-block text-muted pt-2 font-size-sm">
+                        Chỉnh sửa @ViewData["Title"]?.ToString()?.ToLower()
+                    </span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_edit"></form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Update()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Reset Modal-->
+<div class="modal fade" id="Reset_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Đồng ý thay đổi mật khẩu về mặc định???</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group fv-plugins-icon-container">
+                    <label>
+                        Username:&nbsp;<b id="username_reset" style="color: #0000FF"></b>
+                        - Tên tài khoản:&nbsp;<b id="name_reset" style="color: #0000FF"></b>
+                    </label>
+                </div>
+
+                <input hidden id="id_reset" name="id_reset" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="ResetPassword()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Duplicate Modal-->
+<div class="modal fade" id="Duplicate_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Sao chép thông tin tài khoản</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group fv-plugins-icon-container">
+                    <label style="font-weight:bold; color:blue">Thông tin tài khoản cần sao chép</label>
+                    <label>
+                        Username:&nbsp;<b id="username_duplicate" style="color: #0000FF"></b>
+                        - Tên tài khoản:&nbsp;<b id="name_duplicate" style="color: #0000FF"></b>
+                    </label>
+                </div>
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Username:</label>
+                            <input type="text" id="username_duplicate" name="username_duplicate" class="form-control" />                           
+                        </div>
+                    </div>
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Tên tài khoản:</label>
+                            <input type="text" id="name_duplicate" name="name_duplicate" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="col-xl-12">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Email:</label>
+                            <input type="email" id="email_duplicate" name="email_duplicate" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <input hidden id="id_duplicate" name="id_duplicate" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Duplicate()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Modal-->
+<div class="modal fade" id="Delete_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Thông tin đơn vị
+                    <span class="d-block text-muted pt-2 font-size-sm">Đồng ý xóa thông tin đơn vị ???</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="User" asp-action="Delete" method="post">
+                <div class="modal-body">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label>
+                            Username:&nbsp;<b id="username_delete" style="color: #0000FF"></b>
+                            - Tên tài khoản:&nbsp;<b id="name_delete" style="color: #0000FF"></b>
+                        </label>
+
+                    </div>
+                    @Html.AntiForgeryToken()
+                    <input hidden id="id_delete" name="id_delete" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function SetEdit(id_edit) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Systems/User/Edit',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Id: id_edit,
+            },
+            success: function (data) {
+                $('#frm_edit').html(data);
+                $('#Edit_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+            }
+        })
+    }
+
+    function Update() {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Systems/User/Update',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Name: $('#name_edit').val(),
+                Status: $('#status_edit').val(),
+                GroupPermissionId: $('#group_edit').val(),
+                Email: $('#email_edit').val(),
+                Password: $('#password_edit').val(),
+                Content: $('#content_edit').val(),
+                Id: $('#id_edit').val(),
+            },
+            dataType: 'JSON',
+            success: function (data) {
+                if (data.status == 'success') {
+                    location.reload();
+                } else {
+                    toastr.error(data.message, "Lỗi!");
+                }
+            }
+        })
+    }
+
+    function SetReset(id, username, name) {
+        document.getElementById("id_reset").value = id;
+        document.getElementById("username_reset").innerHTML = username;
+        document.getElementById("name_reset").innerHTML = name;
+        $('#Reset_Modal').modal('show');
+    }
+
+    function ResetPassword() {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Systems/User/ResetPassword',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Id: $('#id_reset').val(),
+            },
+            dataType: 'JSON',
+            success: function (data) {
+                if (data.status == 'success') {
+                    location.reload();
+                } else {
+                    toastr.error(data.message, "Lỗi!");
+                }
+            }
+        })
+    }
+
+    function SetDuplicate(id, username, name) {
+        document.getElementById("id_duplicate").value = id;
+        document.getElementById("username_duplicate").innerHTML = username;
+        document.getElementById("name_duplicate").innerHTML = name;
+        $('#Duplicate_Modal').modal('show');
+    }
+
+    function Duplicate() {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        if ($('#username_duplicate').val() != '' && $('#name_duplicate').val() != '' && $('#email_duplicate').val() != '') {
+            $.ajax({
+                url: '/Systems/User/Duplicate',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': csrfToken // Gửi token qua header
+                },
+                data: {
+                    IdDuplicate: $('#id_duplicate').val(),
+                    Username: $('#username_duplicate').val(),
+                    Name: $('#name_duplicate').val(),
+                    Email: $('#email_duplicate').val(),
+                },
+                dataType: 'JSON',
+                success: function (data) {
+                    if (data.status == 'success') {
+                        location.reload();
+                    } else {
+                        toastr.error(data.message, "Lỗi!");
+                    }
+                }
+            })
+        } else {
+            toastr.error("Thông tin không được để trống!", "Lỗi!");
+        }
+    }
+
+    function SetDelete(id, username, name) {
+        document.getElementById("id_delete").value = id;
+        document.getElementById("username_delete").innerHTML = username;
+        document.getElementById("name_delete").innerHTML = name;
+        $('#Delete_Modal').modal('show');
+    }   
+</script>
+
+<!--Active Modal-->
+<div class="modal fade" id="Active_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm" id="title_active">Kích hoạt/Khóa tài khoản???</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group fv-plugins-icon-container">
+                    <label>
+                        Username:&nbsp;<b id="username_active" style="color: #0000FF"></b>
+                        - Tên tài khoản:&nbsp;<b id="name_active" style="color: #0000FF"></b>
+                    </label>
+                </div>
+                <input hidden id="id_active" name="id_active" />
+                <input hidden id="status_active" name="status_active" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Active()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function SetActive(id, status, username, name) {
+        document.getElementById("id_active").value = id;
+        document.getElementById("status_active").value = status;
+        document.getElementById("username_active").innerHTML = username;
+        document.getElementById("name_active").innerHTML = name;
+        if (status == 'Kích hoạt') {
+            document.getElementById("title_active").innerHTML = "Đồng ý kích hoạt tài khoản?";
+        } else {
+            document.getElementById("title_active").innerHTML = "Đồng ý khóa tài khoản?";
+        }
+        $('#Active_Modal').modal('show');
+    }
+
+    function Active() {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Systems/User/Active',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken // Gửi token qua header
+            },
+            data: {
+                Id: $('#id_active').val(),
+                Status: $('#status_active').val(),
+            },
+            dataType: 'JSON',
+            success: function (data) {
+                if (data.status == 'success') {
+                    location.reload();
+                } else {
+                    toastr.error(data.message, "Lỗi!");
+                }
+            }
+        })
+    }
+</script>

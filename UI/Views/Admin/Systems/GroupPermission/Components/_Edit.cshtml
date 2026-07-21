@@ -1,0 +1,56 @@
+﻿@model DataAccess.Entities.Systems.Permission
+
+<div class="form-group row">
+    <label class="col-4 col-form-label">Chức năng:</label>
+    <div class="col-8 col-form-label">
+        <span style="font-weight:bold; color:blue">@Model?.Title</span>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label class="col-4 col-form-label">Tương tác với dữ liệu:</label>
+    <div class="col-8 col-form-label">
+        <div class="checkbox-list">
+            <label class="checkbox">
+                <input type="checkbox" asp-for="Index" id="Index_edit" name="Index_edit" />
+                <span></span> Xem
+            </label>
+            @if (Model != null && !string.IsNullOrEmpty(Model.PhanLoai) && Model.PhanLoai != "Group")
+            {
+                if (Model.Role != null)
+                {
+                    if (!Model.Role.Contains("Log"))
+                    {
+                        <label class="checkbox">
+                            <input type="checkbox" asp-for="Create" id="Create_edit" name="Create_edit" />
+                            <span></span> Thêm
+                        </label>
+
+                        <label class="checkbox">
+                            <input type="checkbox" asp-for="Edit" id="Edit_edit" name="Edit_edit" />
+                            <span></span> Sửa
+                        </label>
+                        <label class="checkbox">
+                            <input type="checkbox" asp-for="Delete" id="Delete_edit" name="Delete_edit" />
+                            <span></span> Xóa
+                        </label>
+                        if (Model.Role.Contains("systems") || Model.Role.Contains("settings"))
+                        {
+                            <label class="checkbox">
+                                <input type="checkbox" asp-for="Approve" id="Approve_edit" name="Approve_edit" />
+                                <span></span> Chuyển/ Xét duyệt
+                            </label>
+
+                            <label class="checkbox">
+                                <input type="checkbox" asp-for="Public" id="Public_edit" name="Public_edit" />
+                                <span></span> Công bố
+                            </label>
+                        }
+                    }
+                }
+            }
+        </div>
+    </div>
+</div>
+<input type="hidden" id="Id_edit" name="Id_edit" value="@Model?.Id" />
+<input type="hidden" id="GroupPermissionId_edit" name="GroupPermissionId_edit" value="@Model?.GroupPermissionId" />

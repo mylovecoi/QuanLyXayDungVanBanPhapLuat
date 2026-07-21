@@ -1,0 +1,241 @@
+@using DataAccess.Entities.Settings;
+
+<!--Create-Modal-->
+<div class="modal fade" id="Create_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Thêm mới @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_create">
+                    @await Html.PartialAsync("~/Views/Admin/Settings/DanhMucGia/DanhMucGiaThueTaiNguyenCt/_FormFields.cshtml", new DataAccess.Entities.Settings.DanhMucGia.DanhMucGiaThueTaiNguyenCt { DanhMucGiaThueTaiNguyenId = (Guid)ViewData["DanhMucGiaThueTaiNguyenId"]! })
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Store()">Thêm mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Edit Modal-->
+<div class="modal fade" id="Edit_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Chỉnh sửa @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="frm_edit"></form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Update()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Delete Modal-->
+<div class="modal fade" id="Delete_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Xóa chi tiết @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="DanhMucGiaThueTaiNguyenCt" asp-action="Delete" method="post">
+                <div class="modal-body">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label>
+                            Nhóm, loại tài nguyên:&nbsp;<b id="ten_delete" name="ten_delete" style="color: #FF0000"></b>
+                        </label>
+                    </div>
+                    <input hidden id="id_delete" name="id_delete" />
+                    @Html.AntiForgeryToken()
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--DeleteAll Modal-->
+<div class="modal fade" id="DeleteAll_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Xóa toàn bộ chi tiết @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="DanhMucGiaThueTaiNguyenCt" asp-action="DeleteAll" method="post">
+                <div class="modal-body">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label>
+                            Bạn có đồng ý xóa toàn bộ chi tiết của danh mục <b class="text-primary">@ViewData["TenDanhMuc"]</b> không?
+                        </label>
+                    </div>
+                    <input hidden id="danhMucGiaThueTaiNguyenId_delete" name="danhMucGiaThueTaiNguyenId_delete" value="@ViewData["DanhMucGiaThueTaiNguyenId"]" />
+                    @Html.AntiForgeryToken()
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/modal.validation.js"></script>
+<script>
+    function Create() {
+        $('#Create_Modal').modal('show');
+    }
+
+    function Store() {
+        var form = document.getElementById('frm_create');
+        if (!form) {
+            toastr.error("Không tìm thấy form với id 'frm_create'", "Lỗi!");
+            return;
+        }
+        const fieldsToValidate = [
+            { id: 'Ten', message: 'Thông tin không được bỏ trống' },
+        ];
+        if (validateModalFormFields(form, fieldsToValidate)) {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+            const formData = new FormData(form);
+            $.ajax({
+                url: '/Settings/DanhMucGia/DanhMucGiaThueTaiNguyenCt/Store',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': csrfToken
+                },
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'JSON',
+                success: function (data) {
+                    if (data.status == 'success') {
+                        toastr.success(data.message);
+                        location.reload();
+                    } else {
+                        toastr.error(data.message, "Lỗi!");
+                    }
+                }
+            })
+        }
+    }
+
+    function Edit(id_edit) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '/Settings/DanhMucGia/DanhMucGiaThueTaiNguyenCt/Edit',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: {
+                id: id_edit,
+            },
+            success: function (data) {
+                $('#frm_edit').html(data);
+                $('#Edit_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+            }
+        })
+    }
+
+    $(document).on('show.bs.modal', '#Edit_Modal', function () {
+        $(this).find('input, select').each(function () {
+            var oldId = $(this).attr('id');
+            if (oldId && !oldId.startsWith('edit_')) {
+                $(this).attr('id', 'edit_' + oldId);
+            }
+        });
+    });
+
+    function Update() {
+        var form = document.getElementById('frm_edit');
+        if (!form) {
+            toastr.error("Không tìm thấy form với id 'frm_edit'", "Lỗi!");
+            return;
+        }
+        const fieldsToValidate = [
+            { id: 'edit_Ten', message: 'Thông tin không được bỏ trống' },
+        ];
+        if (validateModalFormFields(form, fieldsToValidate)) {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+            const formData = new FormData(form);
+            const tempForm = document.createElement('form');
+            for (let pair of formData.entries()) {
+                let name = pair[0];
+                let val = pair[1];
+                let input = document.createElement('input');
+                input.name = name;
+                input.value = val;
+                tempForm.appendChild(input);
+            }
+            const submitData = new FormData(tempForm);
+
+            $.ajax({
+                url: '/Settings/DanhMucGia/DanhMucGiaThueTaiNguyenCt/Update',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': csrfToken
+                },
+                data: submitData,
+                processData: false,
+                contentType: false,
+                dataType: 'JSON',
+                success: function (data) {
+                    if (data.status == 'success') {
+                        toastr.success(data.message);
+                        location.reload();
+                    } else {
+                        toastr.error(data.message, "Lỗi!");
+                    }
+                }
+            })
+        }
+    }
+
+    function Delete(id, Ten) {
+        document.getElementById("id_delete").value = id;
+        document.getElementById("ten_delete").innerHTML = Ten;
+        $('#Delete_Modal').modal('show');
+    }
+
+    function DeleteAll() {
+        $('#DeleteAll_Modal').modal('show');
+    }
+</script>

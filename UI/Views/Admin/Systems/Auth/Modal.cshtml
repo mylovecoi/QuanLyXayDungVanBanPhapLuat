@@ -1,0 +1,118 @@
+ <!--end::Page Scripts-->
+<div class="modal fade" id="ValidateOTP_Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form asp-controller="Auth" asp-action="SignIn" method="post" id="otpvalidation_frm">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h3 class="card-label">
+                        @ViewData["Title"]
+                        <span class="d-block text-muted pt-2 font-size-sm">Xác thực OTP để truy cập vào chương trình!!!</span>
+                    </h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="otpvalidate_data">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary font-weight-bold" onclick="SubmitOTPValidate()">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    function GetOTPValidate() {
+        if ($('#username').val() != '' && $('#password').val() != '') {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+            $.ajax({
+                url: '/Auth/GetOTPValidate',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': csrfToken // Gửi token qua header
+                },
+                data: {
+                    Username: $('#username').val(),
+                    Password: $('#password').val(),
+                },
+                success: function (data) {
+                    //console.log("Response nhận được:", data); // Debug
+                    if (data.status === "error") {
+                        toastr.error(data.message, "Lỗi!");
+                    } else {
+                        $('#otpvalidate_data').html(data);
+                        $('#ValidateOTP_Modal').modal('show'); // Hiển thị modal
+                    }
+                },
+                error: function (xhr, status, error) {
+                    //console.error("Lỗi AJAX:", xhr.responseText); // Debug lỗi
+                    toastr.error("Không thể tải dữ liệu!", "Lỗi!");
+                }
+            });
+        } else {
+            toastr.error("Thông tin không được bỏ trống!!!", "Lỗi!");
+        }
+    }
+    function SubmitOTPValidate() {
+        if ($('#key_otp').val() !== '') {
+            document.getElementById("clientUnixTimestamp_otp").value = Math.floor(Date.now() / 1000);
+            $('#otpvalidation_frm').submit();
+        } else {
+            toastr.error("Thông tin không được bỏ trống!!!", "Lỗi!");
+        }
+    }
+
+    $(document).ready(function () {
+        // Lắng nghe sự kiện bấm phím Enter trong ô nhập OTP khi modal đang hiển thị
+        $('#ValidateOTP_Modal').on('shown.bs.modal', function () {
+            $('#key_otp').on('keypress', function (e) {
+                if (e.which == 13) { // Kiểm tra phím Enter (ASCII 13)
+                    SubmitOTPValidate();
+                }
+            });
+        });
+
+        // Hủy bỏ sự kiện khi modal bị đóng (để tránh lỗi khi mở lại modal)
+        $('#ValidateOTP_Modal').on('hidden.bs.modal', function () {
+            $('#key_otp').off('keypress'); // Hủy bỏ sự kiện để tránh trùng lặp
+        });
+
+        $('#ValidateOTP_Modal').on('shown.bs.modal', function () {
+            $('#key_otp').focus();  // Focus vào trường OTP sau khi modal được mở
+        });
+
+        // Show registration success modal if redirecting from registration
+        var urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('registered') === 'true') {
+            $('#RegistrationSuccess_Modal').modal('show');
+        }
+    });
+</script>
+
+<div class="modal fade" id="RegistrationSuccess_Modal" tabindex="-1" role="dialog" aria-labelledby="regSuccessLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 8px;">
+            <div class="modal-header bg-success">
+                <h5 class="modal-title text-white" id="regSuccessLabel" style="font-weight: bold;">
+                    <i class="la la-check-circle mr-2 icon-xl text-white"></i>Đăng ký thành công
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center p-6">
+                <p class="font-size-h5 text-dark font-weight-bold mb-4">
+                    Đăng ký tài khoản thành công!
+                </p>
+                <p class="text-muted">
+                    Vui lòng chờ tài khoản được xét duyệt và kích hoạt bởi cơ quan có thẩm quyền.
+                </p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-primary font-weight-bold px-10" data-dismiss="modal">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+</div>

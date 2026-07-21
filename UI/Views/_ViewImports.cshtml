@@ -1,0 +1,11 @@
+@using UI
+@using UI.Helper;
+@using UI.ViewModels;
+@using DataAccess.Entities;
+@using DataAccess.Entities.Settings.DanhMucGia;
+@using Microsoft.AspNetCore.Http;
+@using Services.Systems;
+
+@inject IHttpContextAccessor HttpContextAccessor
+@inject ISystemInfoService _systemInfoService
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

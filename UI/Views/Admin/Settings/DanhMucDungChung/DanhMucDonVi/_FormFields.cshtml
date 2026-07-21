@@ -1,0 +1,108 @@
+﻿@using DataAccess.Entities.Systems
+@{
+    var groupPermission = ViewData["GroupPermission"] as IEnumerable<GroupPermision> ?? Enumerable.Empty<GroupPermision>();
+    var useGroups = ViewData["UseGroups"] as List<OptionData> ?? new List<OptionData>();
+}
+@model DataAccess.Entities.Settings.DanhMucDonVi
+
+<div class="row">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="DonViChuQuanId" />
+    <input type="hidden" asp-for="Level" />
+    @if (Model.DonViChuQuanId != Guid.Empty)
+    {
+        <div class="col-xl-12">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Tên đơn vị chủ quản: </label>
+                <label class="form-control">@Model.TenDonViChuQuan</label>
+            </div>
+        </div>
+    }
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Tên đơn vị: </label>
+            <input class="form-control" type="text" asp-for="TenDonVi" autofocus />
+            <span id="TenDonViError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Địa chỉ: </label>
+            <input class="form-control" type="text" asp-for="DiaChi" />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Phân loại đơn vị: </label>
+            <select class="form-control" asp-for="PhanLoaiDonVi">
+                @foreach (var item in useGroups)
+                {
+                    <option value="@item.Value">@item.DisplayName</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Sắp xếp: </label>
+            <input type="number" class="form-control" asp-for="STTSapXep" />
+        </div>
+    </div>
+    <div class="col-xl-4">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Tính năng thanh toán: </label>
+            <select class="form-control" asp-for="TinhNangThanhToan">
+                <option value="true">Kích hoạt</option>
+                <option value="false">Vô hiệu hoá</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Chức danh thủ trưởng: </label>
+            <input type="text" class="form-control" asp-for="ChucDanhQuanLy" />
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label style="font-weight:bold; color:blue">Họ và tên thủ trưởng: </label>
+            <input type="text" class="form-control" asp-for="HoVaTenNguoiQuanLy" />
+        </div>
+    </div>
+    @if (Model.Id == Guid.Empty)
+    {
+        <div class="col-xl-6">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Username: </label>
+                <input type="text" class="form-control" id="Username" name="Username" />
+                <span id="UsernameError" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Email: </label>
+                <input type="email" class="form-control" id="Email" name="Email" />
+                <span id="emailError" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Mật khẩu: </label>
+                <input type="text" class="form-control" id="Password" name="Password" />
+                <span id="PasswordError" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Nhóm quyền: </label>
+                <select class="form-control" id="GroupPermissionId" name="GroupPermissionId">
+                    @foreach (var item in groupPermission)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    }
+</div>

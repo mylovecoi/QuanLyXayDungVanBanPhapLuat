@@ -1,0 +1,121 @@
+@model DataAccess.Entities.KeKhaiDangKyGia.DoanhNghiep
+@using DataAccess.Entities.KeKhaiDangKyGia;
+@using DataAccess.Entities.Settings;
+@{
+    var lvkd = ViewData["DoanhNghiepLvKd"] as IEnumerable<DoanhNghiepLvKd> ?? new List<DoanhNghiepLvKd>();
+    var listKinhDoanh = ViewData["DanhMucKinhDoanh"] as IEnumerable<DanhMucKinhDoanh> ?? new List<DanhMucKinhDoanh>();
+    var dsdonvi = ViewData["DanhMucDonVi"] as IEnumerable<DanhMucDonVi> ?? new List<DanhMucDonVi>();
+    int record_id = 1;
+}
+
+<div class="row">
+    <!-- Cột: Thông tin chung doanh nghiệp -->
+    <div class="col-xl-6 mb-6">
+        <div class="card card-custom gutter-b" style="border: 1px solid #ebedf3;">
+            <div class="card-header h-50px">
+                <div class="card-title">
+                    <span class="card-label font-weight-bolder text-primary font-size-h6">Thông Tin Cơ Bản</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="form-group row my-2">
+                    <label class="col-4 col-form-label font-weight-bold text-muted">Tên doanh nghiệp:</label>
+                    <div class="col-8 col-form-label">
+                        <span class="font-weight-bold text-dark-75">@Model.TenDoanhNghiep</span>
+                    </div>
+                </div>
+                <div class="form-group row my-2">
+                    <label class="col-4 col-form-label font-weight-bold text-muted">Mã số thuế:</label>
+                    <div class="col-8 col-form-label">
+                        <span class="font-weight-bold text-dark-75">@Model.MaSoThue</span>
+                    </div>
+                </div>
+                <div class="form-group row my-2">
+                    <label class="col-4 col-form-label font-weight-bold text-muted">Số điện thoại:</label>
+                    <div class="col-8 col-form-label">
+                        <span class="font-weight-bold text-dark-75">@Model.SoDienThoai</span>
+                    </div>
+                </div>
+                <div class="form-group row my-2">
+                    <label class="col-4 col-form-label font-weight-bold text-muted">Địa chỉ:</label>
+                    <div class="col-8 col-form-label">
+                        <span class="font-weight-bold text-dark-75">@Model.DiaChi</span>
+                    </div>
+                </div>
+                <div class="form-group row my-2">
+                    <label class="col-4 col-form-label font-weight-bold text-muted">Email:</label>
+                    <div class="col-8 col-form-label">
+                        <span class="font-weight-bold text-dark-75">@Model.Email</span>
+                    </div>
+                </div>
+                <div class="form-group row my-2">
+                    <label class="col-4 col-form-label font-weight-bold text-muted">Trạng thái:</label>
+                    <div class="col-8 col-form-label">
+                        <span class="label label-lg label-inline font-weight-bold label-light-success">@Model.TrangThai</span>
+                    </div>
+                </div>
+                <div class="form-group row my-2">
+                    <label class="col-4 col-form-label font-weight-bold text-muted">Giấy phép ĐKKD:</label>
+                    <div class="col-8 col-form-label">
+                        @if (!string.IsNullOrEmpty(Model.GiayPhepKd))
+                        {
+                            <a href="@Model.GiayPhepKd" target="_blank" class="btn btn-xs btn-light-success font-weight-bold">
+                                <i class="la la-download"></i> Tải về / Xem file
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted font-italic">Chưa tải lên</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-100"></div>
+
+    <!-- Cột: Lĩnh vực kinh doanh đăng ký -->
+    <div class="col-xl-6">
+        <div class="card card-custom gutter-b" style="border: 1px solid #ebedf3;">
+            <div class="card-header h-50px">
+                <div class="card-title">
+                    <span class="card-label font-weight-bolder text-primary font-size-h6">Lĩnh Vực Kinh Doanh</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead>
+                            <tr style="text-align:center" class="bg-light">
+                                <th width="10%">#</th>
+                                <th>Lĩnh vực / Nghề kinh doanh</th>
+                                <th>Cơ quan tiếp nhận</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (lvkd != null && lvkd.Any())
+                            {
+                                foreach (var item in lvkd)
+                                {
+                                    var nghe = listKinhDoanh.FirstOrDefault(x => x.MaNghe == item.MaNghe);
+                                    <tr>
+                                        <td class="text-center">@(record_id++)</td>
+                                        <td class="font-weight-bold text-dark-75">@nghe?.TenNghe</td>
+                                        <td>@(dsdonvi.FirstOrDefault(x => x.Id == item.DonViQuanLyId)?.TenDonVi ?? "")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted font-italic">Không có lĩnh vực đăng ký nào.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

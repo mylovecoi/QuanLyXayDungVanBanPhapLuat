@@ -1,0 +1,52 @@
+@model DataAccess.Entities.Settings.DanhMucGia.DanhMucGiaChung
+@using DataAccess.Entities.Settings;
+
+@{
+    var listKinhDoanhNganh = ViewData["DanhMucKinhDoanhNganh"] as IEnumerable<DanhMucKinhDoanh> ?? new List<DanhMucKinhDoanh>();
+    var listKinhDoanhNghe = ViewData["DanhMucKinhDoanhNghe"] as IEnumerable<DanhMucKinhDoanh> ?? new List<DanhMucKinhDoanh>();
+}
+
+<input type="hidden" asp-for="Id" />
+<div class="row">
+    <div class="col-xl-12">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Nghề kinh doanh: <span class="text-danger">*</span></label>
+            <select class="form-control select2multi" asp-for="MaNghe" required>
+                <option value="">-- Chọn nghề kinh doanh --</option>
+                @foreach (var nganh in listKinhDoanhNganh)
+                {
+                    <optgroup label="@nganh.TenNghe">
+                        @{
+                            var listNgheTheoNganh = listKinhDoanhNghe.Where(t => t.MaNganh == nganh.MaNghe).ToList();
+                        }
+                        @foreach (var nghe in listNgheTheoNganh)
+                        {
+                            <!option value="@nghe.MaNghe" @(Model.MaNghe == nghe.MaNghe ? "selected" : "")>&emsp;@nghe.TenNghe</!option>
+                        }
+                    </optgroup>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Mã danh mục: <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" asp-for="MaDanhMuc" required />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Tên danh mục: <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" asp-for="TenDanhMuc" required />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group fv-plugins-icon-container">
+            <label>Trạng thái theo dõi:</label>
+            <select class="form-control" asp-for="TrangThai">
+                <option value="TD">Đang theo dõi</option>
+                <option value="KTD">Dừng theo dõi</option>
+            </select>
+        </div>
+    </div>
+</div>
