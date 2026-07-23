@@ -1,5 +1,6 @@
 using DataAccess;
 using DataAccess.Entities.Systems;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Services.DTOs;
@@ -178,7 +179,10 @@ namespace Services
                 var userInfo = _authService.GetUserInfo();
                 Guid? donViId = userInfo?.DanhMucDonViId;
                 bool isSSA = userInfo?.SSA ?? false;
-
+                /*
+                 * Lấy dữ liệu thống kê hồ sơ theo năm hiện tại hoặc năm lớn nhất có dữ liệu
+                 * Thống kê số lượng hồ sơ theo tháng cho các loại hồ sơ: Định giá, Kê khai đăng ký giá, Giá thị trường
+                 
                 var queryDG = _dbContext.DinhGias.AsNoTracking().Where(x => x.TrangThai != "CXD");
                 var queryKK = _dbContext.KeKhaiDangKyGias.AsNoTracking().Where(x => x.TrangThai != "CXD");
                 var queryGTT = _dbContext.GiaThiTruongs.AsNoTracking().Where(x => x.TrangThai != "CXD");
@@ -225,7 +229,7 @@ namespace Services
                     monthlyGTT.Add(gttCount);
                     monthlyTotal.Add(dgCount + kkCount + gttCount);
                 }
-
+                
                 var result = new
                 {
                     Year = currentYear,
@@ -234,7 +238,15 @@ namespace Services
                     MonthlyGTT = monthlyGTT,
                     MonthlyTotal = monthlyTotal
                 };
-
+                */
+                var result = new
+                {
+                    Year = DateTime.Now.Year,
+                    MonthlyDG = 12,
+                    MonthlyKK = 12,
+                    MonthlyGTT = 12,
+                    MonthlyTotal = 12
+                };
                 return new CommonResponse("success", "Thành công", result);
             }
             catch (Exception ex)

@@ -1,15 +1,9 @@
 using DataAccess.Entities;
 using DataAccess.Entities.Settings;
-using DataAccess.Entities.Settings.DanhMucGia;
-using DataAccess.Entities.DinhGiaHHDV;
-using DataAccess.Entities.DinhGiaHHDV.ChiTiet;
-using DataAccess.Entities.KeKhaiDangKyGia;
 using DataAccess.Entities.Manages;
-using DataAccess.Entities.Manages.ThongTinHoSo;
 using DataAccess.Entities.Systems;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using DataAccess.Entities.ThamDinhGia;
 
 namespace DataAccess
 {
@@ -23,30 +17,7 @@ namespace DataAccess
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
-            // Cấu hình MoMoPayment với ConcurrencyToken
-            modelBuilder.Entity<MoMoPayment>()
-                .Property(p => p.RowVersion)
-                .IsRowVersion();
-
-            // NEW: Unique constraint for EAV values per (HoSoId, DanhMucHopDongChiTietId)
-            modelBuilder.Entity<HoSoCCCTChiTiet>()
-                .HasIndex(e => new { e.HoSoId, e.DanhMucHopDongChiTietId })
-                .IsUnique();
-
-            // NEW: Configure delete behaviors to avoid multiple cascade paths in SQL Server
-            modelBuilder.Entity<HoSoCCCTChiTiet>()
-                .HasOne(e => e.HoSo)
-                .WithMany(h => h.HoSoCCCTChiTiets)
-                .HasForeignKey(e => e.HoSoId)
-                .OnDelete(DeleteBehavior.NoAction);
-
-            modelBuilder.Entity<HoSoCCCTChiTiet>()
-                .HasOne(e => e.Field)
-                .WithMany()
-                .HasForeignKey(e => e.DanhMucHopDongChiTietId)
-                .OnDelete(DeleteBehavior.Cascade);
+            base.OnModelCreating(modelBuilder);            
         }
 
         public override int SaveChanges()
@@ -121,67 +92,15 @@ namespace DataAccess
         public DbSet<DanhMucDonVi> DanhMucDonVis { get; set; }
         public DbSet<DanhMucDiaDanh> DanhMucDiaDanhs { get; set; }
         public DbSet<OptionData> OptionDatas { get; set; }
-        public DbSet<DanhMucHopDong> DanhMucHopDongs { get; set; }
-        public DbSet<DanhMucHopDongChiTiet> DanhMucHopDongChiTiets { get; set; }
+       
         public DbSet<DanhMucPhongBan> DanhMucPhongBans { get; set; }
         public DbSet<DanhMucCanBo> DanhMucCanBos { get; set; }
-        public DbSet<DanhMucPhiLePhi> DanhMucPhiLePhis { get; set; }
-        public DbSet<DanhMucDonViTinh> DanhMucDonViTinhs { get; set; }
-        public DbSet<DanhMucKinhDoanh> DanhMucKinhDoanhs { get; set; }
-        public DbSet<DanhMucGiaChung> DanhMucGiaChungs { get; set; }
-        public DbSet<DanhMucGiaChungCt> DanhMucGiaChungCts { get; set; }
-        public DbSet<DanhMucNuocSach> DanhMucNuocSachs { get; set; }
-        public DbSet<DanhMucNuocSachCt> DanhMucNuocSachCts { get; set; }
-        public DbSet<DanhMucGiaThueTaiNguyen> DanhMucGiaThueTaiNguyens { get; set; }
-        public DbSet<DanhMucGiaThueTaiNguyenCt> DanhMucGiaThueTaiNguyenCts { get; set; }
         #endregion
 
         #region Manages
         public DbSet<AttachedFile> AttachedFiles { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
-        public DbSet<ThongTinNganChan> ThongTinNganChans { get; set; }
-        public DbSet<HoSoCCCT> HoSoCCCTs { get; set; }
-        public DbSet<HoSoCCCTChiPhi> HoSoCCCTChiPhis { get; set; }
-        public DbSet<HoSoCCCTHistory> HoSoCCCTHistories { get; set; }
-        public DbSet<HoSoCCCTChiTiet> HoSoCCCTChiTiets { get; set; }
-        public DbSet<ThuTucHanhChinh> ThuTucHanhChinhs { get; set; }
-        public DbSet<MoMoPayment> MoMoPayments { get; set; }
-        #endregion
-
-        #region DinhGiaHHDV
-        public DbSet<GiaThiTruong> GiaThiTruongs { get; set; }
-        public DbSet<GiaThiTruongCt> GiaThiTruongCts { get; set; }
-        public DbSet<GiaThiTruongDanhMuc> GiaThiTruongDanhMucs { get; set; }
-        public DbSet<GiaThiTruongDanhMucCt> GiaThiTruongDanhMucCts { get; set; }
-        public DbSet<GiaThiTruongTongHop> GiaThiTruongTongHops { get; set; }
-        public DbSet<GiaThiTruongTongHopCt> GiaThiTruongTongHopCts { get; set; }
-        public DbSet<DinhGia> DinhGias { get; set; }
-        public DbSet<ChiTietGiaChung> ChiTietGiaChungs { get; set; }
-        public DbSet<ChiTietNuocSach> ChiTietNuocSachs { get; set; }
-        public DbSet<ChiTietGiaThueTaiNguyen> ChiTietGiaThueTaiNguyens { get; set; }
-
-        #endregion
-
-        #region KeKhaiDangKyGia
-        public DbSet<DoanhNghiep> DoanhNghieps { get; set; }
-        public DbSet<DoanhNghiepLvKd> DoanhNghiepLvKds { get; set; }
-        public DbSet<KeKhaiDangKyGiaDMDT> KeKhaiDangKyGiaDMDTs { get; set; }
-        public DbSet<KeKhaiDangKyGiaDMKH> KeKhaiDangKyGiaDMKHs { get; set; }
-        public DbSet<KeKhaiDangKyGiaDMHH> KeKhaiDangKyGiaDMHHs { get; set; }
-        public DbSet<KeKhaiDangKyGia> KeKhaiDangKyGias { get; set; }
-        public DbSet<KeKhaiDangKyGiaCt> KeKhaiDangKyGiaCts { get; set; }
-
-        #endregion
-
-        #region ThamDinhGia
-        public DbSet<ThamDinhGiaDanhMucDonVi> ThamDinhGiaDanhMucDonVis { get; set; }
-        public DbSet<ThamDinhGiaDanhMucHangHoa> ThamDinhGiaDanhMucHangHoas { get; set; }
-        public DbSet<ThamDinhGiaDanhMucHangHoaCt> ThamDinhGiaDanhMucHangHoaCts { get; set; }
-        public DbSet<ThamDinhGiaHoiDong> ThamDinhGiaHoiDongs { get; set; }
-        public DbSet<ThamDinhGiaHoiDongCt> ThamDinhGiaHoiDongCts { get; set; }
-        public DbSet<ThamDinhGia> ThamDinhGias { get; set; }
-        public DbSet<ThamDinhGiaCt> ThamDinhGiaCts { get; set; }
-
+        public DbSet<Notification> Notifications { get; set; }       
+        public DbSet<ThuTucHanhChinh> ThuTucHanhChinhs { get; set; }       
         #endregion
     }
 }

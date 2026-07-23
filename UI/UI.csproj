@@ -6,17 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Controllers\Admin\DinhGiaHHDV\DinhGia\**" />
-    <Compile Remove="Views\Admin\DinhGiaHHDV\DinhGia\**" />
-    <Content Remove="Controllers\Admin\DinhGiaHHDV\DinhGia\**" />
-    <Content Remove="Views\Admin\DinhGiaHHDV\DinhGia\**" />
-    <EmbeddedResource Remove="Controllers\Admin\DinhGiaHHDV\DinhGia\**" />
-    <EmbeddedResource Remove="Views\Admin\DinhGiaHHDV\DinhGia\**" />
-    <None Remove="Controllers\Admin\DinhGiaHHDV\DinhGia\**" />
-    <None Remove="Views\Admin\DinhGiaHHDV\DinhGia\**" />
-  </ItemGroup>
-
 
 
   <ItemGroup>
@@ -44,10 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\Admin\Reports\" />
     <Folder Include="Controllers\Admin\Settings\DanhMucDonViSuDung\" />
-    <Folder Include="Views\Admin\KeKhaiDangKyGia\DoanhNghiep\DangKy\" />
-    <Folder Include="Views\Admin\KeKhaiDangKyGia\DoanhNghiep\DanhSach\" />
-    <Folder Include="Views\Admin\KeKhaiDangKyGia\DoanhNghiep\LvKd\" />
+    <Folder Include="Views\Admin\Reports\" />
     <Folder Include="Views\Admin\Settings\DanhMucDonViSuDung\" />
     <Folder Include="Views\Admin\Settings\DanhMucDonViSuDung\" />
     <Folder Include="wwwroot\FileUpload\HDSD\" />

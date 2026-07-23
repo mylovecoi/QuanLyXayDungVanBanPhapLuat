@@ -131,76 +131,7 @@ namespace Services.Systems
             }
         }
 
-        /// <summary>
-        /// Lấy mã nghề (MaNghe) từ request hiện tại.
-        /// Hỗ trợ cả trường hợp truy vấn trực tiếp từ Query/Route/Form hoặc truy vấn Db qua hoSoId/Mahs/MaHoSo.
-        /// </summary>
-        private string? GetCurrentMaNghe()
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext == null) return null;
-
-            // 1. Lấy trực tiếp từ Query string (ví dụ: ?MaNghe=...)
-            if (httpContext.Request.Query.TryGetValue("MaNghe", out var queryMaNghe))
-            {
-                return queryMaNghe.ToString();
-            }
-
-            // 2. Lấy từ Route values
-            if (httpContext.Request.RouteValues.TryGetValue("MaNghe", out var routeMaNghe))
-            {
-                return routeMaNghe?.ToString();
-            }
-
-            // 3. Lấy từ Form data (dành cho POST request)
-            if (httpContext.Request.HasFormContentType && httpContext.Request.Form.TryGetValue("MaNghe", out var formMaNghe))
-            {
-                return formMaNghe.ToString();
-            }
-
-            // 4. Nếu không có MaNghe trực tiếp, thử tìm khóa chính hoSoId trong tham số để query DB lấy MaNghe
-            string? hoSoIdStr = null;
-            if (httpContext.Request.Query.TryGetValue("hoSoId", out var queryHoSoId))
-            {
-                hoSoIdStr = queryHoSoId.ToString();
-            }
-            else if (httpContext.Request.RouteValues.TryGetValue("hoSoId", out var routeHoSoId))
-            {
-                hoSoIdStr = routeHoSoId?.ToString();
-            }
-            else if (httpContext.Request.HasFormContentType && httpContext.Request.Form.TryGetValue("hoSoId", out var formHoSoId))
-            {
-                hoSoIdStr = formHoSoId.ToString();
-            }
-
-            if (!string.IsNullOrEmpty(hoSoIdStr) && Guid.TryParse(hoSoIdStr, out var hoSoId))
-            {
-                var dinhGia = _dbContext.DinhGias.FirstOrDefault(t => t.Id == hoSoId);
-                if (dinhGia != null)
-                {
-                    return dinhGia.MaNghe;
-                }
-            }
-
-            // 5. Thử tìm theo mã hồ sơ (Mahs hoặc MaHoSo) để query DB lấy MaNghe
-            string? mahs = null;
-            if (httpContext.Request.Query.TryGetValue("Mahs", out var qMahs)) mahs = qMahs.ToString();
-            else if (httpContext.Request.RouteValues.TryGetValue("Mahs", out var rMahs)) mahs = rMahs?.ToString();
-            else if (httpContext.Request.Query.TryGetValue("MaHoSo", out var qMaHoSo)) mahs = qMaHoSo.ToString();
-            else if (httpContext.Request.RouteValues.TryGetValue("MaHoSo", out var rMaHoSo)) mahs = rMaHoSo?.ToString();
-
-            if (!string.IsNullOrEmpty(mahs))
-            {
-                var dinhGia = _dbContext.DinhGias.FirstOrDefault(t => t.MaHoSo == mahs);
-                if (dinhGia != null)
-                {
-                    return dinhGia.MaNghe;
-                }
-            }
-
-            return null;
-        }
-
+       
         /// <summary>
         /// Lấy thông tin Permission khớp với Controller, Action và MaNghe (Parameter).
         /// Giải quyết trường hợp nhiều chức năng dùng chung Controller/Action nhưng khác tham số MaNghe.
@@ -209,11 +140,11 @@ namespace Services.Systems
         {
             if (permissions == null || !permissions.Any()) return null;
 
-            string? maNghe = GetCurrentMaNghe();
-            if (!string.IsNullOrEmpty(maNghe))
+            //2026.07.21 - chưa xem kỹ nội dung này (mới khởi tạo dự án) nên chưa biết có cần thiết hay không, nhưng tạm thời giữ lại để tránh lỗi khi chưa có dữ liệu
+            if (!string.IsNullOrEmpty(action))
             {
                 // Ưu tiên so khớp chính xác cả Controller, Action và Parameter trùng với MaNghe
-                var matched = permissions.FirstOrDefault(t => t.Controller == controller && t.Action == action && t.Parameter == maNghe);
+                var matched = permissions.FirstOrDefault(t => t.Controller == controller && t.Action == action);
                 if (matched != null) return matched;
             }
 

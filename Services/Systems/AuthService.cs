@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Http;
 using DataAccess.Entities.Systems;
-using DataAccess.Entities.Settings;
-using DataAccess.Entities.Settings.DanhMucGia;
-using DataAccess.Entities.KeKhaiDangKyGia;
 using Newtonsoft.Json;
 using System.Text;
 using DataAccess;
@@ -129,11 +126,7 @@ namespace Services.Systems
             {
                 var roles = await _roleActionService.GetAllRolesAsync();
                 if (roles != null) // Kiểm tra null
-                {
-                    if (request.Level == "Doanh nghiệp")
-                    {
-                        roles = roles.Where(r => r.UseGroupList.Contains("DN")).ToList();
-                    }
+                {                   
                     foreach (var role in roles)
                     {
                         data.Add(new Permission
@@ -165,138 +158,7 @@ namespace Services.Systems
             {
                 var roles = await _permissionService.GetAllPermissionsByGroupIdAsync(request.GroupPermissionId);
                 data.AddRange(roles.Data);
-            }
-
-            // Lấy danh sách ngành nghề động
-            var dataKinhDoanhAll = await _dbContext.DanhMucKinhDoanhs
-                .Where(t => t.TheoDoi == "TD" && t.LoaiGia == "KKG")
-                .OrderBy(t => t.STTSapXep)
-                .ToListAsync();
-
-            List<DanhMucKinhDoanh> dataKinhDoanh;
-            if (request.Level == "Doanh nghiệp")
-            {
-                var listMaNghe = await _dbContext.DoanhNghiepLvKds
-                    .Where(t => t.DoanhNghiepQuanLyId == request.DoanhNghiepId && t.TrangThai != "CXD")
-                    .Select(t => t.MaNghe)
-                    .Distinct()
-                    .ToListAsync();
-
-                var childItems = dataKinhDoanhAll.Where(t => listMaNghe.Contains(t.MaNghe)).ToList();
-                var parentRoles = childItems.Where(t => !string.IsNullOrEmpty(t.RoleGoc)).Select(t => t.RoleGoc).Distinct().ToList();
-
-                dataKinhDoanh = dataKinhDoanhAll.Where(t => 
-                    listMaNghe.Contains(t.MaNghe) || 
-                    (t.Level == 0 && parentRoles.Contains(t.Role))
-                ).ToList();
-            }
-            else
-            {
-                dataKinhDoanh = dataKinhDoanhAll;
-            }
-
-            var dynamicPermissions = new List<Permission>();
-            foreach (var item in data)
-            {
-                if (item.Role != null && (item.Role.Equals("KeKhaiDangKyGia.ThongTinHoSo", StringComparison.OrdinalIgnoreCase) || item.Role.EndsWith(".KeKhaiDangKyGia.ThongTinHoSo", StringComparison.OrdinalIgnoreCase)))
-                {
-                    item.PhanLoai = "Group";
-                    foreach (var nghe in dataKinhDoanh)
-                    {
-                        var parentId = item.RoleActionId;
-                        if (nghe.Level > 0 && !string.IsNullOrEmpty(nghe.RoleGoc))
-                        {
-                            var parentNghe = dataKinhDoanh.FirstOrDefault(p => p.Role == nghe.RoleGoc);
-                            if (parentNghe != null)
-                            {
-                                parentId = parentNghe.Id;
-                            }
-                        }
-
-                        dynamicPermissions.Add(new Permission
-                        {
-                            GroupPermissionId = item.GroupPermissionId,
-                            RoleActionId = nghe.Id,
-                            RoleActionGroupId = parentId,
-                            Status = item.Status,
-                            PhanLoai = nghe.PhanLoai,
-                            Level = (item.Level + 1 + nghe.Level), // Điều chỉnh level khớp với cấp phân nhánh
-                            STTSapXep = nghe.STTSapXep,
-                            Title = nghe.TenNghe,
-                            Role = item.Role + "." + nghe.Role,
-                            MenuActive = (item.Role + "." + nghe.Role).Replace(".", "_"),
-                            Controller = "KeKhaiDangKyGia",
-                            Action = "Index",
-                            Parameter = nghe.MaNghe,
-                            Index = true,
-                            Create = true,
-                            Edit = true,
-                            Delete = true,
-                            Approve = true,
-                            Public = true,
-                        });
-                    }
-                }
-            }
-            data.AddRange(dynamicPermissions);
-
-            // Lấy danh sách ngành nghề động cho Định giá
-            var dataDinhGia = await _dbContext.DanhMucKinhDoanhs
-                .Where(t => t.TheoDoi == "TD" && t.LoaiGia == "DG")
-                .OrderBy(t => t.STTSapXep)
-                .ToListAsync();
-
-            var dynamicDinhGiaPermissions = new List<Permission>();
-            foreach (var item in data)
-            {
-                if (item.Role != null && (item.Role.Equals("DinhGia.ThongTinHoSo", StringComparison.OrdinalIgnoreCase) || item.Role.EndsWith(".DinhGia.ThongTinHoSo", StringComparison.OrdinalIgnoreCase)))
-                {
-                    item.PhanLoai = "Group";
-
-                    foreach (var nghe in dataDinhGia)
-                    {
-                        var parentId = item.RoleActionId;
-                        if (!string.IsNullOrEmpty(nghe.RoleGoc))
-                        {
-                            var parentNghe = dataDinhGia.FirstOrDefault(p => p.Role == nghe.RoleGoc);
-                            if (parentNghe != null)
-                            {
-                                parentId = parentNghe.Id;
-                            }
-                        }
-
-                        int ngheLevel = nghe.Level;
-                        if (!string.IsNullOrEmpty(nghe.Role) && nghe.Role.Contains("."))
-                        {
-                            ngheLevel = nghe.Role.Split('.').Length - 1;
-                        }
-
-                        dynamicDinhGiaPermissions.Add(new Permission
-                        {
-                            GroupPermissionId = item.GroupPermissionId,
-                            RoleActionId = nghe.Id,
-                            RoleActionGroupId = parentId,
-                            Status = item.Status,
-                            PhanLoai = nghe.PhanLoai,
-                            Level = (item.Level + 1 + ngheLevel),
-                            STTSapXep = nghe.STTSapXep,
-                            Title = nghe.TenNghe,
-                            Role = item.Role + "." + nghe.Role,
-                            MenuActive = (item.Role + "." + nghe.Role).Replace(".", "_"),
-                            Controller = "DinhGia",
-                            Action = "Index",
-                            Parameter = nghe.MaNghe,
-                            Index = true,
-                            Create = true,
-                            Edit = true,
-                            Delete = true,
-                            Approve = true,
-                            Public = true,
-                        });
-                    }
-                }
-            }
-            data.AddRange(dynamicDinhGiaPermissions);
+            }           
 
             // Serialize and store model in session
             var jsonString = JsonConvert.SerializeObject(data);

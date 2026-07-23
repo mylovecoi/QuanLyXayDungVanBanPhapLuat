@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Entities\DinhGiaHHDV\DinhGia\**" />
-    <EmbeddedResource Remove="Entities\DinhGiaHHDV\DinhGia\**" />
-    <None Remove="Entities\DinhGiaHHDV\DinhGia\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.3.0" />

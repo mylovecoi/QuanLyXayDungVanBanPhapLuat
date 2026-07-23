@@ -77,75 +77,27 @@ namespace UI.Security
                 requestBody = context.Request.QueryString.Value;
             }
 
-            string actionDescription = "";
-            if (controllerName.Contains("KeKhai", StringComparison.OrdinalIgnoreCase) || controllerName.Contains("DoanhNghiep", StringComparison.OrdinalIgnoreCase))
+            string actionNameFriendly = actionName switch
             {
-                actionDescription = "[Kê khai đăng ký giá] ";
-            }
-            else if (controllerName.Contains("DinhGia", StringComparison.OrdinalIgnoreCase))
-            {
-                actionDescription = "[Định giá] ";
-            }
-            else if (controllerName.Contains("GiaThiTruong", StringComparison.OrdinalIgnoreCase))
-            {
-                actionDescription = "[Giá thị trường] ";
-            }
-
-            if (!string.IsNullOrEmpty(actionDescription))
-            {
-                string maNghe = context.Request.Query["MaNghe"].ToString();
-                if (string.IsNullOrEmpty(maNghe) && routeValues != null && routeValues.ContainsKey("MaNghe"))
-                {
-                    maNghe = routeValues["MaNghe"]?.ToString() ?? "";
-                }
-                if (string.IsNullOrEmpty(maNghe) && !string.IsNullOrEmpty(requestBody))
-                {
-                    var match = System.Text.RegularExpressions.Regex.Match(requestBody, @"[?&""']?MaNghe[?&""']?\s*[:=]\s*""?([^""&'\s,}]*)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-                    if (match.Success)
-                    {
-                        maNghe = match.Groups[1].Value;
-                    }
-                }
-
-                string tenNghe = "";
-                if (!string.IsNullOrEmpty(maNghe))
-                {
-                    try
-                    {
-                        var dbContext = context.RequestServices.GetRequiredService<ApplicationDbContext>();
-                        var dm = dbContext.DanhMucKinhDoanhs.AsNoTracking().FirstOrDefault(x => x.MaNghe == maNghe);
-                        if (dm != null)
-                        {
-                            tenNghe = dm.TenNghe ?? "";
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        // Bỏ qua lỗi DB nếu có để tránh ảnh hưởng đến luồng request chính
-                    }
-                }
-
-                string actionNameFriendly = actionName switch
-                {
-                    "Index" => "Xem danh sách / Trang chủ",
-                    "Create" => "Tạo mới",
-                    "Store" => "Lưu mới",
-                    "Edit" => "Chỉnh sửa",
-                    "Update" => "Cập nhật",
-                    "Destroy" => "Xóa bỏ",
-                    "Delete" => "Xóa bỏ",
-                    "Show" => "Xem chi tiết",
-                    "XetDuyet" => "Xét duyệt hồ sơ",
-                    "Chuyen" => "Chuyển hồ sơ",
-                    "TraLai" => "Trả lại hồ sơ",
-                    "CongBo" => "Công bố",
-                    "HuyCongBo" => "Hủy công bố",
-                    _ => actionName
-                };
-                string ngheSuffix = !string.IsNullOrEmpty(tenNghe) ? $" - Nghề: {tenNghe}" : "";
-                actionDescription += $"Thực hiện hành động: {actionNameFriendly}{ngheSuffix} (Chức năng: {controllerName})";
-                requestBody = string.IsNullOrEmpty(requestBody) ? actionDescription : $"{actionDescription} | Dữ liệu: {requestBody}";
-            }
+                "Index" => "Xem danh sách / Trang chủ",
+                "Create" => "Tạo mới",
+                "Store" => "Lưu mới",
+                "Edit" => "Chỉnh sửa",
+                "Update" => "Cập nhật",
+                "Destroy" => "Xóa bỏ",
+                "Delete" => "Xóa bỏ",
+                "Show" => "Xem chi tiết",
+                "XetDuyet" => "Xét duyệt hồ sơ",
+                "Chuyen" => "Chuyển hồ sơ",
+                "TraLai" => "Trả lại hồ sơ",
+                "CongBo" => "Công bố",
+                "HuyCongBo" => "Hủy công bố",
+                _ => actionName
+            };
+                
+            string actionDescription = $"Thực hiện hành động: {actionNameFriendly} (Chức năng: {controllerName})";
+            requestBody = string.IsNullOrEmpty(requestBody) ? actionDescription : $"{actionDescription} | Dữ liệu: {requestBody}";
+           
 
             var data = new Log
             {

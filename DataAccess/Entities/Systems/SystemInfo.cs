@@ -14,5 +14,7 @@ namespace DataAccess.Entities.Systems
         public DateTime ExpDate { get; set; } = DateTime.Now.AddYears(1);
         public int LoginLock { get; set; } = 5;
         public bool Train { get; set; } = false;
+        public bool IsChatBot { get; set; } = false;
+        public bool IsOPT { get; set; } = false;
     }
 }

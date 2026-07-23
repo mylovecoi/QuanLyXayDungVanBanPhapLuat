@@ -6,22 +6,13 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Services;
-using Services.BaoCao12;
-using Services.BaoCao17;
 using Services.Hubs;
-using Services.DinhGiaHHDV.DinhGiaKhac;
-using Services.DinhGiaHHDV.GiaThiTruong;
+
 using Services.Manages;
-using Services.Manages.ThongTinHoSo;
 using Services.Settings;
-using Services.Settings.DanhMucDungChung;
-using Services.Settings.DanhMucDungChung.DmHopDong;
-using Services.Settings.DanhMucGia;
+
 using Services.Systems;
-using Services.KeKhaiDangKyGia;
-using Services.TraCuuBaoCao;
-using Services.TraCuuBaoCao.TraCuu;
-using Services.ThamDinhGia;
+
 using System.Text;
 using System.Threading.RateLimiting;
 using UI.Security;
@@ -49,10 +40,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-builder.Services.AddHttpClient<IMoMoPaymentService, MoMoPaymentService>(client =>
-{
-    client.Timeout = TimeSpan.FromSeconds(30);
-});
 
 // Đăng ký HttpContextAccessor (dùng trong Service)
 builder.Services.AddHttpContextAccessor();
@@ -86,34 +73,8 @@ builder.Services.AddRateLimiter(options =>
         await context.HttpContext.Response.WriteAsync("Quá nhiều yêu cầu, hãy thử lại sau.", cancellationToken);
     };
 });
-//Services DinhGiaHHDV
-builder.Services.AddScoped<IDinhGiaService, DinhGiaService>();
-builder.Services.AddScoped<IDinhGiaXetDuyetService, DinhGiaXetDuyetService>();
-builder.Services.AddScoped<IGiaThiTruongDanhMucService, GiaThiTruongDanhMucService>();
-builder.Services.AddScoped<IGiaThiTruongDanhMucCtService, GiaThiTruongDanhMucCtService>();
-builder.Services.AddScoped<IGiaThiTruongService, GiaThiTruongService>();
-builder.Services.AddScoped<IGiaThiTruongXetDuyetService, GiaThiTruongXetDuyetService>();
-builder.Services.AddScoped<IGiaThiTruongTongHopService, GiaThiTruongTongHopService>();
-//End Services DinhGiaHHDV
 
-//Services KeKhaiDangKyGia
-builder.Services.AddScoped<IDoanhNghiepService, DoanhNghiepService>();
-// builder.Services.AddScoped<IKeKhaiDangKyGiaCsKdService, KeKhaiDangKyGiaCsKdService>();
-builder.Services.AddScoped<IKeKhaiDangKyGiaService, KeKhaiDangKyGiaService>();
-builder.Services.AddScoped<IKeKhaiDangKyGiaXetDuyetService, KeKhaiDangKyGiaXetDuyetService>();
-builder.Services.AddScoped<IKeKhaiDangKyGiaDanhMucService, KeKhaiDangKyGiaDanhMucService>();
-builder.Services.AddScoped<IKeKhaiDangKyGiaTheoDoiService, KeKhaiDangKyGiaTheoDoiService>();
-//End Services KeKhaiDangKyGia
 
-//Services ThamDinhGia
-builder.Services.AddScoped<IThamDinhGiaDanhMucDonViService, ThamDinhGiaDanhMucDonViService>();
-builder.Services.AddScoped<IThamDinhGiaDanhMucHangHoaService, ThamDinhGiaDanhMucHangHoaService>();
-builder.Services.AddScoped<IThamDinhGiaDanhMucHangHoaCtService, ThamDinhGiaDanhMucHangHoaCtService>();
-builder.Services.AddScoped<IThamDinhGiaHoiDongService, ThamDinhGiaHoiDongService>();
-builder.Services.AddScoped<IThamDinhGiaHoiDongCtService, ThamDinhGiaHoiDongCtService>();
-builder.Services.AddScoped<IThamDinhGiaService, ThamDinhGiaService>();
-builder.Services.AddScoped<IThamDinhGiaXetDuyetService, ThamDinhGiaXetDuyetService>();
-//End Services ThamDinhGia
 
 //Services Systems
 builder.Services.AddSingleton<OTPService>();
@@ -137,16 +98,7 @@ builder.Services.AddScoped<IDanhMucDonViService, DanhMucDonViService>();
 builder.Services.AddScoped<IDanhMucPhongBanService, DanhMucPhongBanService>();
 builder.Services.AddScoped<IDanhMucCanBoService, DanhMucCanBoService>();
 builder.Services.AddScoped<IDanhMucDiaDanhService, DanhMucDiaDanhService>();
-builder.Services.AddScoped<IDmHopDongService, DmHopDongService>();
-builder.Services.AddScoped<IDmHopDongChiTietService, DmHopDongChiTietService>();
-builder.Services.AddScoped<IDanhMucPhiLePhiService, DanhMucPhiLePhiService>();
-builder.Services.AddScoped<IDmKinhDoanhService, DanhMucKinhDoanhService>();
-builder.Services.AddScoped<IDanhMucNuocSachService, DanhMucNuocSachService>();
-builder.Services.AddScoped<IDanhMucNuocSachCtService, DanhMucNuocSachCtService>();
-builder.Services.AddScoped<IDanhMucGiaChungService, DanhMucGiaChungService>();
-builder.Services.AddScoped<IDanhMucGiaChungCtService, DanhMucGiaChungCtService>();
-builder.Services.AddScoped<IDanhMucGiaThueTaiNguyenService, DanhMucGiaThueTaiNguyenService>();
-builder.Services.AddScoped<IDanhMucGiaThueTaiNguyenCtService, DanhMucGiaThueTaiNguyenCtService>();
+
 //End Services Settings
 
 
@@ -154,28 +106,14 @@ builder.Services.AddScoped<IDanhMucGiaThueTaiNguyenCtService, DanhMucGiaThueTaiN
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVanBanPhapLuatService, VanBanPhapLuatService>();
 builder.Services.AddScoped<IAttachedFileService, AttachedFileService>();
-builder.Services.AddScoped<IThongTinNganChanService, ThongTinNganChanService>();
-builder.Services.AddScoped<IHoSoCCCTService, HoSoCCCTService>();
-builder.Services.AddScoped<IHoSoCCCTXetDuyetService, HoSoCCCTXetDuyetService>();
-builder.Services.AddScoped<IHoSoCCCTBaoCaoService, HoSoCCCTBaoCaoService>();
 builder.Services.AddScoped<IThuTucHanhChinhService, ThuTucHanhChinhService>();
-builder.Services.AddScoped<IHoSoCCCTChiTietService, HoSoCCCTChiTietService>();
-builder.Services.AddScoped<IHoSoCCCTDynamicService, HoSoCCCTDynamicService>();
 
-// Services BaoCao12 và BaoCao17
-builder.Services.AddScoped<IBaoCao12Service, BaoCao12Service>();
-builder.Services.AddScoped<IBaoCao17Service, BaoCao17Service>();
-// Đăng ký MoMoPaymentService
-builder.Services.Configure<MoMoConfig>(builder.Configuration.GetSection("MoMo"));
-builder.Services.AddScoped<ITraCuuService, TraCuuService>();
-builder.Services.AddScoped<IBaoCaoService, BaoCaoService>();
+
 
 // Đăng ký BackgroundTaskQueue và QueuedHostedService
 builder.Services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
 
 builder.Services.AddHostedService<QueuedHostedService>();
-// Đăng ký MoMoScheduledTaskService để kiểm tra giao dịch định kỳ
-builder.Services.AddHostedService<MoMoScheduledTaskService>();
 //End Services Manages
 
 // Filter
