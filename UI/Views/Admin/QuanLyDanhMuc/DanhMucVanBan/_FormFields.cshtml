@@ -1,0 +1,77 @@
+@using DataAccess.Entities.QuanLyDanhMuc
+
+@model DanhMucVanBan
+
+<input asp-for="Id" type="hidden" />
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Tên loại văn bản <span class="text-danger">*</span></label>
+            <input asp-for="TenLoaiVanBan" class="form-control" placeholder="Ví dụ: Nghị quyết của HĐND" />
+        </div>
+    </div>
+    <div class="col-xl-3">
+        <div class="form-group">
+            <label>Cấp chính quyền <span class="text-danger">*</span></label>
+            <select asp-for="CapChinhQuyen" class="form-control">
+                <option value="">-- Chọn cấp --</option>
+                <option value="Tỉnh">Tỉnh</option>
+                <option value="Xã">Xã</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-3">
+        <div class="form-group">
+            <label>Thứ tự sắp xếp</label>
+            <input asp-for="ThuTuSapXep" type="number" min="1" class="form-control" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Chủ thể ban hành <span class="text-danger">*</span></label>
+            <select asp-for="ChuTheBanHanh" class="form-control">
+                <option value="">-- Chọn chủ thể --</option>
+                <option value="HĐND">HĐND</option>
+                <option value="UBND">UBND</option>
+                <option value="Chủ tịch UBND">Chủ tịch UBND</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Ký hiệu mẫu</label>
+            <input asp-for="KyHieuMau" class="form-control" placeholder="Ví dụ: 01/2026/QĐ-UBND" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Mô tả</label>
+            <textarea asp-for="MoTa" class="form-control" rows="3" placeholder="Mô tả ngắn về loại văn bản"></textarea>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Ghi chú</label>
+            <textarea asp-for="GhiChu" class="form-control" rows="3" placeholder="Ghi chú bổ sung"></textarea>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Trạng thái</label>
+            <select asp-for="TrangThai" class="form-control">
+                <option value="true">Đang sử dụng</option>
+                <option value="false">Ngừng sử dụng</option>
+            </select>
+        </div>
+    </div>
+</div>

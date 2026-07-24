@@ -152,6 +152,22 @@ CREATE TABLE [QuestionAnswers] (
     CONSTRAINT [PK_QuestionAnswers] PRIMARY KEY ([Id])
 );
 
+CREATE TABLE [DanhMucTrangThais] (
+    [Id] uniqueidentifier NOT NULL,
+    [MaTrangThai] nvarchar(max) NOT NULL,
+    [TenTrangThai] nvarchar(max) NOT NULL,
+    [MaMauHex] nvarchar(max) NOT NULL,
+    [ThuTuSapXep] int NOT NULL,
+    [TrangThai] bit NOT NULL,
+    [MoTa] nvarchar(max) NULL,
+    [GhiChu] nvarchar(max) NULL,
+    [CreatedBy] uniqueidentifier NOT NULL,
+    [CreatedDate] datetime2 NOT NULL,
+    [UpdatedBy] uniqueidentifier NOT NULL,
+    [UpdatedDate] datetime2 NOT NULL,
+    CONSTRAINT [PK_DanhMucTrangThais] PRIMARY KEY ([Id])
+);
+
 CREATE TABLE [RoleActions] (
     [Id] uniqueidentifier NOT NULL,
     [STTSapXep] int NOT NULL,
@@ -307,6 +323,56 @@ CREATE INDEX [IX_DanhMucPhongBans_DanhMucDonViId] ON [DanhMucPhongBans] ([DanhMu
 
 DECLARE @Now DATETIME = GETDATE();
 
+INSERT INTO DanhMucTrangThais
+(
+    Id, MaTrangThai, TenTrangThai, MaMauHex, ThuTuSapXep,
+    TrangThai, MoTa, GhiChu,
+    CreatedBy, CreatedDate, UpdatedBy, UpdatedDate
+)
+VALUES
+(
+    '30000000-0000-0000-0000-000000000001',
+    N'DANG_XU_LY',
+    N'Đang xử lý',
+    N'#28A745',
+    1,
+    1,
+    N'Trạng thái đang được xử lý và hiển thị màu xanh trên màn hình theo dõi.',
+    NULL,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now
+),
+(
+    '30000000-0000-0000-0000-000000000002',
+    N'QUA_HAN',
+    N'Quá hạn',
+    N'#DC3545',
+    2,
+    1,
+    N'Trạng thái đã quá hạn xử lý và hiển thị màu đỏ trên màn hình theo dõi.',
+    NULL,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now
+),
+(
+    '30000000-0000-0000-0000-000000000003',
+    N'SAP_DEN_HAN',
+    N'Sắp đến hạn',
+    N'#FFC107',
+    3,
+    1,
+    N'Trạng thái sắp đến hạn xử lý và hiển thị màu vàng trên màn hình theo dõi.',
+    NULL,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now
+);
+
 INSERT INTO OptionDatas
 (
     Id, CreatedBy, CreatedDate, UpdatedBy, UpdatedDate,
@@ -439,8 +505,8 @@ VALUES
     @Now,
     '11111111-1111-1111-1111-111111111111',
     @Now,
-    3, 'Detail', 2, 'Manages.VanBanPhapLuat', '20000000-0000-0000-0000-000000000011',
-    N'Danh sách văn bản', 'VanBanPhapLuat', 'Index', NULL, 'AttachedFiles',
+    3, 'Detail', 2, 'QuanLyDanhMuc.DanhMucVanBan', '20000000-0000-0000-0000-000000000011',
+    N'Danh sách văn bản', 'DanhMucVanBan', 'Index', NULL, 'DanhMucVanBans',
     N'Kích hoạt', 'QuanTriHeThong', NULL
 ),
 (
@@ -449,8 +515,8 @@ VALUES
     @Now,
     '11111111-1111-1111-1111-111111111111',
     @Now,
-    4, 'Detail', 2, 'Settings.TrangThai', '20000000-0000-0000-0000-000000000011',
-    N'Danh sách trạng thái', 'DangPhatTrien', 'TrangThai', NULL, 'DangPhatTrien',
+    4, 'Detail', 2, 'QuanLyDanhMuc.DanhMucTrangThai', '20000000-0000-0000-0000-000000000011',
+    N'Danh sách trạng thái', 'DanhMucTrangThai', 'Index', NULL, 'DanhMucTrangThais',
     N'Kích hoạt', 'QuanTriHeThong', NULL
 ),
 (
@@ -466,6 +532,9 @@ VALUES
 
 INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
 VALUES (N'20260723082931_InitDb', N'9.0.2');
+
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20260724093000_AddDanhMucTrangThai', N'9.0.7');
 
 COMMIT;
 GO

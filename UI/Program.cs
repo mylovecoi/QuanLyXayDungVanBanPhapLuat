@@ -9,6 +9,7 @@ using Services;
 using Services.Hubs;
 
 using Services.Manages;
+using Services.QuanLyDanhMuc;
 using Services.Settings;
 
 using Services.Systems;
@@ -98,6 +99,8 @@ builder.Services.AddScoped<IDanhMucDonViService, DanhMucDonViService>();
 builder.Services.AddScoped<IDanhMucPhongBanService, DanhMucPhongBanService>();
 builder.Services.AddScoped<IDanhMucCanBoService, DanhMucCanBoService>();
 builder.Services.AddScoped<IDanhMucDiaDanhService, DanhMucDiaDanhService>();
+builder.Services.AddScoped<IDanhMucTrangThaiService, DanhMucTrangThaiService>();
+builder.Services.AddScoped<IDanhMucVanBanService, DanhMucVanBanService>();
 
 //End Services Settings
 

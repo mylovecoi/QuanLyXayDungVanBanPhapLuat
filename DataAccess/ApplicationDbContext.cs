@@ -1,5 +1,6 @@
 using DataAccess.Entities;
 using DataAccess.Entities.Settings;
+using DataAccess.Entities.QuanLyDanhMuc;
 using DataAccess.Entities.Manages;
 using DataAccess.Entities.Systems;
 using Microsoft.AspNetCore.Http;
@@ -91,6 +92,8 @@ namespace DataAccess
         #region Settings
         public DbSet<DanhMucDonVi> DanhMucDonVis { get; set; }
         public DbSet<DanhMucDiaDanh> DanhMucDiaDanhs { get; set; }
+        public DbSet<DanhMucTrangThai> DanhMucTrangThais { get; set; }
+        public DbSet<DanhMucVanBan> DanhMucVanBans { get; set; }
         public DbSet<OptionData> OptionDatas { get; set; }
        
         public DbSet<DanhMucPhongBan> DanhMucPhongBans { get; set; }
