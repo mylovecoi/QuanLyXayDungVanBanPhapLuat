@@ -1,34 +1,52 @@
-﻿@model DataAccess.Entities.Manages.AttachedFile
+@using Services.Manages
+@model DataAccess.Entities.Manages.AttachedFile
+
+@{
+    var donViOptions = ViewData["FormDonViOptions"] as List<DonViOptionModel> ?? new List<DonViOptionModel>();
+    Guid? selectedDonViId = Model.DonViId;
+    if (selectedDonViId == null && ViewData["FormSelectedDonViId"] is Guid selectedGuid)
+    {
+        selectedDonViId = selectedGuid;
+    }
+    var isSSA = ViewData["FormIsSSA"] is bool flag && flag;
+}
+
 <div class="modal-body">
     @Html.AntiForgeryToken()
     <input hidden asp-for="Id" />
     <input hidden asp-for="TableName" />
+
+    @if (!isSSA)
+    {
+        <input type="hidden" asp-for="DonViId" value="@(selectedDonViId?.ToString() ?? string.Empty)" />
+    }
+
     <div class="row">
         <div class="col-xl-4">
             <div class="form-group fv-plugins-icon-container">
-                <label style="font-weight:bold; color:blue">Số văn bản: </label>
+                <label style="font-weight:bold; color:blue">Số văn bản:</label>
                 <input type="text" asp-for="SoVanBan" class="form-control" />
                 <span id="SoVanBanError" class="text-danger"></span>
             </div>
         </div>
         <div class="col-xl-4">
             <div class="form-group fv-plugins-icon-container">
-                <label style="font-weight:bold; color:blue">Ngày ban hành: </label>
+                <label style="font-weight:bold; color:blue">Ngày ban hành:</label>
                 <input type="date" asp-for="NgayBanHanh" class="form-control" onkeydown="return false;" />
                 <span id="NgayBanHanhError" class="text-danger"></span>
             </div>
         </div>
         <div class="col-xl-4">
             <div class="form-group fv-plugins-icon-container">
-                <label style="font-weight:bold; color:blue">Ngày áp dụng: </label>
+                <label style="font-weight:bold; color:blue">Ngày áp dụng:</label>
                 <input type="date" asp-for="NgayApDung" class="form-control" onkeydown="return false;" />
                 <span id="NgayApDungError" class="text-danger"></span>
             </div>
         </div>
-    
+
         <div class="col-xl-8">
             <div class="form-group fv-plugins-icon-container">
-                <label style="font-weight:bold; color:blue">Mô tả: </label>
+                <label style="font-weight:bold; color:blue">Mô tả:</label>
                 <input type="text" asp-for="MoTa" class="form-control" />
                 <span id="MoTaError" class="text-danger"></span>
             </div>
@@ -43,21 +61,45 @@
                 <span asp-validation-for="Public" class="text-danger"></span>
             </div>
         </div>
+
         <div class="col-xl-12">
             <div class="form-group fv-plugins-icon-container">
-                <label style="font-weight:bold; color:blue">Đường dẫn: </label>
+                <label style="font-weight:bold; color:blue">Đơn vị quản lý:</label>
+                @if (isSSA)
+                {
+                    <select asp-for="DonViId" class="form-control">
+                        @foreach (var item in donViOptions)
+                        {
+                            <option value="@item.Id" selected="@(selectedDonViId.HasValue && selectedDonViId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
+                        }
+                    </select>
+                }
+                else
+                {
+                    <select asp-for="DonViId" class="form-control" disabled>
+                        @foreach (var item in donViOptions)
+                        {
+                            <option value="@item.Id" selected="@(selectedDonViId.HasValue && selectedDonViId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
+                        }
+                    </select>
+                }
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="form-group fv-plugins-icon-container">
+                <label style="font-weight:bold; color:blue">Đường dẫn:</label>
                 <input type="text" asp-for="Url" class="form-control" />
             </div>
         </div>
         <div class="col-xl-12">
             <div class="form-group fv-plugins-icon-container">
                 <label style="font-weight:bold; color:blue">
-                    File Upload:
+                    File upload:
                     @if (!string.IsNullOrEmpty(Model.FileName))
                     {
-                        <a href="/Manages/Download/AttachedFile?id=@Model.Id" target="_blank" ; font-weight: bold;
-                           color: red; text-decoration: underline;">
-                            📎 File hiện tại (@Model.FileName)
+                        <a href="/Manages/Download/AttachedFile?id=@Model.Id" target="_blank" style="font-weight: bold; color: red; text-decoration: underline;">
+                            File hiện tại (@Model.FileName)
                         </a>
                     }
                 </label>

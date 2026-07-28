@@ -1,0 +1,453 @@
+@{
+    var routePrefix = ViewData["RoutePrefix"]?.ToString() ?? "/Manages/HoSoVanBan";
+    var isXetDuyetDangKy = string.Equals(routePrefix, "/Manages/XetDuyetDangKy", StringComparison.OrdinalIgnoreCase);
+    var isPheDuyetDangKy = string.Equals(routePrefix, "/Manages/PheDuyetDangKy", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="modal fade" id="Create_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    <b>@ViewData["Title"]?.ToString()?.ToUpper()</b>
+                    <span class="d-block text-muted pt-2 font-size-sm">Thêm mới @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form action="@($"{routePrefix}/Store")" method="post" id="frm_create">
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="Store()">Thêm mới</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="Show_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Thông tin @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="frm_show">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="Timeline_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Timeline @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Theo dõi bằng timeline của @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="frm_timeline">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ChuyenHoSo_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Chuyển hồ sơ đăng ký
+                    <span class="d-block text-muted pt-2 font-size-sm">Gửi hồ sơ lên đơn vị tiếp nhận</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form id="frm_chuyenhoso">
+                <div class="modal-body" id="frm_chuyenhoso_body">
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="SubmitChuyenHoSo()">Chuyển hồ sơ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (isXetDuyetDangKy)
+{
+    <div class="modal fade" id="NhanHoSo_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="card-label">
+                        Nhận hồ sơ
+                        <span class="d-block text-muted pt-2 font-size-sm">Chọn cách tiếp nhận hồ sơ đăng ký</span>
+                    </h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                </div>
+                <form id="frm_nhanhoso">
+                    <div class="modal-body">
+                        <input type="hidden" id="NhanHoSoId" />
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold">Hình thức nhận</label>
+                            <select id="NhanHoSoActionType" class="form-control">
+                                <option value="NHAN_HO_SO">Nhận hồ sơ</option>
+                                <option value="NHAN_VA_CHUYEN_PHE_DUYET">Nhận và chuyển phê duyệt</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary font-weight-bold" onclick="SubmitNhanHoSo()">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (isXetDuyetDangKy || isPheDuyetDangKy)
+{
+    <div class="modal fade" id="TraLaiHoSo_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="card-label">
+                        Trả lại hồ sơ
+                        <span class="d-block text-muted pt-2 font-size-sm">Nhập lý do để chuyển hồ sơ về bước đăng ký</span>
+                    </h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i aria-hidden="true" class="ki ki-close"></i>
+                    </button>
+                </div>
+                <form id="frm_tralaihoso">
+                    <div class="modal-body">
+                        <input type="hidden" id="TraLaiHoSoId" />
+                        <div class="form-group">
+                            <label class="font-weight-bold">Lý do trả lại <span class="text-danger">*</span></label>
+                            <textarea id="LyDoTraLai" class="form-control" rows="4" placeholder="Nhập rõ lý do trả lại hồ sơ"></textarea>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold">Ghi chú</label>
+                            <textarea id="GhiChuTraLai" class="form-control" rows="2" placeholder="Thông tin bổ sung nếu cần"></textarea>
+                        </div>
+                    </div>
+                </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger font-weight-bold" onclick="SubmitTraLaiHoSo()">Trả lại hồ sơ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    function Create() {
+        if ('@routePrefix' === '/Manages/DangKyVanBan') {
+            window.location.href = '/Manages/DangKyVanBan/CreatePage';
+            return;
+        }
+
+        $.ajax({
+            url: '@routePrefix/Create',
+            type: 'GET',
+            success: function (data) {
+                $('#frm_create').html(data);
+                $('#Create_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error('Không thể tải dữ liệu!', 'Lỗi!');
+            }
+        });
+    }
+
+    function EditDangKyHoSo(id) {
+        window.location.href = '/Manages/DangKyVanBan/EditPage?id=' + id;
+    }
+
+    function Store() {
+        var form = document.getElementById('frm_create');
+        if (!form) {
+            return;
+        }
+
+        const fields = [
+            { id: 'TenHoSo', message: 'Tên hồ sơ không được bỏ trống' },
+            { id: 'DanhMucVanBanId', message: 'Loại văn bản không được bỏ trống' },
+            { id: 'QuyTrinhSoanThaoId', message: 'Quy trình soạn thảo không được bỏ trống' }
+        ];
+
+        if (validateHoSoForm(form, fields)) {
+            form.submit();
+        }
+    }
+
+    function validateHoSoForm(form, fields) {
+        let isValid = true;
+        fields.forEach(function (field) {
+            const input = form.querySelector('#' + field.id);
+            if (!input) {
+                return;
+            }
+
+            let error = form.querySelector('#' + field.id + 'Error');
+            if (!error) {
+                error = document.createElement('span');
+                error.id = field.id + 'Error';
+                error.className = 'text-danger';
+                input.parentNode.appendChild(error);
+            }
+
+            if (!input.value || !input.value.trim()) {
+                isValid = false;
+                input.style.border = '1px solid red';
+                error.textContent = field.message;
+            } else {
+                input.style.border = '';
+                error.textContent = '';
+            }
+        });
+        return isValid;
+    }
+
+    function Show(id) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '@routePrefix/Show',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: { id: id },
+            success: function (data) {
+                $('#frm_show').html(data);
+                $('#Show_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error('Không thể tải dữ liệu!', 'Lỗi!');
+            }
+        });
+    }
+
+    function OpenWorkflowAction(id) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        const actionUrl = '@(isPheDuyetDangKy ? "/Manages/PheDuyetDangKy/WorkflowAction" : "")';
+        if (!actionUrl) {
+            Show(id);
+            return;
+        }
+
+        $.ajax({
+            url: actionUrl,
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: { id: id },
+            success: function (data) {
+                $('#frm_show').html(data);
+                $('#Show_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error('Không thể tải màn hình xử lý!', 'Lỗi!');
+            }
+        });
+    }
+
+    function OpenNhanHoSo(id) {
+        if (!$('#NhanHoSo_Modal').length) {
+            NhanHoSo(id, 'NHAN_HO_SO');
+            return;
+        }
+
+        $('#NhanHoSoId').val(id);
+        $('#NhanHoSoActionType').val('NHAN_HO_SO');
+        $('#NhanHoSo_Modal').modal('show');
+    }
+
+    function SubmitNhanHoSo() {
+        const id = $('#NhanHoSoId').val();
+        const actionType = $('#NhanHoSoActionType').val() || 'NHAN_HO_SO';
+        if (!id) {
+            return;
+        }
+
+        $('#NhanHoSo_Modal').modal('hide');
+        NhanHoSo(id, actionType);
+    }
+
+    function OpenTraLaiHoSo(id) {
+        if (!$('#TraLaiHoSo_Modal').length) {
+            return;
+        }
+
+        $('#TraLaiHoSoId').val(id);
+        $('#LyDoTraLai').val('');
+        $('#GhiChuTraLai').val('');
+        $('#TraLaiHoSo_Modal').modal('show');
+    }
+
+    function SubmitTraLaiHoSo() {
+        const id = $('#TraLaiHoSoId').val();
+        const lyDoTraLai = ($('#LyDoTraLai').val() || '').trim();
+        const ghiChu = ($('#GhiChuTraLai').val() || '').trim();
+
+        if (!id) {
+            return;
+        }
+
+        if (!lyDoTraLai) {
+            toastr.error('Bạn phải nhập lý do trả lại hồ sơ.');
+            $('#LyDoTraLai').focus();
+            return;
+        }
+
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '@($"{routePrefix}/TraLaiHoSo")',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: {
+                id: id,
+                lyDoTraLai: lyDoTraLai,
+                ghiChu: ghiChu
+            },
+            success: function (res) {
+                if (res.status === 'success') {
+                    toastr.success(res.message || 'Đã trả lại hồ sơ');
+                    $('#TraLaiHoSo_Modal').modal('hide');
+                    window.location.reload();
+                } else {
+                    toastr.error(res.message || 'Có lỗi xảy ra');
+                }
+            },
+            error: function () {
+                toastr.error('Không thể trả lại hồ sơ!', 'Lỗi!');
+            }
+        });
+    }
+
+    function NhanHoSo(id, actionType) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '@routePrefix/NhanHoSo',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: {
+                id: id,
+                actionType: actionType || 'NHAN_HO_SO'
+            },
+            success: function (res) {
+                if (res.status === 'success') {
+                    toastr.success(res.message || 'Đã cập nhật trạng thái tiếp nhận');
+                    Show(id);
+                    window.setTimeout(function () {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    toastr.error(res.message || 'Có lỗi xảy ra');
+                }
+            },
+            error: function () {
+                toastr.error('Không thể cập nhật tiếp nhận hồ sơ!', 'Lỗi!');
+            }
+        });
+    }
+
+    function ShowTimeline(id) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '@routePrefix/Timeline',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: { id: id },
+            success: function (data) {
+                $('#frm_timeline').html(data);
+                $('#Timeline_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error('Không thể tải timeline!', 'Lỗi!');
+            }
+        });
+    }
+
+    function OpenChuyenHoSo(id) {
+        $.ajax({
+            url: '@routePrefix/ChuyenHoSo',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                $('#frm_chuyenhoso_body').html(data);
+                $('#ChuyenHoSo_Modal').modal('show');
+            },
+            error: function () {
+                toastr.error('Không thể tải form chuyển hồ sơ!', 'Lỗi!');
+            }
+        });
+    }
+
+    function SubmitChuyenHoSo() {
+        const form = document.getElementById('frm_chuyenhoso');
+        if (!form) {
+            return;
+        }
+
+        const donViTiepNhan = form.querySelector('#DonViTiepNhanId');
+        if (!donViTiepNhan || !donViTiepNhan.value) {
+            toastr.error('Đơn vị tiếp nhận không được bỏ trống');
+            return;
+        }
+
+        const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value
+            || $('input[name="__RequestVerificationToken"]').val();
+
+        $.ajax({
+            url: '@($"{routePrefix}/HoanThanhXuLy")',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': token
+            },
+            data: $(form).serialize(),
+            success: function (res) {
+                if (res.status === 'success') {
+                    toastr.success(res.message || 'Thành công');
+                    $('#ChuyenHoSo_Modal').modal('hide');
+                    window.location.reload();
+                } else {
+                    toastr.error(res.message || 'Có lỗi xảy ra');
+                }
+            },
+            error: function () {
+                toastr.error('Không thể chuyển hồ sơ!', 'Lỗi!');
+            }
+        });
+    }
+</script>

@@ -20,7 +20,7 @@ namespace UI.Controllers.Public
         {
             PageSize = PageSize < 5 ? 5 : PageSize > 100 ? 100 : PageSize;
             PageCurrent = PageCurrent < 1 ? 1 : PageCurrent;
-            var model = await _vanBanPhapLuatService.GetVanBanPhapLuatsAsync(TimKiem, PageSize, PageCurrent,true);
+            var model = await _vanBanPhapLuatService.GetVanBanPhapLuatsAsync(TimKiem, null, PageSize, PageCurrent, true);
             if (model.Status == "error")
             {
                 ViewData["Messages"] = model.Message;

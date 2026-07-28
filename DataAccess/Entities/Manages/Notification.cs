@@ -28,5 +28,9 @@ namespace DataAccess.Entities.Manages
         public string? TenDonViGuiThongBao { get; set; }
         [NotMapped]
         public bool DaXem { get; set; } = false;
+        [NotMapped]
+        public string? UrlDanhSach { get; set; }
+        [NotMapped]
+        public string? UrlXetDuyet { get; set; }
     }
 }

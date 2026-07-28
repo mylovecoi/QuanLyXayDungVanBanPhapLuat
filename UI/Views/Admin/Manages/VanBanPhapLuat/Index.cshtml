@@ -1,17 +1,19 @@
-﻿@using UI.ViewModels;
+@using Services.Manages
+@using UI.ViewModels
+
 @{
     var session = HttpContextAccessor?.HttpContext?.Session ?? null;
     int pageSize = (ViewData["PageInfo"] as VMPageInfo)?.PageSize ?? 5;
     string timKiem = (ViewData["PageInfo"] as VMPageInfo)?.Search ?? "";
-    string sort = (ViewData["PageInfo"] as VMPageInfo)?.Sort ?? "";
     string role = ViewData["Role"]?.ToString() ?? "";
-    int record_id = 1;
+    int recordId = 1;
+    var donViOptions = ViewData["DonViOptions"] as List<DonViOptionModel> ?? new List<DonViOptionModel>();
+    Guid? selectedDonViId = ViewData["SelectedDonViId"] is Guid selected ? selected : ViewData["SelectedDonViId"] as Guid?;
+    var selectedDonViName = ViewData["SelectedDonViName"]?.ToString();
+    var isSSA = ViewData["IsSSA"] is bool flag && flag;
 }
 
 @model IEnumerable<DataAccess.Entities.Manages.AttachedFile>
-
-@section custom_style {
-}
 
 @section custom_script {
     <script>
@@ -20,9 +22,12 @@
                 ReloadFrm();
             });
 
-            // Handle Enter key press on search input
+            $('#DonViId_Search').change(function () {
+                ReloadFrm();
+            });
+
             $('#txt_Search').keypress(function (e) {
-                if (e.which == 13) { // Enter key
+                if (e.which == 13) {
                     e.preventDefault();
                     SubmitTxtSearch();
                 }
@@ -31,7 +36,7 @@
 
         function ClearTxtSearch() {
             $('#txt_Search').val('');
-            ReloadFrm(); // Automatically reload after clearing
+            ReloadFrm();
         }
 
         function SubmitTxtSearch() {
@@ -39,27 +44,27 @@
         }
 
         function ReloadFrm() {
-            var current_path_url = window.location.pathname + '?';
-            var timkiem = '&TimKiem=' + $('#txt_Search').val();
+            var currentPathUrl = window.location.pathname + '?';
+            var timKiem = '&TimKiem=' + $('#txt_Search').val();
             var pageSize = '&PageSize=' + $('#PageSize_Search').val();
-            var url = current_path_url + timkiem + pageSize;
-            window.location.href = url;
+            var donViId = $('#DonViId_Search').length ? '&DonViId=' + ($('#DonViId_Search').val() || '') : '';
+            window.location.href = currentPathUrl + timKiem + pageSize + donViId;
         }
 
         function ClickPage(pageSelect) {
-            var current_path_url = window.location.pathname + '?';
-            var timkiem = '&TimKiem=' + $('#txt_Search').val();
+            var currentPathUrl = window.location.pathname + '?';
+            var timKiem = '&TimKiem=' + $('#txt_Search').val();
             var pageSize = '&PageSize=' + $('#PageSize_Search').val();
+            var donViId = $('#DonViId_Search').length ? '&DonViId=' + ($('#DonViId_Search').val() || '') : '';
             var pageCurrent = '&PageCurrent=' + pageSelect;
-            var url = current_path_url + timkiem + pageSize + pageCurrent;
-            window.location.href = url;
+            window.location.href = currentPathUrl + timKiem + pageSize + donViId + pageCurrent;
         }
     </script>
 }
 
 <div class="card card-custom">
     <div class="card-header flex-wrap border-0 pt-6 pb-0">
-         <div class="card-title">
+        <div class="card-title">
             <h3 class="card-label">
                 <b>@ViewData["Title"]?.ToString()?.ToUpper()</b>
                 <span class="d-block text-muted pt-2 font-size-sm">
@@ -79,6 +84,28 @@
     @Html.AntiForgeryToken()
     <div class="card-body pt-0">
         <hr />
+
+        @if (!string.IsNullOrWhiteSpace(selectedDonViName))
+        {
+            <div class="alert alert-light-primary d-flex align-items-center mb-6">
+                <i class="la la-building icon-xl mr-3 text-primary"></i>
+                <div>
+                    <div class="font-weight-bold">Đang xem dữ liệu của đơn vị</div>
+                    <div>@selectedDonViName</div>
+                </div>
+            </div>
+        }
+        else if (isSSA)
+        {
+            <div class="alert alert-light-warning d-flex align-items-center mb-6">
+                <i class="la la-sitemap icon-xl mr-3 text-warning"></i>
+                <div>
+                    <div class="font-weight-bold">Đang xem dữ liệu toàn bộ đơn vị</div>
+                    <div>Tài khoản SSA có thể lọc theo từng đơn vị hoặc xem tất cả.</div>
+                </div>
+            </div>
+        }
+
         <div class="row">
             <div class="col-xl-3">
                 <div class="form-group fv-plugins-icon-container">
@@ -88,75 +115,87 @@
                         <!option value="10" @(pageSize == 10 ? "selected" : "")>10 thông tin</!option>
                         <!option value="20" @(pageSize == 20 ? "selected" : "")>20 thông tin</!option>
                         <!option value="50" @(pageSize == 50 ? "selected" : "")>50 thông tin</!option>
-                        <!option value="100" @(pageSize == 100 ? "selected" : "")> 100 thông tin</!option>
+                        <!option value="100" @(pageSize == 100 ? "selected" : "")>100 thông tin</!option>
                     </select>
                 </div>
             </div>
             <div class="col-xl-9">
-                <div class="form-group fv-plugins-icon-container">
-                    <label class="text-blue font-weight-bold">Tìm kiếm</label>
-                    <div class="input-group">
-                        <input class="form-control" name="txt_Search" id="txt_Search" placeholder="Tìm kiếm..." value="@timKiem">
-                        <div class="input-group-prepend">
-                            <button class="btn btn-danger" type="button" onclick="ClearTxtSearch()"><i class="las la-times-circle"></i></button>
+                <div class="row">
+                    <div class="col-xl-5">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label class="text-blue font-weight-bold">Đơn vị</label>
+                            <select class="form-control" name="DonViId_Search" id="DonViId_Search" @(isSSA ? "" : "disabled")>
+                                @if (isSSA)
+                                {
+                                    <option value="">-- Tất cả đơn vị --</option>
+                                }
+                                @foreach (var item in donViOptions)
+                                {
+                                    <option value="@item.Id" selected="@(selectedDonViId.HasValue && selectedDonViId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
+                                }
+                            </select>
                         </div>
-                        <div class="input-group-append">
-                            <button class="btn btn-primary" type="submit" onclick="SubmitTxtSearch()"><i class="las la-search"></i></button>
+                    </div>
+                    <div class="col-xl-7">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label class="text-blue font-weight-bold">Tìm kiếm</label>
+                            <div class="input-group">
+                                <input class="form-control" name="txt_Search" id="txt_Search" placeholder="Tìm kiếm..." value="@timKiem">
+                                <div class="input-group-prepend">
+                                    <button class="btn btn-danger" type="button" onclick="ClearTxtSearch()"><i class="las la-times-circle"></i></button>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" type="button" onclick="SubmitTxtSearch()"><i class="las la-search"></i></button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <input hidden id="sort_current" name="sort_current" value="@ViewData["Sort"]" />
-        <input hidden id="PageCurrent" name="PageCurrent" value="@ViewData["PageCurrent"]" />
-        <!--begin: Datatable-->
+
         <div class="table-responsive border rounded-lg mb-8">
             <table class="table table-striped table-hover table-responsive-lg rounded-lg">
                 <thead>
                     <tr style="text-align:center;" class="table-active">
-                        <th style="font-weight: bold;" width="2%">#</th>
-                        <th style="font-weight: bold;" width="25%">Thông tin văn bản pháp luật</th>
-                        <th style="font-weight: bold;" width="40%">Mô tả</th>
-                        <th style="font-weight: bold;">Công khai văn bản:</th>
-                        <th style="font-weight: bold;" width="10%">File đính kèm</th>
-                        <th style="font-weight: bold;" width="10%">Thao tác</th>
+                        <th width="4%">#</th>
+                        <th width="24%">Thông tin văn bản pháp luật</th>
+                        <th width="34%">Mô tả</th>
+                        <th width="12%">Công khai</th>
+                        <th width="14%">File đính kèm</th>
+                        <th width="12%">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model.Count() > 0)
+                    @if (Model.Any())
                     {
                         @foreach (var item in Model)
                         {
-                            int record = record_id++;
+                            var record = recordId++;
                             <tr class="@FuntionGlobal.GetClassTable(record)">
-                                <td style="text-align: center; vertical-align:middle" width="5%">@record</td>
-                                <td style="font-weight: bold; vertical-align: middle">
-                                    Số văn bản: <span class="text-blue">@item.SoVanBan</span><br />
-                                    Ngày ban hành: <span class="text-blue">@FuntionGlobal.ConvertDateToStr(item.NgayBanHanh)</span><br />
-                                    Ngày áp dụng: <span class="text-blue">@FuntionGlobal.ConvertDateToStr(item.NgayApDung)</span><br />
+                                <td class="text-center align-middle">@record</td>
+                                <td class="font-weight-bold align-middle">
+                                    <div>Số văn bản: <span class="text-blue">@item.SoVanBan</span></div>
+                                    <div>Ngày ban hành: <span class="text-blue">@FuntionGlobal.ConvertDateToStr(item.NgayBanHanh)</span></div>
+                                    <div>Ngày áp dụng: <span class="text-blue">@FuntionGlobal.ConvertDateToStr(item.NgayApDung)</span></div>
                                     @if (!string.IsNullOrEmpty(item.Url))
                                     {
-                                        <span>Đường dẫn: </span>
-                                        <span class="text-blue">@item.Url</span>
-    
-                                        <br />
+                                        <div>Đường dẫn: <span class="text-blue">@item.Url</span></div>
                                     }
                                 </td>
-                                <td style="font-weight: bold; vertical-align: middle">@item.MoTa</td>
-                                <td style="font-weight: bold; vertical-align: middle; text-align: center">
+                                <td class="font-weight-bold align-middle">@item.MoTa</td>
+                                <td class="font-weight-bold align-middle text-center">
                                     @if (item.Public)
                                     {
-                                        <span style="width: 109px;"><span class="label font-weight-bold label-lg  label-light-primary label-inline">Công bố</span></span>
+                                        <span class="label font-weight-bold label-lg label-light-primary label-inline">Công bố</span>
                                     }
                                     else
                                     {
-                                        <span style="width: 109px;"><span class="label font-weight-bold label-lg  label-light-success label-inline">Nội bộ</span></span>
+                                        <span class="label font-weight-bold label-lg label-light-success label-inline">Nội bộ</span>
                                     }
-
-
                                 </td>
-                                <td style="vertical-align: middle">@item.FileName</td>
-                                <td style="vertical-align: middle">
+                                <td class="align-middle">@item.FileName</td>
+                                <td class="align-middle">
                                     @if (session != null && FuntionGlobal.CheckPermission(session, role, "Index"))
                                     {
                                         <button type="button" onclick="Show('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Xem chi tiết">
@@ -169,7 +208,6 @@
                                             <i class="icon-lg la la-edit text-success"></i>
                                         </button>
                                     }
-
                                     @if (session != null && FuntionGlobal.CheckPermission(session, role, "Delete"))
                                     {
                                         <button type="button" class="btn btn-sm btn-clean btn-icon" title="Xóa" onclick="Delete('@item.Id', '@item.SoVanBan')">
@@ -183,15 +221,15 @@
                     else
                     {
                         <tr>
-                            <td style="text-align:center" colspan="6">Không tìm thấy thông tin!!!</td>
+                            <td style="text-align:center" colspan="6">Không tìm thấy thông tin.</td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
 
-        <!--end: Datatable-->
         @await Html.PartialAsync("~/Views/Shared/Pagination.cshtml")
     </div>
 </div>
+
 @await Html.PartialAsync("~/Views/Admin/Manages/VanBanPhapLuat/Modal.cshtml")

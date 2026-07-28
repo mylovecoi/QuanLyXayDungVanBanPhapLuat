@@ -21,7 +21,14 @@ namespace UI.Controllers.Admin.Manages
             PageCurrent = PageCurrent < 1 ? 1 : PageCurrent;
             var model = await _attachedFileService.GetAttachedFilesAsync(GroupId, TableName, TimKiem, PageSize, PageCurrent);
             ViewData["PageInfo"] = FuntionGlobal.GetPageInfo(model.TotalRecord, TimKiem, PageSize, PageCurrent);
-            return PartialView("~/Views/Admin/AttachedFile/Index.cshtml", model.Data);
+            return PartialView("~/Views/Admin/AttachedFile/Index.cshtml", model.Data as List<AttachedFile> ?? new List<AttachedFile>());
+        }
+
+        [HttpGet("Manages/AttachedFile/GetAttachedFilesReadonly")]
+        public async Task<IActionResult> GetAttachedFilesReadonly(Guid GroupId, string TableName)
+        {
+            var files = await _attachedFileService.GetAllAttachedFilesAsync(GroupId, TableName);
+            return PartialView("~/Views/Admin/AttachedFile/ReadonlyList.cshtml", files ?? new List<AttachedFile>());
         }
 
         [HttpPost("Manages/AttachedFile/Store")]

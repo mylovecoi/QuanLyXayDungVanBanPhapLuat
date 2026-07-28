@@ -9,6 +9,7 @@ using Services;
 using Services.Hubs;
 
 using Services.Manages;
+using Services.QuanLyDanhMuc;
 using Services.Settings;
 
 using Services.Systems;
@@ -98,6 +99,9 @@ builder.Services.AddScoped<IDanhMucDonViService, DanhMucDonViService>();
 builder.Services.AddScoped<IDanhMucPhongBanService, DanhMucPhongBanService>();
 builder.Services.AddScoped<IDanhMucCanBoService, DanhMucCanBoService>();
 builder.Services.AddScoped<IDanhMucDiaDanhService, DanhMucDiaDanhService>();
+builder.Services.AddScoped<IDanhMucTrangThaiService, DanhMucTrangThaiService>();
+builder.Services.AddScoped<IDanhMucVanBanService, DanhMucVanBanService>();
+builder.Services.AddScoped<IQuyTrinhSoanThaoService, QuyTrinhSoanThaoService>();
 
 //End Services Settings
 
@@ -105,6 +109,7 @@ builder.Services.AddScoped<IDanhMucDiaDanhService, DanhMucDiaDanhService>();
 //Sevices Manages
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVanBanPhapLuatService, VanBanPhapLuatService>();
+builder.Services.AddScoped<IHoSoVanBanWorkflowService, HoSoVanBanWorkflowService>();
 builder.Services.AddScoped<IAttachedFileService, AttachedFileService>();
 builder.Services.AddScoped<IThuTucHanhChinhService, ThuTucHanhChinhService>();
 

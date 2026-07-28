@@ -1,0 +1,433 @@
+@using Services.Manages
+
+@model HoSoVanBanWorkflowDetailModel
+
+@{
+    var routePrefix = ViewData["RoutePrefix"]?.ToString() ?? "/Manages/HoSoVanBan";
+    var workflowActionTitle = ViewData["WorkflowActionTitle"]?.ToString();
+    workflowActionTitle = string.IsNullOrWhiteSpace(workflowActionTitle)
+        ? (string.IsNullOrWhiteSpace(Model.TieuDeXuLyBuoc) ? "Cập nhật bước hiện tại" : Model.TieuDeXuLyBuoc)
+        : workflowActionTitle;
+
+    var approvalReviewMode = ViewData["ApprovalReviewMode"]?.ToString();
+    var isDangKyApprovalMode = approvalReviewMode == "DangKy" && Model.MaBuocHienTai == "BUOC_02_THONG_NHAT";
+    var isXetDuyetDangKy = string.Equals(routePrefix, "/Manages/XetDuyetDangKy", StringComparison.OrdinalIgnoreCase);
+    var isPheDuyetDangKy = string.Equals(routePrefix, "/Manages/PheDuyetDangKy", StringComparison.OrdinalIgnoreCase);
+    var hideWorkflowAction = string.Equals(ViewData["HideWorkflowAction"]?.ToString(), "true", StringComparison.OrdinalIgnoreCase)
+        || !Model.CanXuLyBuocHienTai;
+    var isCompactApprovalView = isPheDuyetDangKy && isDangKyApprovalMode && !hideWorkflowAction;
+    var waitingReceive = Model.CanNhanHoSo;
+    var showInternalActionButtons = !waitingReceive && isXetDuyetDangKy && Model.TrangThaiNghiepVuTiepNhan == "NHAN_HO_SO";
+}
+
+@Html.AntiForgeryToken()
+
+<style>
+    .hoso-detail-shell {
+        display: grid;
+        gap: 20px;
+    }
+
+    .hoso-detail-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .hoso-summary-card,
+    .hoso-info-card,
+    .hoso-attachment-card,
+    .hoso-action-card {
+        border: 1px solid #e7ebf3;
+        border-radius: 16px;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+        box-shadow: 0 10px 26px rgba(27, 39, 94, 0.06);
+    }
+
+    .hoso-summary-card {
+        padding: 16px 18px;
+    }
+
+    .hoso-summary-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #7e8299;
+        margin-bottom: 8px;
+        font-weight: 700;
+    }
+
+    .hoso-summary-value {
+        font-size: 16px;
+        font-weight: 700;
+        color: #181c32;
+        line-height: 1.4;
+    }
+
+    .hoso-info-card,
+    .hoso-attachment-card,
+    .hoso-action-card {
+        padding: 20px 22px;
+    }
+
+    .hoso-section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f4c81;
+        margin-bottom: 16px;
+    }
+
+    .hoso-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .hoso-info-item {
+        padding: 14px 16px;
+        border-radius: 12px;
+        background: #f8faff;
+        border: 1px solid #edf1f7;
+    }
+
+    .hoso-info-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #7e8299;
+        margin-bottom: 6px;
+        font-weight: 700;
+    }
+
+    .hoso-info-value {
+        font-size: 15px;
+        color: #181c32;
+        word-break: break-word;
+    }
+
+    .readonly-file-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .readonly-file-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        border: 1px solid #e9edf5;
+        border-radius: 14px;
+        background: #f8fbff;
+        text-decoration: none;
+        transition: all .2s ease;
+    }
+
+    .readonly-file-item:hover {
+        transform: translateY(-1px);
+        border-color: #8dc6ff;
+        box-shadow: 0 10px 22px rgba(54, 153, 255, 0.12);
+        text-decoration: none;
+    }
+
+    .readonly-file-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: #e8f3ff;
+        color: #3699ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .readonly-file-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .readonly-file-name {
+        font-weight: 700;
+        color: #181c32;
+    }
+
+    .readonly-file-note {
+        margin-top: 4px;
+        color: #7e8299;
+        font-size: 13px;
+    }
+
+    .readonly-file-action {
+        color: #3699ff;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .empty-attachment-state {
+        padding: 18px;
+        border-radius: 14px;
+        background: #f8f9fc;
+        color: #7e8299;
+        text-align: center;
+        border: 1px dashed #dbe3ef;
+    }
+
+    @@media (max-width: 991.98px) {
+        .hoso-detail-summary,
+        .hoso-info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="hoso-detail-shell">
+    @if (!isCompactApprovalView)
+    {
+        <div class="hoso-detail-summary">
+            <div class="hoso-summary-card">
+                <div class="hoso-summary-label">Tên hồ sơ</div>
+                <div class="hoso-summary-value">@Model.TenHoSo</div>
+            </div>
+            <div class="hoso-summary-card">
+                <div class="hoso-summary-label">Đơn vị soạn thảo</div>
+                <div class="hoso-summary-value">@Model.TenDonViSoanThao</div>
+            </div>
+            <div class="hoso-summary-card">
+                <div class="hoso-summary-label">Bước hiện tại</div>
+                <div class="hoso-summary-value">@(string.IsNullOrWhiteSpace(Model.TenBuocHienTai) ? "Đã hoàn thành" : Model.TenBuocHienTai)</div>
+            </div>
+            <div class="hoso-summary-card">
+                <div class="hoso-summary-label">Trạng thái</div>
+                <div class="hoso-summary-value">
+                    @if (!string.IsNullOrWhiteSpace(Model.TenTrangThai))
+                    {
+                        <span class="badge" style="background-color:@(string.IsNullOrWhiteSpace(Model.MaMauTrangThai) ? "#6c757d" : Model.MaMauTrangThai);color:#212529;padding:8px 12px;">
+                            @Model.TenTrangThai
+                        </span>
+                    }
+                    else
+                    {
+                        <span>-</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="hoso-info-card">
+            <div class="hoso-section-title">Thông tin hồ sơ</div>
+            <div class="hoso-info-grid">
+                <div class="hoso-info-item">
+                    <div class="hoso-info-label">Loại văn bản</div>
+                    <div class="hoso-info-value">@Model.TenLoaiVanBan</div>
+                </div>
+                <div class="hoso-info-item">
+                    <div class="hoso-info-label">Quy trình</div>
+                    <div class="hoso-info-value">@Model.TenQuyTrinh</div>
+                </div>
+                <div class="hoso-info-item">
+                    <div class="hoso-info-label">Ngày tạo hồ sơ</div>
+                    <div class="hoso-info-value">@FuntionGlobal.ConvertDateTimeToStr(Model.NgayTaoHoSo)</div>
+                </div>
+                <div class="hoso-info-item">
+                    <div class="hoso-info-label">Ngày nhận hồ sơ</div>
+                    <div class="hoso-info-value">@(Model.DaNhanHoSo && Model.NgayNhanHienTai.HasValue ? FuntionGlobal.ConvertDateTimeToStr(Model.NgayNhanHienTai.Value) : "Chưa nhận")</div>
+                </div>
+                <div class="hoso-info-item">
+                    <div class="hoso-info-label">Hạn xử lý</div>
+                    <div class="hoso-info-value">@(Model.HanXuLy.HasValue ? FuntionGlobal.ConvertDateToStr(Model.HanXuLy.Value) : "-")</div>
+                </div>
+                <div class="hoso-info-item">
+                    <div class="hoso-info-label">Ngày hoàn thành</div>
+                    <div class="hoso-info-value">@(Model.NgayHoanThanh.HasValue ? FuntionGlobal.ConvertDateTimeToStr(Model.NgayHoanThanh.Value) : "-")</div>
+                </div>
+                <div class="hoso-info-item">
+                    <div class="hoso-info-label">Trạng thái tiếp nhận</div>
+                    <div class="hoso-info-value">@(string.IsNullOrWhiteSpace(Model.TenTrangThaiNghiepVuTiepNhan) ? "-" : Model.TenTrangThaiNghiepVuTiepNhan)</div>
+                </div>
+                <div class="hoso-info-item">
+                    <div class="hoso-info-label">Ghi chú</div>
+                    <div class="hoso-info-value">@(string.IsNullOrWhiteSpace(Model.GhiChu) ? "-" : Model.GhiChu)</div>
+                </div>
+                <div class="hoso-info-item" style="grid-column: 1 / -1;">
+                    <div class="hoso-info-label">Mô tả</div>
+                    <div class="hoso-info-value">@(string.IsNullOrWhiteSpace(Model.MoTa) ? "-" : Model.MoTa)</div>
+                </div>
+                @if (Model.TrangThaiNghiepVuTiepNhan == "TRA_LAI_HO_SO" && !string.IsNullOrWhiteSpace(Model.NoiDungXuLyHienTai))
+                {
+                    <div class="hoso-info-item" style="grid-column: 1 / -1; border-color:#ffd4d4; background:#fff7f7;">
+                        <div class="hoso-info-label" style="color:#dc3545;">Lý do trả lại</div>
+                        <div class="hoso-info-value text-danger">@Model.NoiDungXuLyHienTai</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="hoso-attachment-card">
+            <div class="hoso-section-title">File đính kèm</div>
+            <div id="attachedFileReadonlyContainer">
+                <div class="empty-attachment-state">Đang tải danh sách file đính kèm...</div>
+            </div>
+        </div>
+    }
+
+    @if (Model.BuocHienTaiId.HasValue && !hideWorkflowAction)
+    {
+        <div class="hoso-action-card">
+            <div class="hoso-section-title">@workflowActionTitle</div>
+
+            @if (waitingReceive && isXetDuyetDangKy)
+            {
+                <div class="alert alert-warning mb-6">
+                    Hồ sơ đã chuyển đến đơn vị tiếp nhận nhưng chưa được xác nhận nhận hồ sơ.
+                </div>
+                <button type="button" class="btn btn-success" onclick="OpenNhanHoSo('@Model.Id')">Nhận hồ sơ</button>
+            }
+            else if (waitingReceive)
+            {
+                <div class="alert alert-warning mb-6">
+                    Hồ sơ đã chuyển đến đơn vị tiếp nhận nhưng chưa được xác nhận nhận hồ sơ.
+                </div>
+                <button type="button" class="btn btn-success" onclick="NhanHoSo('@Model.Id', 'NHAN_HO_SO')">Nhận hồ sơ</button>
+            }
+
+            @if (showInternalActionButtons)
+            {
+                <div class="alert alert-light-info mb-6">
+                    Sau khi nhận hồ sơ, đơn vị tiếp nhận có thể ghi nhận tiếp thao tác nội bộ trước khi xử lý bước chính thức.
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <button type="button" class="btn btn-warning mr-2 mb-2" onclick="NhanHoSo('@Model.Id', 'CHUYEN_PHE_DUYET')">Chuyển phê duyệt</button>
+                    <button type="button" class="btn btn-danger mb-2" onclick="OpenTraLaiHoSo('@Model.Id')">Trả lại</button>
+                </div>
+            }
+
+            @if (!waitingReceive && isDangKyApprovalMode && isPheDuyetDangKy)
+            {
+                <div class="alert alert-light-warning mb-6">
+                    Chọn phê duyệt để chuyển hồ sơ sang bước 3. Nếu cần trả lại, hãy dùng nút Trả lại ở danh sách hồ sơ.
+                </div>
+
+                <div class="card border mb-6">
+                    <div class="card-body">
+                        <form id="frm_step_approve_dangky">
+                            <input type="hidden" name="HoSoVanBanId" value="@Model.Id" />
+                            <input type="hidden" name="KetQuaXuLy" value="DONG_Y" />
+                            <input type="hidden" name="AttachedFileGroupId" value="@Model.Id" />
+                            <div class="row">
+                                <div class="col-xl-4">
+                                    <div class="form-group">
+                                        <label>Thời gian phê duyệt</label>
+                                        <input type="datetime-local" name="NgayXuLy" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                                    </div>
+                                </div>
+                                <div class="col-xl-8">
+                                    <div class="form-group">
+                                        <label>Thời hạn hoàn thành xây dựng văn bản</label>
+                                        <input type="date" name="HanXuLy" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label>Nội dung phê duyệt</label>
+                                        <textarea name="NoiDungXuLy" class="form-control" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-xl-6">
+                                    <div class="form-group">
+                                        <label>Ghi chú</label>
+                                        <textarea name="GhiChu" class="form-control" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>File đính kèm bổ sung (nếu có)</label>
+                                <div class="small text-muted mb-3">
+                                    File được gắn theo đúng hồ sơ hiện tại và sẽ đi cùng hồ sơ khi chuyển sang bước tiếp theo.
+                                </div>
+                                <input type="hidden" id="ApprovalFileGroupId" value="@Model.Id" />
+                                <input type="hidden" id="ApprovalFileTableName" value="HoSoVanBan" />
+                                <div id="approvalAttachedFileEditor">
+                                    <div class="empty-attachment-state">Đang tải khu vực đính kèm file...</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-success" onclick="submitApprovalDangKy('approve')">Phê duyệt</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    function submitApprovalDangKy(actionType) {
+        const formId = actionType === 'return' ? 'frm_step_return_dangky' : 'frm_step_approve_dangky';
+        const form = document.getElementById(formId);
+        if (!form) {
+            return;
+        }
+
+        submitCurrentStep('@($"{routePrefix}/HoanThanhXuLy")', formId);
+    }
+
+    function submitCurrentStep(url, formId) {
+        const form = document.getElementById(formId);
+        if (!form) {
+            return;
+        }
+
+        const token = document.querySelector('#frm_show input[name="__RequestVerificationToken"]')?.value
+            || document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': token
+            },
+            data: $(form).serialize(),
+            success: function (res) {
+                if (res.status === 'success') {
+                    toastr.success(res.message || 'Thành công');
+                    Show('@Model.Id');
+                    window.setTimeout(function () {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    toastr.error(res.message || 'Có lỗi xảy ra');
+                }
+            },
+            error: function () {
+                toastr.error('Không thể cập nhật bước hiện tại');
+            }
+        });
+    }
+
+    function loadAttachedFilesReadonly() {
+        const url = '@Url.Action("GetAttachedFilesReadonly", "AttachedFile")' + '?GroupId=@Model.Id&TableName=HoSoVanBan';
+        $('#attachedFileReadonlyContainer').load(url);
+    }
+
+    function loadApprovalAttachedFilesEditor() {
+        const container = $('#approvalAttachedFileEditor');
+        const groupId = $('#ApprovalFileGroupId').val();
+        const tableName = $('#ApprovalFileTableName').val();
+        if (!container.length || !groupId || !tableName) {
+            return;
+        }
+
+        $('#Id').val(groupId);
+        $('#tableName').val(tableName);
+
+        const url = '@Url.Action("GetAttachedFiles", "AttachedFile")' + '?GroupId=' + groupId + '&TableName=' + tableName;
+        container.load(url, function () {
+            $('.select2basic').select2();
+        });
+    }
+
+    loadAttachedFilesReadonly();
+    loadApprovalAttachedFilesEditor();
+</script>

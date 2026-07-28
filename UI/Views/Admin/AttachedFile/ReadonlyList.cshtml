@@ -1,0 +1,33 @@
+@model List<DataAccess.Entities.Manages.AttachedFile>
+
+@{
+    var files = Model ?? new List<DataAccess.Entities.Manages.AttachedFile>();
+}
+
+@if (files.Any())
+{
+    <div class="readonly-file-list">
+        @foreach (var item in files)
+        {
+            <a class="readonly-file-item" href="/Manages/Download/AttachedFile?id=@item.Id" target="_blank">
+                <div class="readonly-file-icon">
+                    <i class="la la-paperclip"></i>
+                </div>
+                <div class="readonly-file-content">
+                    <div class="readonly-file-name">@(string.IsNullOrWhiteSpace(item.FileName) ? "Tệp đính kèm" : item.FileName)</div>
+                    @if (!string.IsNullOrWhiteSpace(item.MoTa))
+                    {
+                        <div class="readonly-file-note">@item.MoTa</div>
+                    }
+                </div>
+                <div class="readonly-file-action">Tải xuống</div>
+            </a>
+        }
+    </div>
+}
+else
+{
+    <div class="empty-attachment-state">
+        Chưa có file đính kèm được gán vào hồ sơ.
+    </div>
+}

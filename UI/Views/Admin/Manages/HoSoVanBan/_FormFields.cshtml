@@ -1,0 +1,374 @@
+@using DataAccess.Entities.QuanLyDanhMuc
+@using Services.Manages
+@using System.Text.Json
+
+@{
+    var danhMucVanBans = ViewData["DanhMucVanBans"] as List<DanhMucVanBan> ?? new List<DanhMucVanBan>();
+    var quyTrinhSoanThaos = ViewData["QuyTrinhSoanThaos"] as List<DanhMucQuyTrinhSoanThao> ?? new List<DanhMucQuyTrinhSoanThao>();
+    var donViOptions = ViewData["CreateDonViOptions"] as List<DonViOptionModel> ?? new List<DonViOptionModel>();
+    var createIsSSA = ViewData["CreateIsSSA"] is bool flag && flag;
+    var workflowStepUrl = ViewData["WorkflowStepUrl"]?.ToString() ?? "/Manages/HoSoVanBan/LoadWorkflowSteps";
+    var initialStepRowsJson = JsonSerializer.Serialize(
+        Model.BuocThoiHans
+            .OrderBy(x => x.ThuTuSapXep)
+            .Select(x => new
+            {
+                buocQuyTrinhId = x.BuocQuyTrinhId,
+                maBuoc = x.MaBuoc,
+                tenBuoc = x.TenBuoc,
+                thuTuSapXep = x.ThuTuSapXep,
+                soNgayXuLy = x.SoNgayXuLy,
+                soNgayCanhBaoSapHan = x.SoNgayCanhBaoSapHan,
+                ghiChu = x.GhiChu
+            }));
+}
+
+@model HoSoVanBanCreateModel
+
+@Html.AntiForgeryToken()
+<input asp-for="Id" type="hidden" />
+<input asp-for="AttachedFileGroupId" type="hidden" />
+<input asp-for="HanXuLy" type="hidden" id="HanXuLy" value="@(Model.DenNgaySoanThao?.ToString("yyyy-MM-dd") ?? Model.HanXuLy?.ToString("yyyy-MM-dd"))" />
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Đơn vị đề nghị <span class="text-danger">*</span></label>
+            @if (createIsSSA)
+            {
+                <select asp-for="DonViDeNghiId" class="form-control">
+                    <option value="">-- Chọn đơn vị đề nghị --</option>
+                    @foreach (var item in donViOptions)
+                    {
+                        <option value="@item.Id" selected="@(Model.DonViDeNghiId.HasValue && Model.DonViDeNghiId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
+                    }
+                </select>
+            }
+            else
+            {
+                <select class="form-control" disabled>
+                    <option value="">-- Chọn đơn vị đề nghị --</option>
+                    @foreach (var item in donViOptions)
+                    {
+                        <option value="@item.Id" selected="@(Model.DonViDeNghiId.HasValue && Model.DonViDeNghiId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
+                    }
+                </select>
+                <input type="hidden" asp-for="DonViDeNghiId" />
+            }
+            <span id="DonViDeNghiIdError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Tên hồ sơ <span class="text-danger">*</span></label>
+            <input asp-for="TenHoSo" class="form-control" placeholder="Nhập tên hồ sơ văn bản" />
+            <span id="TenHoSoError" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Loại văn bản <span class="text-danger">*</span></label>
+            <select asp-for="DanhMucVanBanId" class="form-control">
+                <option value="">-- Chọn loại văn bản --</option>
+                @foreach (var item in danhMucVanBans)
+                {
+                    <option value="@item.Id" selected="@(Model.DanhMucVanBanId == item.Id ? "selected" : null)">@item.TenLoaiVanBan</option>
+                }
+            </select>
+            <span id="DanhMucVanBanIdError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Quy trình soạn thảo <span class="text-danger">*</span></label>
+            <select asp-for="QuyTrinhSoanThaoId" class="form-control">
+                <option value="">-- Chọn quy trình --</option>
+                @foreach (var item in quyTrinhSoanThaos)
+                {
+                    <option value="@item.Id" data-vanbanid="@item.DanhMucVanBanId" selected="@(Model.QuyTrinhSoanThaoId == item.Id ? "selected" : null)">@item.TenQuyTrinh (@item.CapApDung)</option>
+                }
+            </select>
+            <span id="QuyTrinhSoanThaoIdError" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Từ ngày soạn thảo <span class="text-danger">*</span></label>
+            <input asp-for="TuNgaySoanThao" type="date" class="form-control" value="@(Model.TuNgaySoanThao?.ToString("yyyy-MM-dd"))" />
+            <span id="TuNgaySoanThaoError" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Đến ngày soạn thảo <span class="text-danger">*</span></label>
+            <input asp-for="DenNgaySoanThao" type="date" class="form-control" value="@(Model.DenNgaySoanThao?.ToString("yyyy-MM-dd"))" />
+            <span id="DenNgaySoanThaoError" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="separator separator-dashed my-6"></div>
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <h5 class="mb-0">Thời hạn từng bước</h5>
+        <div class="text-muted font-size-sm">Có thể chỉnh riêng cho hồ sơ này khi mỗi loại văn bản có thời hạn khác nhau.</div>
+    </div>
+</div>
+
+<div class="table-responsive border rounded mb-4">
+    <table class="table table-bordered table-sm m-0">
+        <thead class="thead-light">
+            <tr class="text-center">
+                <th style="min-width:60px;">Thứ tự</th>
+                <th style="min-width:140px;">Mã bước</th>
+                <th style="min-width:220px;">Tên bước</th>
+                <th style="min-width:140px;">Số ngày xử lý</th>
+                <th style="min-width:160px;">Cảnh báo sắp hạn</th>
+                <th style="min-width:180px;">Ghi chú</th>
+            </tr>
+        </thead>
+        <tbody id="workflow-step-deadlines-body">
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">Chọn quy trình để nạp thời hạn từng bước.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="row mb-6">
+    <div class="col-xl-12">
+        <div class="alert alert-light border mb-0" id="workflow-deadline-summary">
+            <div class="font-weight-bold mb-2">Kiểm tra thời gian soạn thảo</div>
+            <div class="mb-1">Tổng số ngày xử lý đã nhập: <span id="tong-so-ngay-xu-ly">0</span> ngày</div>
+            <div class="mb-1">Khoảng thời gian soạn thảo: <span id="tong-so-ngay-soan-thao">0</span> ngày</div>
+            <div id="ket-qua-kiem-tra-thoi-gian" class="font-weight-bold text-muted">Chọn từ ngày và đến ngày để hệ thống kiểm tra.</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Mô tả</label>
+            <textarea asp-for="MoTa" class="form-control" rows="3" placeholder="Mô tả nội dung hồ sơ"></textarea>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Ghi chú</label>
+            <textarea asp-for="GhiChu" class="form-control" rows="3" placeholder="Ghi chú bổ sung"></textarea>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const danhMucVanBan = document.getElementById('DanhMucVanBanId');
+        const quyTrinh = document.getElementById('QuyTrinhSoanThaoId');
+        const deadlineBody = document.getElementById('workflow-step-deadlines-body');
+        const tuNgaySoanThao = document.getElementById('TuNgaySoanThao');
+        const denNgaySoanThao = document.getElementById('DenNgaySoanThao');
+        const hanXuLy = document.getElementById('HanXuLy');
+        const tongSoNgayXuLy = document.getElementById('tong-so-ngay-xu-ly');
+        const tongSoNgaySoanThao = document.getElementById('tong-so-ngay-soan-thao');
+        const ketQuaKiemTraThoiGian = document.getElementById('ket-qua-kiem-tra-thoi-gian');
+        let initialStepRows = @Html.Raw(initialStepRowsJson);
+        const initialWorkflowId = quyTrinh ? quyTrinh.value : '';
+
+        if (!danhMucVanBan || !quyTrinh || !deadlineBody) {
+            return;
+        }
+
+        function normalizeDate(dateValue) {
+            if (!dateValue) {
+                return null;
+            }
+
+            const date = new Date(dateValue + 'T00:00:00');
+            return Number.isNaN(date.getTime()) ? null : date;
+        }
+
+        function tinhTongSoNgayXuLy() {
+            return Array.from(deadlineBody.querySelectorAll('input[name$=".SoNgayXuLy"]'))
+                .map(function (input) { return Number(input.value); })
+                .filter(function (value) { return Number.isFinite(value) && value > 0; })
+                .reduce(function (total, value) { return total + value; }, 0);
+        }
+
+        function tinhTongSoNgaySoanThao() {
+            const fromDate = normalizeDate(tuNgaySoanThao ? tuNgaySoanThao.value : '');
+            const toDate = normalizeDate(denNgaySoanThao ? denNgaySoanThao.value : '');
+
+            if (!fromDate || !toDate) {
+                return null;
+            }
+
+            const diffInMs = toDate.getTime() - fromDate.getTime();
+            const diffInDays = Math.floor(diffInMs / 86400000) + 1;
+            return diffInDays > 0 ? diffInDays : 0;
+        }
+
+        function capNhatTongNgayXuLy() {
+            const totalStepDays = tinhTongSoNgayXuLy();
+            const totalDraftDays = tinhTongSoNgaySoanThao();
+
+            if (hanXuLy && denNgaySoanThao) {
+                hanXuLy.value = denNgaySoanThao.value || '';
+            }
+
+            if (tongSoNgayXuLy) {
+                tongSoNgayXuLy.textContent = totalStepDays.toString();
+            }
+
+            if (tongSoNgaySoanThao) {
+                tongSoNgaySoanThao.textContent = totalDraftDays === null ? '0' : totalDraftDays.toString();
+            }
+
+            if (!ketQuaKiemTraThoiGian) {
+                return;
+            }
+
+            ketQuaKiemTraThoiGian.className = 'font-weight-bold';
+
+            if (totalDraftDays === null) {
+                ketQuaKiemTraThoiGian.classList.add('text-muted');
+                ketQuaKiemTraThoiGian.textContent = 'Chọn từ ngày và đến ngày để hệ thống kiểm tra.';
+                return;
+            }
+
+            if (totalDraftDays === 0) {
+                ketQuaKiemTraThoiGian.classList.add('text-danger');
+                ketQuaKiemTraThoiGian.textContent = 'Đến ngày phải lớn hơn hoặc bằng từ ngày.';
+                return;
+            }
+
+            const chenhLech = totalDraftDays - totalStepDays;
+            if (chenhLech >= 0) {
+                ketQuaKiemTraThoiGian.classList.add('text-success');
+                ketQuaKiemTraThoiGian.textContent = `Đủ thời gian thực hiện. Còn dư ${chenhLech} ngày so với tổng số ngày xử lý.`;
+                return;
+            }
+
+            ketQuaKiemTraThoiGian.classList.add('text-danger');
+            ketQuaKiemTraThoiGian.textContent = `Không đủ thời gian thực hiện. Thiếu ${Math.abs(chenhLech)} ngày so với tổng số ngày xử lý.`;
+        }
+
+        function filterQuyTrinh() {
+            const selectedVanBanId = danhMucVanBan.value;
+            Array.from(quyTrinh.options).forEach(function (option, index) {
+                if (index === 0) {
+                    option.hidden = false;
+                    return;
+                }
+
+                const vanBanId = option.getAttribute('data-vanbanid');
+                const visible = !selectedVanBanId || !vanBanId || vanBanId === selectedVanBanId;
+                option.hidden = !visible;
+                if (!visible && option.selected) {
+                    quyTrinh.value = '';
+                }
+            });
+        }
+
+        function renderDeadlineRows(items) {
+            if (!items || !items.length) {
+                deadlineBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Quy trình này chưa có bước nào.</td></tr>';
+                capNhatTongNgayXuLy();
+                return;
+            }
+
+            deadlineBody.innerHTML = items.map(function (item, index) {
+                return `
+                    <tr>
+                        <td class="text-center align-middle">
+                            ${item.thuTuSapXep}
+                            <input type="hidden" name="BuocThoiHans[${index}].BuocQuyTrinhId" value="${item.buocQuyTrinhId}" />
+                            <input type="hidden" name="BuocThoiHans[${index}].MaBuoc" value="${item.maBuoc}" />
+                            <input type="hidden" name="BuocThoiHans[${index}].TenBuoc" value="${item.tenBuoc}" />
+                            <input type="hidden" name="BuocThoiHans[${index}].ThuTuSapXep" value="${item.thuTuSapXep}" />
+                        </td>
+                        <td class="align-middle font-weight-bold">${item.maBuoc}</td>
+                        <td class="align-middle">${item.tenBuoc}</td>
+                        <td>
+                            <input name="BuocThoiHans[${index}].SoNgayXuLy" type="number" min="1" class="form-control form-control-sm" value="${item.soNgayXuLy ?? ''}" />
+                        </td>
+                        <td>
+                            <input name="BuocThoiHans[${index}].SoNgayCanhBaoSapHan" type="number" min="0" class="form-control form-control-sm" value="${item.soNgayCanhBaoSapHan ?? ''}" />
+                        </td>
+                        <td>
+                            <input name="BuocThoiHans[${index}].GhiChu" class="form-control form-control-sm" value="${item.ghiChu ?? ''}" />
+                        </td>
+                    </tr>`;
+            }).join('');
+
+            capNhatTongNgayXuLy();
+        }
+
+        function clearDeadlineRows(message) {
+            deadlineBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">${message}</td></tr>`;
+            capNhatTongNgayXuLy();
+        }
+
+        function loadWorkflowSteps() {
+            const quyTrinhId = quyTrinh.value;
+            if (!quyTrinhId) {
+                clearDeadlineRows('Chọn quy trình để nạp thời hạn từng bước.');
+                return;
+            }
+
+            if (Array.isArray(initialStepRows) && initialStepRows.length > 0 && quyTrinhId === initialWorkflowId) {
+                renderDeadlineRows(initialStepRows);
+                initialStepRows = [];
+                return;
+            }
+
+            $.ajax({
+                url: '@workflowStepUrl',
+                type: 'GET',
+                data: { quyTrinhSoanThaoId: quyTrinhId },
+                success: function (data) {
+                    renderDeadlineRows(data);
+                },
+                error: function () {
+                    clearDeadlineRows('Không thể tải danh sách bước của quy trình.');
+                }
+            });
+        }
+
+        deadlineBody.addEventListener('input', function (event) {
+            if (event.target && event.target.name && event.target.name.endsWith('.SoNgayXuLy')) {
+                capNhatTongNgayXuLy();
+            }
+        });
+
+        if (tuNgaySoanThao) {
+            tuNgaySoanThao.addEventListener('change', capNhatTongNgayXuLy);
+        }
+
+        if (denNgaySoanThao) {
+            denNgaySoanThao.addEventListener('change', capNhatTongNgayXuLy);
+        }
+
+        danhMucVanBan.addEventListener('change', function () {
+            initialStepRows = [];
+            filterQuyTrinh();
+        });
+        quyTrinh.addEventListener('change', function () {
+            if (quyTrinh.value !== initialWorkflowId) {
+                initialStepRows = [];
+            }
+            loadWorkflowSteps();
+        });
+
+        filterQuyTrinh();
+        loadWorkflowSteps();
+        capNhatTongNgayXuLy();
+    })();
+</script>

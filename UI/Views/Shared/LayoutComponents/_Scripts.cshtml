@@ -262,8 +262,10 @@
     // Begin::Notification scripts
     let hasUnread = false;
     let shakeInterval;
+    let lastNotificationCount = null;
+    let isNotificationPreviewLoaded = false;
 
-    function updateNotificationCount(count) {
+    function updateNotificationCount(count, canToast = false) {
         const badge = document.getElementById("notification-badge");
         hasUnread = count > 0;
 
@@ -278,6 +280,13 @@
             badge.style.display = "none";
             stopShakingLoop();
         }
+
+        if (canToast && lastNotificationCount !== null && count > lastNotificationCount) {
+            const soThongBaoMoi = count - lastNotificationCount;
+            toastr.info(`Bạn có ${soThongBaoMoi} thông báo mới từ đơn vị gửi hồ sơ.`, "Thông báo");
+        }
+
+        lastNotificationCount = count;
     }
 
     function shakeBell() {
@@ -306,9 +315,77 @@
         fetch("/Manages/Notification/Count")
             .then(response => response.json())
             .then(data => {
-                updateNotificationCount(data.count);
+                updateNotificationCount(data.count || 0, true);
             })
             .catch(error => console.error("Lỗi khi tải thông báo:", error));
+    }
+
+    function escapeHtml(value) {
+        return (value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function renderNotificationPreview(items) {
+        const container = document.getElementById("notification-preview-list");
+        if (!container) {
+            return;
+        }
+
+        if (!items || items.length === 0) {
+            container.innerHTML = '<div class="px-4 py-6 text-center text-muted">Chưa có thông báo nào.</div>';
+            return;
+        }
+
+        const rows = items.map(item => {
+            const mainUrl = item.urlXetDuyet || item.urlDanhSach || "/Manages/Notifications";
+            const statusBadge = item.daXem
+                ? '<span class="label label-light-info label-inline font-weight-bold">Đã xem</span>'
+                : '<span class="label label-warning label-inline font-weight-bold">Chưa xem</span>';
+
+            return `
+                <a href="${mainUrl}" class="d-block text-dark text-hover-primary px-4 py-3 border-bottom notification-preview-item">
+                    <div class="d-flex align-items-start justify-content-between mb-2">
+                        <div class="font-weight-bolder mr-3">${escapeHtml(item.tenDonViGuiThongBao || "Đơn vị gửi")}</div>
+                        ${statusBadge}
+                    </div>
+                    <div class="text-muted font-size-sm mb-2">${escapeHtml(item.noiDung || "")}</div>
+                    <div class="font-size-xs text-muted">${escapeHtml(item.createdDate || "")}</div>
+                </a>`;
+        });
+
+        container.innerHTML = rows.join("");
+    }
+
+    function fetchLatestNotifications(forceRefresh = false) {
+        const container = document.getElementById("notification-preview-list");
+        if (!container) {
+            return;
+        }
+
+        if (!forceRefresh && isNotificationPreviewLoaded) {
+            return;
+        }
+
+        container.innerHTML = '<div class="px-4 py-6 text-center text-muted">Đang tải thông báo...</div>';
+        fetch("/Manages/Notification/Latest?top=5")
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== "success") {
+                    container.innerHTML = '<div class="px-4 py-6 text-center text-danger">Không tải được thông báo.</div>';
+                    return;
+                }
+
+                renderNotificationPreview(data.data || []);
+                isNotificationPreviewLoaded = true;
+            })
+            .catch(error => {
+                console.error("Lỗi khi tải danh sách thông báo:", error);
+                container.innerHTML = '<div class="px-4 py-6 text-center text-danger">Không tải được thông báo.</div>';
+            });
     }
 
     // begin :: signalR
@@ -331,11 +408,17 @@
     connection.on("ReceiveUpdate", () => {
         // console.log("Có cập nhật mới, gọi API để lấy số thông báo...");
         fetchUnreadNotifications();
+        fetchLatestNotifications(true);
     });
     //end :: signalR
     // End::Notification scripts
 
     document.addEventListener("DOMContentLoaded", function () {
+        $('#notificationDropdownToggle').on('click', function (e) {
+            e.preventDefault();
+            fetchLatestNotifications(true);
+        });
+
         $('#imageCarousel').carousel({
             interval: 3000,
             ride: 'carousel'

@@ -1,12 +1,14 @@
 @using UI.ViewModels;
+@model List<DataAccess.Entities.Manages.AttachedFile>
+
 @{
     int pageSize = (ViewData["PageInfo"] as VMPageInfo)?.PageSize ?? 5;
     int pageCurrent = (ViewData["PageInfo"] as VMPageInfo)?.PageCurrent ?? 1;
     string timKiem = (ViewData["PageInfo"] as VMPageInfo)?.Search ?? "";
     string sortCurrent = (ViewData["PageInfo"] as VMPageInfo)?.Sort ?? "";
     int record_giayto = 1;
+    var files = Model ?? new List<DataAccess.Entities.Manages.AttachedFile>();
 }
-@model List<DataAccess.Entities.Manages.AttachedFile>
 
 <div class="card card-custom" style="border: 1px solid #60aee4;">
     <div class="card-header flex-wrap border-0 pt-6 pb-0">
@@ -33,7 +35,7 @@
                         <!option value="10" @(pageSize == 10 ? "selected" : "")>10 thông tin</!option>
                         <!option value="20" @(pageSize == 20 ? "selected" : "")>20 thông tin</!option>
                         <!option value="50" @(pageSize == 50 ? "selected" : "")>50 thông tin</!option>
-                        <!option value="100" @(pageSize == 100 ? "selected" : "")> 100 thông tin</!option>
+                        <!option value="100" @(pageSize == 100 ? "selected" : "")>100 thông tin</!option>
                     </select>
                 </div>
             </div>
@@ -58,9 +60,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model.Any())
+                    @if (files.Any())
                     {
-                        @foreach (var item in Model)
+                        @foreach (var item in files)
                         {
                             <tr>
                                 <td style="text-align: center; vertical-align: middle">@(record_giayto++)</td>

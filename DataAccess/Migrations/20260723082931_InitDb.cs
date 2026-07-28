@@ -556,8 +556,8 @@ namespace DataAccess.Migrations
                     @Now,
                     '11111111-1111-1111-1111-111111111111',
                     @Now,
-                    3, 'Detail', 2, 'Manages.VanBanPhapLuat', '20000000-0000-0000-0000-000000000011',
-                    N'Danh sách văn bản', 'VanBanPhapLuat', 'Index', NULL, 'AttachedFiles',
+                    3, 'Detail', 2, 'QuanLyDanhMuc.DanhMucVanBan', '20000000-0000-0000-0000-000000000011',
+                    N'Danh sách văn bản', 'DanhMucVanBan', 'Index', NULL, 'DanhMucVanBans',
                     N'Kích hoạt', 'QuanTriHeThong', NULL
                 ),
                 (
@@ -566,8 +566,8 @@ namespace DataAccess.Migrations
                     @Now,
                     '11111111-1111-1111-1111-111111111111',
                     @Now,
-                    4, 'Detail', 2, 'Settings.TrangThai', '20000000-0000-0000-0000-000000000011',
-                    N'Danh sách trạng thái', 'DangPhatTrien', 'TrangThai', NULL, 'DangPhatTrien',
+                    4, 'Detail', 2, 'QuanLyDanhMuc.DanhMucTrangThai', '20000000-0000-0000-0000-000000000011',
+                    N'Danh sách trạng thái', 'DanhMucTrangThai', 'Index', NULL, 'DanhMucTrangThais',
                     N'Kích hoạt', 'QuanTriHeThong', NULL
                 ),
                 (

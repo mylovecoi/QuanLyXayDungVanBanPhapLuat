@@ -188,9 +188,13 @@
                 </div>
                 @if (session != null && !string.IsNullOrEmpty(session.GetString("SsAdmin")))
                 {
-                    <div class="topbar-item">
+                    <div class="topbar-item topbar-item-notification dropdown">
                         <a asp-controller="Notification" asp-action="Index"
-                           class="btn btn-icon btn-icon-mobile w-auto btn-clean d-flex align-items-center btn-lg px-2">
+                           class="btn btn-icon btn-icon-mobile w-auto btn-clean d-flex align-items-center btn-lg px-2"
+                           id="notificationDropdownToggle"
+                           data-toggle="dropdown"
+                           aria-haspopup="true"
+                           aria-expanded="false">
                             <span class="svg-icon svg-icon-xl svg-icon-primary">
                                 <svg id="notification-bell" xmlns="http://www.w3.org/2000/svg" width="22px" height="22px" viewBox="0 0 22 22" version="1.1">
                                     <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -201,6 +205,18 @@
                                 <span id="notification-badge" class="notification-badge"></span>
                             </span>
                         </a>
+                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-anim-up dropdown-menu-lg p-0" aria-labelledby="notificationDropdownToggle" style="min-width: 360px;">
+                            <div class="d-flex align-items-center justify-content-between px-6 py-4 border-bottom">
+                                <div>
+                                    <div class="font-weight-bolder text-dark">Thông báo mới</div>
+                                    <div class="text-muted font-size-sm">Hồ sơ, văn bản gửi đến đơn vị của bạn</div>
+                                </div>
+                                <a href="/Manages/Notifications" class="btn btn-sm btn-light-primary">Xem tất cả</a>
+                            </div>
+                            <div id="notification-preview-list" class="px-2 py-2">
+                                <div class="px-4 py-6 text-center text-muted">Đang tải thông báo...</div>
+                            </div>
+                        </div>
                     </div>
                 }
                 <div class="topbar-item">

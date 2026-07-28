@@ -78,11 +78,32 @@ namespace UI.Controllers.Admin.Manages
         public async Task<IActionResult> CountNotification()
         {
             int count = await _notificationService.CountNotificationAsync();
-            if (count == 0)
-            {
-                return Json(new { status = "error" });
-            }
             return Json(new { status = "success", count = count });
+        }
+
+        [HttpGet("Manages/Notification/Latest")]
+        public async Task<IActionResult> Latest(int top = 5)
+        {
+            if (_session == null || string.IsNullOrEmpty(_session.GetString("SsAdmin")))
+            {
+                return Json(new { status = "error", message = "Phiên đăng nhập đã hết hạn." });
+            }
+
+            var data = await _notificationService.GetLatestNotificationsAsync(top);
+            var result = data.Select(x => new
+            {
+                id = x.Id,
+                tenDonViGuiThongBao = x.TenDonViGuiThongBao,
+                noiDung = x.NoiDung,
+                daXem = x.DaXem,
+                createdDate = x.CreatedDate.ToString("dd/MM/yyyy HH:mm"),
+                urlDanhSach = x.UrlDanhSach,
+                urlXetDuyet = x.UrlXetDuyet,
+                roleDanhSach = x.RoleDanhSach,
+                roleXetDuyet = x.RoleXetDuyet
+            });
+
+            return Json(new { status = "success", data = result });
         }
 
         [HttpPost("Manages/Notification/Store")]

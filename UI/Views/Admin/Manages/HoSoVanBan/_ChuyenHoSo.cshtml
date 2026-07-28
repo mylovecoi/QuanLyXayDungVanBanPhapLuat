@@ -1,0 +1,56 @@
+@using Services.Manages
+
+@model HoSoVanBanXuLyStepModel
+
+@{
+    var donViOptions = ViewData["DonViOptions"] as List<DonViOptionModel> ?? new List<DonViOptionModel>();
+    var vpUbndId = "40000000-0000-0000-0000-000000000013";
+}
+
+@Html.AntiForgeryToken()
+<input type="hidden" name="HoSoVanBanId" value="@Model.HoSoVanBanId" />
+<input type="hidden" name="KetQuaXuLy" value="@Model.KetQuaXuLy" />
+<input type="hidden" name="NoiDungXuLy" value="Chuyển hồ sơ @Model.TenHoSo lên đơn vị tiếp nhận." />
+
+<div class="alert alert-light-primary mb-6">
+    <div><strong>Tên hồ sơ:</strong> @Model.TenHoSo</div>
+</div>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div class="form-group">
+            <label class="font-weight-bold text-primary">Đơn vị tiếp nhận</label>
+            <select class="form-control" id="DonViTiepNhanId" name="DonViTiepNhanId">
+                <option value="">-- Chọn đơn vị tiếp nhận --</option>
+                @foreach (var item in donViOptions)
+                {
+                    <option value="@item.Id" selected="@(item.Id.ToString() == vpUbndId ? "selected" : null)">@item.TenDonVi</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Ngày chuyển</label>
+            <input type="date" class="form-control" name="NgayXuLy" value="@Model.NgayXuLy?.ToString("yyyy-MM-dd")" />
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Hạn xử lý bước tiếp theo</label>
+            <input type="date" class="form-control" name="HanXuLy" value="@Model.HanXuLy?.ToString("yyyy-MM-dd")" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-12">
+        <div class="form-group mb-0">
+            <label>Ghi chú</label>
+            <textarea class="form-control" name="GhiChu" rows="2">@Model.GhiChu</textarea>
+        </div>
+    </div>
+</div>

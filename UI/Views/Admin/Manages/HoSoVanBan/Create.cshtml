@@ -1,0 +1,156 @@
+@using Services.Manages
+@model HoSoVanBanCreateModel
+
+@{
+    var attachedFileTableName = ViewData["AttachedFileTableName"]?.ToString() ?? "HoSoVanBan";
+    var formAction = ViewData["FormAction"]?.ToString() ?? "/Manages/DangKyVanBan/Store";
+    var submitLabel = ViewData["SubmitLabel"]?.ToString() ?? "Thêm mới";
+    var pageTitle = ViewData["PageTitle"]?.ToString() ?? ViewData["Title"]?.ToString() ?? "Đăng ký văn bản";
+    var pageSubtitle = ViewData["PageSubtitle"]?.ToString() ?? "Thêm mới hồ sơ đăng ký văn bản trên màn hình nghiệp vụ riêng.";
+}
+
+@section custom_style {
+    <style>
+        .hoso-create-page .card {
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .hoso-create-page .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f4c81;
+        }
+
+        .hoso-create-page .section-subtitle {
+            color: #7e8299;
+        }
+    </style>
+}
+
+@section custom_script {
+    <script>
+        function validateHoSoForm(form, fields) {
+            let isValid = true;
+            fields.forEach(function (field) {
+                const input = form.querySelector('#' + field.id);
+                if (!input) {
+                    return;
+                }
+
+                let error = form.querySelector('#' + field.id + 'Error');
+                if (!error) {
+                    error = document.createElement('span');
+                    error.id = field.id + 'Error';
+                    error.className = 'text-danger';
+                    input.parentNode.appendChild(error);
+                }
+
+                if (!input.value || !input.value.trim()) {
+                    isValid = false;
+                    input.style.border = '1px solid red';
+                    error.textContent = field.message;
+                } else {
+                    input.style.border = '';
+                    error.textContent = '';
+                }
+            });
+
+            return isValid;
+        }
+
+        function submitCreateHoSo() {
+            const form = document.getElementById('frm_create_page');
+            if (!form) {
+                return;
+            }
+
+            const fields = [
+                { id: 'DonViDeNghiId', message: 'Đơn vị đề nghị không được bỏ trống' },
+                { id: 'TenHoSo', message: 'Tên hồ sơ không được bỏ trống' },
+                { id: 'DanhMucVanBanId', message: 'Loại văn bản không được bỏ trống' },
+                { id: 'QuyTrinhSoanThaoId', message: 'Quy trình soạn thảo không được bỏ trống' },
+                { id: 'TuNgaySoanThao', message: 'Từ ngày soạn thảo không được bỏ trống' },
+                { id: 'DenNgaySoanThao', message: 'Đến ngày soạn thảo không được bỏ trống' }
+            ];
+
+            if (!validateHoSoForm(form, fields)) {
+                return;
+            }
+
+            const tuNgay = form.querySelector('#TuNgaySoanThao')?.value;
+            const denNgay = form.querySelector('#DenNgaySoanThao')?.value;
+            if (tuNgay && denNgay && denNgay < tuNgay) {
+                toastr.error('Đến ngày soạn thảo phải lớn hơn hoặc bằng từ ngày soạn thảo');
+                return;
+            }
+
+            form.submit();
+        }
+
+        function loadAttachedFiles() {
+            const groupId = document.getElementById('Id')?.value;
+            const tableName = document.getElementById('tableName')?.value;
+            if (!groupId || !tableName) {
+                return;
+            }
+
+            const url = '@Url.Action("GetAttachedFiles", "AttachedFile")' + '?GroupId=' + groupId + '&TableName=' + tableName;
+            $('#attachedFile_frm').load(url, function () {
+                $('.select2basic').select2();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadAttachedFiles();
+        });
+    </script>
+}
+
+<div class="hoso-create-page">
+    <div class="card card-custom">
+        <div class="card-header border-0 pt-6">
+            <div class="card-title">
+                <div>
+                    <h3 class="card-label mb-1">
+                        <b>@pageTitle</b>
+                    </h3>
+                    @if (!string.IsNullOrWhiteSpace(pageSubtitle))
+                    {
+                        <div class="text-muted">@pageSubtitle</div>
+                    }
+                </div>
+            </div>
+            <div class="card-toolbar">
+                <a href="/Manages/DangKyVanBan" class="btn btn-light-primary font-weight-bold">Quay lại danh sách</a>
+            </div>
+        </div>
+        <div class="card-body pt-2">
+            <form id="frm_create_page" method="post" action="@formAction">
+                @await Html.PartialAsync("~/Views/Admin/Manages/HoSoVanBan/_FormFields.cshtml", Model)
+
+                <div class="separator separator-dashed my-8"></div>
+
+                <div class="mb-4">
+                    <div class="section-title">Tài liệu đính kèm</div>
+                    <div class="section-subtitle">Upload file trực tiếp cho hồ sơ theo Id hồ sơ trước khi bấm lưu.</div>
+                </div>
+
+                <input type="hidden" id="Id" value="@Model.Id" />
+                <input type="hidden" id="tableName" value="@attachedFileTableName" />
+
+                <div id="attachedFile_frm">
+                    <div class="card card-custom border">
+                        <div class="card-body text-center text-muted py-8">
+                            Đang tải khu vực đính kèm file...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-8">
+                    <a href="/Manages/DangKyVanBan" class="btn btn-light-danger font-weight-bold mr-3">Đóng</a>
+                    <button type="button" class="btn btn-primary font-weight-bold" onclick="submitCreateHoSo()">@submitLabel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

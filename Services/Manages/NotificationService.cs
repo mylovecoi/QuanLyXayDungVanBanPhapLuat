@@ -13,6 +13,7 @@ namespace Services.Manages
     {
         Task<CommonResponse> GetNotificationAsync(string Search, int PageSize, int PageCurrent, string Status = "");
         Task<int> CountNotificationAsync();
+        Task<List<Notification>> GetLatestNotificationsAsync(int top = 5);
         Task<CommonResponse> StoreAsync(Notification request);
         //Task<CommonResponse> UpdateAsync(Guid guidView, Guid guid);
         Task<Notification> GetNoticationByIdAsync(Guid guid);
@@ -36,11 +37,8 @@ namespace Services.Manages
                 var isSSA = _authService.GetUserInfo()?.SSA ?? false;
 
                 var query = from noti in _dbContext.Notifications.AsNoTracking()
-                            join user in _dbContext.Users.AsNoTracking()
-                                on noti.CreatedBy equals user.Id into userGroup
-                            from user in userGroup.DefaultIfEmpty()
                             join dmdv in _dbContext.DanhMucDonVis.AsNoTracking()
-                                on user.DanhMucDonViId equals dmdv.Id into dmdvGroup
+                                on noti.DonViGui equals dmdv.Id into dmdvGroup
                             from dmdv in dmdvGroup.DefaultIfEmpty()
                             select new Notification
                             {
@@ -111,6 +109,10 @@ namespace Services.Manages
         public async Task<int> CountNotificationAsync()
         {
             var donViId = _authService.GetUserInfo()?.DanhMucDonViId ?? Guid.Empty;
+            if (donViId == Guid.Empty)
+            {
+                return 0;
+            }
 
             var count = await _dbContext.Notifications
                 .Where(n =>
@@ -127,6 +129,59 @@ namespace Services.Manages
                 .CountAsync();
 
             return count;
+        }
+
+        public async Task<List<Notification>> GetLatestNotificationsAsync(int top = 5)
+        {
+            var idDonVi = _authService.GetUserInfo()?.DanhMucDonViId ?? Guid.Empty;
+            var isSSA = _authService.GetUserInfo()?.SSA ?? false;
+            if (idDonVi == Guid.Empty && !isSSA)
+            {
+                return [];
+            }
+
+            var query = from noti in _dbContext.Notifications.AsNoTracking()
+                        join dmdv in _dbContext.DanhMucDonVis.AsNoTracking()
+                            on noti.DonViGui equals dmdv.Id into dmdvGroup
+                        from dmdv in dmdvGroup.DefaultIfEmpty()
+                        select new Notification
+                        {
+                            Id = noti.Id,
+                            DonViGui = noti.DonViGui,
+                            DonViTiepNhan = noti.DonViTiepNhan,
+                            DonViDongChuyen = noti.DonViDongChuyen,
+                            NoiDung = noti.NoiDung,
+                            DonViView = noti.DonViView,
+                            ActionNameDanhSach = noti.ActionNameDanhSach,
+                            ControllerNameDanhSach = noti.ControllerNameDanhSach,
+                            ActionNameXetDuyet = noti.ActionNameXetDuyet,
+                            ControllerNameXetDuyet = noti.ControllerNameXetDuyet,
+                            CreatedDate = noti.CreatedDate,
+                            CreatedBy = noti.CreatedBy,
+                            TenDonViGuiThongBao = dmdv.TenDonVi ?? ""
+                        };
+
+            if (!isSSA)
+            {
+                query = query.Where(x => x.DonViGui == idDonVi || x.DonViTiepNhan == idDonVi || (x.DonViDongChuyen ?? "").Contains(idDonVi.ToString()));
+            }
+
+            var data = await query
+                .OrderBy(x => x.DonViView.Contains(idDonVi))
+                .ThenByDescending(x => x.CreatedDate)
+                .Take(top)
+                .ToListAsync();
+
+            foreach (var item in data)
+            {
+                item.DaXem = item.DonViView.Contains(idDonVi);
+                item.UrlDanhSach = BuildNotificationUrl(item.Id, "DanhSach");
+                item.UrlXetDuyet = BuildNotificationUrl(item.Id, "XetDuyet");
+                item.RoleDanhSach = _roleActionService.GetRoleByControllerAction(item.ControllerNameDanhSach, item.ActionNameDanhSach);
+                item.RoleXetDuyet = _roleActionService.GetRoleByControllerAction(item.ControllerNameXetDuyet, item.ActionNameXetDuyet);
+            }
+
+            return data;
         }
 
         public async Task<CommonResponse> StoreAsync(Notification request)
@@ -183,13 +238,14 @@ namespace Services.Manages
             var donViId = _authService.GetUserInfo()?.DanhMucDonViId ?? Guid.Empty;
             var isSSA = _authService.GetUserInfo()?.SSA ?? false;
 
-            if (donViId != Guid.Empty && !model.DonViView.Contains(donViId) && !isSSA)
+            if (donViId != Guid.Empty && !model.DonViView.Contains(donViId))
             {
                 model.DonViView.Add(donViId);
             }
 
             _dbContext.Notifications.Update(model);
             await _dbContext.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("ReceiveUpdate");
         }
 
         public bool ShowNotification(Guid guid, string phanLoai, out string controller, out string action, out object parameter)
@@ -215,6 +271,11 @@ namespace Services.Manages
                 parameter = Helper.ConvertStringToDictionary(data.ParameterXetDuyet ?? "");
             }
             return true;
+        }
+
+        private static string BuildNotificationUrl(Guid id, string phanLoai)
+        {
+            return $"/Manages/Notification/Show?Id={id}&PhanLoai={phanLoai}";
         }
     }
 }

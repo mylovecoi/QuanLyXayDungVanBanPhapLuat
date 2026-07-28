@@ -1,0 +1,162 @@
+@using System.Net
+@using DataAccess.Entities.Settings
+@using Services.QuanLyDanhMuc
+
+@model QuyTrinhSoanThaoEditModel
+
+@{
+    var formMode = ViewData["FormMode"]?.ToString() ?? "Create";
+    var isEdit = formMode == "Edit";
+    var formAction = isEdit ? "Update" : "Store";
+    var heading = isEdit ? "Chỉnh sửa quy trình soạn thảo" : "Thêm mới quy trình soạn thảo";
+    var subHeading = isEdit ? "Cập nhật chi tiết quy trình soạn thảo trên trang riêng" : "Khởi tạo quy trình soạn thảo trên trang riêng";
+    var danhMucDonVis = ViewData["DanhMucDonVis"] as List<DanhMucDonVi> ?? new List<DanhMucDonVi>();
+    var donViOptionsHtml = "<option value=\"\">-- Không cấu hình --</option>" +
+        string.Concat(danhMucDonVis.Select(x =>
+            $"<option value=\"{x.Id}\">{WebUtility.HtmlEncode(x.TenDonVi)}</option>"));
+}
+
+@section custom_script {
+    <script>
+        function addStepRow(button) {
+            const form = button.closest('form');
+            const tbody = form.querySelector('.workflow-steps-body');
+            const row = document.createElement('tr');
+            row.className = 'step-row';
+            row.innerHTML = `
+                <td>
+                    <input type="hidden" value="" data-field="Id" />
+                    <input class="form-control form-control-sm" data-field="MaBuoc" />
+                </td>
+                <td><input class="form-control form-control-sm" data-field="TenBuoc" /></td>
+                <td><input type="number" min="1" value="${tbody.querySelectorAll('.step-row').length + 1}" class="form-control form-control-sm" data-field="ThuTuSapXep" /></td>
+                <td>
+                    <select class="form-control form-control-sm" data-field="LoaiBuoc">
+                        <option value="KhoiTao">Khởi tạo</option>
+                        <option value="PheDuyet">Phê duyệt</option>
+                        <option value="XuLy" selected>Xử lý</option>
+                        <option value="LayYKien">Lấy ý kiến</option>
+                        <option value="DanhGia">Đánh giá</option>
+                        <option value="TrinhKy">Trình ký</option>
+                        <option value="BanHanh">Ban hành</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control form-control-sm" data-field="BatBuoc">
+                        <option value="true" selected>Có</option>
+                        <option value="false">Không</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control form-control-sm" data-field="ChoPhepBoQua">
+                        <option value="true">Có</option>
+                        <option value="false" selected>Không</option>
+                    </select>
+                </td>
+                <td>
+                    <select class="form-control form-control-sm" data-field="ChoPhepQuayLui">
+                        <option value="true">Có</option>
+                        <option value="false" selected>Không</option>
+                    </select>
+                </td>
+                <td><input class="form-control form-control-sm" data-field="CachHoanThanh" /></td>
+                <td><input type="number" min="0" class="form-control form-control-sm" data-field="SoLuongPhanHoiToiThieu" /></td>
+                <td>
+                    <select class="form-control form-control-sm" data-field="YeuCauFileDinhKem">
+                        <option value="true">Có</option>
+                        <option value="false" selected>Không</option>
+                    </select>
+                </td>
+                <td><input type="number" min="0" value="0" class="form-control form-control-sm" data-field="SoLanTraLaiToiDa" /></td>
+                <td><input type="number" min="1" class="form-control form-control-sm" data-field="SoNgayXuLyTieuChuan" /></td>
+                <td><input type="number" min="0" class="form-control form-control-sm" data-field="SoNgayCanhBaoSapHan" /></td>
+                <td>
+                    <select class="form-control form-control-sm" data-field="DonViTiepNhanMacDinhId">
+                        @Html.Raw(donViOptionsHtml)
+                    </select>
+                </td>
+                <td><input class="form-control form-control-sm" data-field="MoTa" /></td>
+                <td><input class="form-control form-control-sm" data-field="GhiChu" /></td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-clean btn-icon text-danger" onclick="removeWorkflowRow(this)">
+                        <i class="la la-trash"></i>
+                    </button>
+                </td>`;
+            tbody.appendChild(row);
+            reindexWorkflowForm(form);
+        }
+
+        function addTransitionRow(button) {
+            const form = button.closest('form');
+            const tbody = form.querySelector('.workflow-transitions-body');
+            const row = document.createElement('tr');
+            row.className = 'transition-row';
+            row.innerHTML = `
+                <td>
+                    <input type="hidden" value="" data-field="Id" />
+                    <input class="form-control form-control-sm" data-field="TuBuocMa" />
+                </td>
+                <td><input class="form-control form-control-sm" data-field="DenBuocMa" /></td>
+                <td><input class="form-control form-control-sm" data-field="DieuKienKetQua" value="HOAN_THANH" /></td>
+                <td>
+                    <select class="form-control form-control-sm" data-field="LaNhanhMacDinh">
+                        <option value="true" selected>Có</option>
+                        <option value="false">Không</option>
+                    </select>
+                </td>
+                <td><input class="form-control form-control-sm" data-field="MoTa" /></td>
+                <td><input class="form-control form-control-sm" data-field="GhiChu" /></td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-clean btn-icon text-danger" onclick="removeWorkflowRow(this)">
+                        <i class="la la-trash"></i>
+                    </button>
+                </td>`;
+            tbody.appendChild(row);
+            reindexWorkflowForm(form);
+        }
+
+        function removeWorkflowRow(button) {
+            const form = button.closest('form');
+            button.closest('tr').remove();
+            reindexWorkflowForm(form);
+        }
+
+        function reindexWorkflowForm(form) {
+            const stepRows = form.querySelectorAll('.workflow-steps-body .step-row');
+            stepRows.forEach((row, index) => {
+                row.querySelectorAll('[data-field]').forEach(input => {
+                    input.name = `BuocQuyTrinhs[${index}].${input.dataset.field}`;
+                });
+            });
+
+            const transitionRows = form.querySelectorAll('.workflow-transitions-body .transition-row');
+            transitionRows.forEach((row, index) => {
+                row.querySelectorAll('[data-field]').forEach(input => {
+                    input.name = `ChuyenBuocs[${index}].${input.dataset.field}`;
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.workflow-upsert-form').forEach(form => reindexWorkflowForm(form));
+        });
+    </script>
+}
+
+<div class="card card-custom workflow-upsert-card">
+    <div class="card-header border-0 pt-6">
+        <div>
+            <h3 class="card-title font-weight-bolder mb-1">@heading</h3>
+            <div class="text-muted font-size-sm">@subHeading</div>
+        </div>
+        <div>
+            <a class="btn btn-light-primary" href="@Url.Action("Index", "QuyTrinhSoanThao", new { area = "Admin" })">Quay lại danh sách</a>
+        </div>
+    </div>
+    <div class="card-body pt-4">
+        <form class="workflow-upsert-form" asp-action="@formAction" asp-controller="QuyTrinhSoanThao" asp-area="Admin" method="post">
+            @Html.AntiForgeryToken()
+            @await Html.PartialAsync("_FormFields", Model)
+        </form>
+    </div>
+</div>

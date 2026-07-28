@@ -1,0 +1,38 @@
+<div class="modal fade" id="Delete_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Xoa @ViewData["Title"]</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form asp-controller="QuyTrinhSoanThao" asp-action="Delete" method="post">
+                <div class="modal-body">
+                    <div class="form-group fv-plugins-icon-container">
+                        <label>
+                            Ten quy trinh:&nbsp;<b id="tenquytrinh_delete" style="color: #0000FF"></b>
+                        </label>
+                    </div>
+                    <input hidden id="id_delete" name="id_delete" />
+                    @Html.AntiForgeryToken()
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Đồng ý</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function Delete(id, tenQuyTrinh) {
+        document.getElementById('id_delete').value = id;
+        document.getElementById('tenquytrinh_delete').innerHTML = tenQuyTrinh;
+        $('#Delete_Modal').modal('show');
+    }
+</script>

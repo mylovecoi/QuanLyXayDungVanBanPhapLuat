@@ -1,0 +1,113 @@
+﻿@using DataAccess.Entities.QuanLyDanhMuc
+
+@model DanhMucTrangThai
+
+<input asp-for="Id" type="hidden" />
+
+<div class="row">
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Mã trạng thái <span class="text-danger">*</span></label>
+            <input asp-for="MaTrangThai" class="form-control" placeholder="Vi du: DANG_XU_LY" />
+        </div>
+    </div>
+    <div class="col-xl-5">
+        <div class="form-group">
+            <label>Tên trạng thái <span class="text-danger">*</span></label>
+            <input asp-for="TenTrangThai" class="form-control" placeholder="Vi du: Dang xu ly" />
+        </div>
+    </div>
+    <div class="col-xl-3">
+        <div class="form-group">
+            <label>Thứ tự sắp xếp</label>
+            <input asp-for="ThuTuSapXep" type="number" min="1" class="form-control" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Màu hiển thị <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text p-1">
+                        <input
+                            id="ColorPicker"
+                            type="color"
+                            value="@(string.IsNullOrWhiteSpace(Model.MaMauHex) ? "#28A745" : Model.MaMauHex)"
+                            style="width:40px;height:32px;border:none;background:none;padding:0;" />
+                    </span>
+                </div>
+                <input asp-for="MaMauHex" class="form-control text-uppercase" placeholder="#28A745" />
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Theo dõi</label>
+            <select asp-for="TrangThai" class="form-control">
+                <option value="true">Kích hoạt</option>
+                <option value="false">Ngừng sử dụng</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const colorPicker = document.getElementById('ColorPicker');
+        const colorInput = document.getElementById('MaMauHex');
+
+        if (!colorPicker || !colorInput) {
+            return;
+        }
+
+        function isHexColor(value) {
+            return /^#([0-9A-F]{6})$/i.test(value);
+        }
+
+        function syncPreview(value) {
+            if (!isHexColor(value)) {
+                return;
+            }
+
+            const normalized = value.toUpperCase();
+            colorInput.value = normalized;
+            colorPicker.value = normalized;
+        }
+
+        syncPreview(colorInput.value || colorPicker.value);
+
+        colorPicker.addEventListener('input', function () {
+            syncPreview(this.value);
+        });
+
+        colorInput.addEventListener('input', function () {
+            if (isHexColor(this.value)) {
+                syncPreview(this.value);
+            }
+        });
+
+        colorInput.addEventListener('blur', function () {
+            if (!this.value) {
+                syncPreview('#28A745');
+            }
+        });
+    })();
+</script>
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Mô tả</label>
+            <textarea asp-for="MoTa" class="form-control" rows="3" placeholder="Mo ta nguyen tac su dung trang thai"></textarea>
+        </div>
+    </div>
+    <div class="col-xl-6">
+        <div class="form-group">
+            <label>Ghi chú</label>
+            <textarea asp-for="GhiChu" class="form-control" rows="3" placeholder="Ghi chu bo sung"></textarea>
+        </div>
+    </div>
+</div>

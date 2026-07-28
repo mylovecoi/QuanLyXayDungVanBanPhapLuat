@@ -40,6 +40,9 @@ namespace DataAccess.Entities.Manages
 
         public bool Public { get; set; } = false;
 
+        [NotMapped]
+        public Guid? DonViId { get; set; }
+
         [NotMapped]         
         public IFormFile? FileUpLoad { get; set; }   
         

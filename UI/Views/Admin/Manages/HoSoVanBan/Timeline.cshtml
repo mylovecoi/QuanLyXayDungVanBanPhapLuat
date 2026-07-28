@@ -1,0 +1,215 @@
+@using Services.Manages
+
+@model HoSoVanBanWorkflowDetailModel
+
+@functions {
+    private static string GetTimelineStatusLabel(HoSoVanBanBuocTheoDoiModel buoc) => buoc.MaTrangThaiTheoDoi switch
+    {
+        "DANG_XU_LY" => "Đang xử lý",
+        "SAP_DEN_HAN" => "Sắp đến hạn",
+        "QUA_HAN" => "Quá hạn",
+        "HOAN_THANH_DUNG_HAN" => "Hoàn thành đúng hạn",
+        "HOAN_THANH_QUA_HAN" => "Hoàn thành quá hạn",
+        "CHUA_THUC_HIEN" => "Chưa thực hiện",
+        _ => string.IsNullOrWhiteSpace(buoc.TenTrangThaiTheoDoi) ? "-" : buoc.TenTrangThaiTheoDoi
+    };
+
+    private static string GetTimelineStatusNote(HoSoVanBanBuocTheoDoiModel buoc) => buoc.MaTrangThaiTheoDoi switch
+    {
+        "DANG_XU_LY" => "Bước đang được thực hiện.",
+        "SAP_DEN_HAN" => "Bước đang xử lý và đã đến ngưỡng cảnh báo sắp hạn.",
+        "QUA_HAN" => $"Bước đang xử lý và đã quá hạn {Math.Max(buoc.SoNgayTre ?? 0, 0)} ngày.",
+        "HOAN_THANH_DUNG_HAN" => "Bước đã hoàn thành trong hạn.",
+        "HOAN_THANH_QUA_HAN" => $"Bước đã hoàn thành nhưng trễ {Math.Max(buoc.SoNgayTre ?? 0, 0)} ngày.",
+        "CHUA_THUC_HIEN" => "Bước này chưa phát sinh xử lý.",
+        _ => buoc.GhiChuTheoDoi ?? string.Empty
+    };
+}
+
+<style>
+    .hoso-timeline {
+        position: relative;
+    }
+
+    .hoso-timeline-item {
+        position: relative;
+        padding-left: 88px;
+        margin-bottom: 24px;
+    }
+
+    .hoso-timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .hoso-timeline-item::before {
+        content: "";
+        position: absolute;
+        left: 36px;
+        top: 28px;
+        bottom: -24px;
+        width: 2px;
+        background: #dfe3eb;
+    }
+
+    .hoso-timeline-item:last-child::before {
+        display: none;
+    }
+
+    .hoso-timeline-step {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 72px;
+        text-align: center;
+    }
+
+    .hoso-timeline-step-badge {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        margin: 0 auto 8px auto;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 2px #dfe3eb;
+    }
+
+    .hoso-timeline-step-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #5e6278;
+        text-transform: uppercase;
+    }
+
+    .hoso-timeline-card {
+        border: 1px solid #e4e6ef;
+        border-radius: 12px;
+        background: #fff;
+        padding: 16px 18px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    .hoso-timeline-meta {
+        color: #7e8299;
+        font-size: 13px;
+    }
+
+    .hoso-timeline-note {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 12px 14px;
+    }
+</style>
+
+<div class="mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+        <div class="mb-2 mb-md-0">
+            <label class="font-weight-bold text-primary mb-0">Timeline quy trình</label>
+            <div class="text-muted font-size-sm mt-1">@Model.TenHoSo</div>
+        </div>
+        <span class="text-muted font-size-sm">Theo dõi đến ngày @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</span>
+    </div>
+    <div class="progress" style="height:10px;">
+        <div class="progress-bar bg-success" role="progressbar" style="width:@Model.TienDoSummary.TyLeHoanThanh%"></div>
+    </div>
+</div>
+
+<div class="row mb-6">
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="border rounded p-3 h-100">
+            <div class="text-muted font-size-sm">Tổng bước</div>
+            <div class="font-size-h3 font-weight-bold text-dark">@Model.TienDoSummary.TongSoBuoc</div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="border rounded p-3 h-100">
+            <div class="text-muted font-size-sm">Đã hoàn thành</div>
+            <div class="font-size-h3 font-weight-bold text-success">@Model.TienDoSummary.SoBuocHoanThanh</div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="border rounded p-3 h-100">
+            <div class="text-muted font-size-sm">Đúng hạn</div>
+            <div class="font-size-h3 font-weight-bold text-primary">@Model.TienDoSummary.SoBuocDungHan</div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="border rounded p-3 h-100">
+            <div class="text-muted font-size-sm">Quá hạn</div>
+            <div class="font-size-h3 font-weight-bold text-danger">@Model.TienDoSummary.SoBuocQuaHan</div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="border rounded p-3 h-100">
+            <div class="text-muted font-size-sm">Chưa thực hiện</div>
+            <div class="font-size-h3 font-weight-bold text-muted">@Model.TienDoSummary.SoBuocChuaThucHien</div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6 mb-4">
+        <div class="border rounded p-3 h-100">
+            <div class="text-muted font-size-sm">Tiến độ</div>
+            <div class="font-size-h3 font-weight-bold text-info">@Model.TienDoSummary.TyLeHoanThanh%</div>
+        </div>
+    </div>
+</div>
+
+<div class="hoso-timeline">
+    @foreach (var buoc in Model.CacBuocTheoDoi.OrderBy(x => x.ThuTuSapXep))
+    {
+        <div class="hoso-timeline-item">
+            <div class="hoso-timeline-step">
+                <div class="hoso-timeline-step-badge" style="background-color:@buoc.MaMauTrangThaiTheoDoi;"></div>
+                <div class="hoso-timeline-step-label">Bước @buoc.ThuTuSapXep</div>
+            </div>
+
+            <div class="hoso-timeline-card">
+                <div class="d-flex flex-wrap align-items-center mb-2">
+                    <span class="font-weight-bold text-dark mr-3 mb-2">@buoc.TenBuoc</span>
+                    <span class="badge mb-2" style="background-color:@buoc.MaMauTrangThaiTheoDoi;color:#212529;padding:8px 12px;">
+                        @GetTimelineStatusLabel(buoc)
+                    </span>
+                    @if (buoc.IsCurrent)
+                    {
+                        <span class="badge badge-light-primary ml-2 mb-2">Bước hiện tại</span>
+                    }
+                </div>
+
+                <div class="hoso-timeline-meta mb-3">
+                    Mã bước: @buoc.MaBuoc | Loại: @buoc.LoaiBuoc |
+                    Hạn tiêu chuẩn: @(buoc.SoNgayXuLyTieuChuan.HasValue ? $"{buoc.SoNgayXuLyTieuChuan} ngày" : "Chưa cấu hình")
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-3 col-md-6 mb-2">
+                        <div><span class="font-weight-bold">Ngày nhận:</span> @(buoc.NgayNhan.HasValue ? FuntionGlobal.ConvertDateTimeToStr(buoc.NgayNhan.Value) : "-")</div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-2">
+                        <div><span class="font-weight-bold">Hạn xử lý:</span> @(buoc.HanXuLy.HasValue ? FuntionGlobal.ConvertDateTimeToStr(buoc.HanXuLy.Value) : "-")</div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-2">
+                        <div><span class="font-weight-bold">Ngày xử lý:</span> @(buoc.NgayXuLy.HasValue ? FuntionGlobal.ConvertDateTimeToStr(buoc.NgayXuLy.Value) : "-")</div>
+                    </div>
+                    <div class="col-xl-3 col-md-6 mb-2">
+                        <div><span class="font-weight-bold">Lần xử lý:</span> @(buoc.LanXuLy > 0 ? buoc.LanXuLy : 0)</div>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(buoc.KetQuaXuLy) || !string.IsNullOrWhiteSpace(buoc.NoiDungXuLy) || !string.IsNullOrWhiteSpace(buoc.GhiChuTheoDoi))
+                {
+                    <div class="hoso-timeline-note mt-3">
+                        @if (!string.IsNullOrWhiteSpace(buoc.KetQuaXuLy))
+                        {
+                            <div><span class="font-weight-bold">Kết quả:</span> @buoc.KetQuaXuLy</div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(buoc.NoiDungXuLy))
+                        {
+                            <div><span class="font-weight-bold">Nội dung:</span> @buoc.NoiDungXuLy</div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(GetTimelineStatusNote(buoc)))
+                        {
+                            <div><span class="font-weight-bold">Đánh giá tiến độ:</span> @GetTimelineStatusNote(buoc)</div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

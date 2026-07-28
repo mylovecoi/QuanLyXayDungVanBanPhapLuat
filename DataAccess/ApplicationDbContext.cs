@@ -1,5 +1,6 @@
 using DataAccess.Entities;
 using DataAccess.Entities.Settings;
+using DataAccess.Entities.QuanLyDanhMuc;
 using DataAccess.Entities.Manages;
 using DataAccess.Entities.Systems;
 using Microsoft.AspNetCore.Http;
@@ -17,7 +18,199 @@ namespace DataAccess
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);            
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<DanhMucBuocQuyTrinh>()
+                .HasOne<DanhMucQuyTrinhSoanThao>()
+                .WithMany()
+                .HasForeignKey(x => x.QuyTrinhSoanThaoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DanhMucBuocQuyTrinh>()
+                .HasOne<DanhMucDonVi>()
+                .WithMany()
+                .HasForeignKey(x => x.DonViTiepNhanMacDinhId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<DanhMucChuyenBuocQuyTrinh>()
+                .HasOne<DanhMucQuyTrinhSoanThao>()
+                .WithMany()
+                .HasForeignKey(x => x.QuyTrinhSoanThaoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DanhMucChuyenBuocQuyTrinh>()
+                .HasOne<DanhMucBuocQuyTrinh>()
+                .WithMany()
+                .HasForeignKey(x => x.TuBuocId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<DanhMucChuyenBuocQuyTrinh>()
+                .HasOne<DanhMucBuocQuyTrinh>()
+                .WithMany()
+                .HasForeignKey(x => x.DenBuocId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<DanhMucQuyTrinhSoanThao>()
+                .HasOne<DanhMucVanBan>()
+                .WithMany()
+                .HasForeignKey(x => x.DanhMucVanBanId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBan>()
+                .HasOne<DanhMucVanBan>()
+                .WithMany()
+                .HasForeignKey(x => x.DanhMucVanBanId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBan>()
+                .HasOne<DanhMucQuyTrinhSoanThao>()
+                .WithMany()
+                .HasForeignKey(x => x.QuyTrinhSoanThaoId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBan>()
+                .HasOne<DanhMucBuocQuyTrinh>()
+                .WithMany()
+                .HasForeignKey(x => x.BuocHienTaiId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBan>()
+                .HasOne<DanhMucTrangThai>()
+                .WithMany()
+                .HasForeignKey(x => x.DanhMucTrangThaiId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBan>()
+                .HasOne<DanhMucDonVi>()
+                .WithMany()
+                .HasForeignKey(x => x.DonViSoanThaoId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBan>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.NguoiTaoId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanXuLy>()
+                .HasOne<HoSoVanBan>()
+                .WithMany()
+                .HasForeignKey(x => x.HoSoVanBanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HoSoVanBanXuLy>()
+                .HasOne<DanhMucBuocQuyTrinh>()
+                .WithMany()
+                .HasForeignKey(x => x.BuocQuyTrinhId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanXuLy>()
+                .HasOne<DanhMucDonVi>()
+                .WithMany()
+                .HasForeignKey(x => x.DonViXuLyId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanXuLy>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.NguoiXuLyId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanXuLy>()
+                .HasOne<DanhMucTrangThai>()
+                .WithMany()
+                .HasForeignKey(x => x.DanhMucTrangThaiId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanBuocThoiHan>()
+                .HasOne<HoSoVanBan>()
+                .WithMany()
+                .HasForeignKey(x => x.HoSoVanBanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HoSoVanBanBuocThoiHan>()
+                .HasOne<DanhMucBuocQuyTrinh>()
+                .WithMany()
+                .HasForeignKey(x => x.BuocQuyTrinhId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanLayYKien>()
+                .HasOne<HoSoVanBan>()
+                .WithMany()
+                .HasForeignKey(x => x.HoSoVanBanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HoSoVanBanLayYKien>()
+                .HasOne<DanhMucBuocQuyTrinh>()
+                .WithMany()
+                .HasForeignKey(x => x.BuocQuyTrinhId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanLayYKien>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.NguoiDuocLayYKienId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanLayYKien>()
+                .HasOne<DanhMucDonVi>()
+                .WithMany()
+                .HasForeignKey(x => x.DonViDuocLayYKienId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanDanhGia>()
+                .HasOne<HoSoVanBan>()
+                .WithMany()
+                .HasForeignKey(x => x.HoSoVanBanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HoSoVanBanDanhGia>()
+                .HasOne<DanhMucBuocQuyTrinh>()
+                .WithMany()
+                .HasForeignKey(x => x.BuocQuyTrinhId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanDanhGia>()
+                .HasOne<DanhMucDonVi>()
+                .WithMany()
+                .HasForeignKey(x => x.DonViDanhGiaId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanDanhGia>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.NguoiDanhGiaId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanDanhGia>()
+                .HasOne<DanhMucBuocQuyTrinh>()
+                .WithMany()
+                .HasForeignKey(x => x.TraLaiBuocId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanPhanHoiDanhGia>()
+                .HasOne<HoSoVanBanDanhGia>()
+                .WithMany()
+                .HasForeignKey(x => x.HoSoVanBanDanhGiaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HoSoVanBanPhanHoiDanhGia>()
+                .HasOne<HoSoVanBan>()
+                .WithMany()
+                .HasForeignKey(x => x.HoSoVanBanId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanPhanHoiDanhGia>()
+                .HasOne<DanhMucDonVi>()
+                .WithMany()
+                .HasForeignKey(x => x.DonViSoanThaoId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanPhanHoiDanhGia>()
+                .HasOne<User>()
+                .WithMany()
+                .HasForeignKey(x => x.NguoiPhanHoiId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
         public override int SaveChanges()
@@ -91,6 +284,11 @@ namespace DataAccess
         #region Settings
         public DbSet<DanhMucDonVi> DanhMucDonVis { get; set; }
         public DbSet<DanhMucDiaDanh> DanhMucDiaDanhs { get; set; }
+        public DbSet<DanhMucQuyTrinhSoanThao> DanhMucQuyTrinhSoanThaos { get; set; }
+        public DbSet<DanhMucBuocQuyTrinh> DanhMucBuocQuyTrinhs { get; set; }
+        public DbSet<DanhMucChuyenBuocQuyTrinh> DanhMucChuyenBuocQuyTrinhs { get; set; }
+        public DbSet<DanhMucTrangThai> DanhMucTrangThais { get; set; }
+        public DbSet<DanhMucVanBan> DanhMucVanBans { get; set; }
         public DbSet<OptionData> OptionDatas { get; set; }
        
         public DbSet<DanhMucPhongBan> DanhMucPhongBans { get; set; }
@@ -99,6 +297,12 @@ namespace DataAccess
 
         #region Manages
         public DbSet<AttachedFile> AttachedFiles { get; set; }
+        public DbSet<HoSoVanBan> HoSoVanBans { get; set; }
+        public DbSet<HoSoVanBanBuocThoiHan> HoSoVanBanBuocThoiHans { get; set; }
+        public DbSet<HoSoVanBanXuLy> HoSoVanBanXuLys { get; set; }
+        public DbSet<HoSoVanBanLayYKien> HoSoVanBanLayYKiens { get; set; }
+        public DbSet<HoSoVanBanDanhGia> HoSoVanBanDanhGias { get; set; }
+        public DbSet<HoSoVanBanPhanHoiDanhGia> HoSoVanBanPhanHoiDanhGias { get; set; }
         public DbSet<Notification> Notifications { get; set; }       
         public DbSet<ThuTucHanhChinh> ThuTucHanhChinhs { get; set; }       
         #endregion
