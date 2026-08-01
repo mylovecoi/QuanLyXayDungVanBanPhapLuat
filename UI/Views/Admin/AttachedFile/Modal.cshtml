@@ -20,6 +20,13 @@
                             <input type="text" id="motaAttachedFileCreate" name="motaAttachedFileCreate" class="form-control" autofocus />
                         </div>
                     </div>
+                    <div class="col-xl-12" id="draftCategoryCreateWrapper" style="display: none;">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Phân loại dự thảo:</label>
+                            <input type="text" id="phanLoaiDuThaoAttachedFileCreate" name="phanLoaiDuThaoAttachedFileCreate" class="form-control" readonly />
+                            <small class="form-text text-muted">File tải lên trong màn hình chuyển xét duyệt sẽ tự gắn đúng lần dự thảo.</small>
+                        </div>
+                    </div>
                     <div class="col-xl-12">
                         <div class="form-group fv-plugins-icon-container">
                             <label style="font-weight:bold; color:blue">Chọn phương án: </label>
@@ -121,6 +128,12 @@
                             <input type="text" id="motaAttachedFileEdit" name="motaAttachedFileEdit" class="form-control" autofocus />
                         </div>
                     </div>
+                    <div class="col-xl-12" id="draftCategoryEditWrapper" style="display: none;">
+                        <div class="form-group fv-plugins-icon-container">
+                            <label style="font-weight:bold; color:blue">Phân loại dự thảo:</label>
+                            <input type="text" id="phanLoaiDuThaoAttachedFileEdit" name="phanLoaiDuThaoAttachedFileEdit" class="form-control" readonly />
+                        </div>
+                    </div>
                     <div class="col-xl-12">
                         <div class="form-group fv-plugins-icon-container">
                             <label style="font-weight:bold; color:blue">Đường dẫn: </label>
@@ -220,10 +233,12 @@
     var motaCreate = '#motaAttachedFileCreate';
     var urlCreate = '#urlAttachedFileCreate';
     var fileUploadCreate = '#fileUploadAttachedFileCreate';
+    var phanLoaiDuThaoCreate = '#phanLoaiDuThaoAttachedFileCreate';
 
     var motaEdit = '#motaAttachedFileEdit';
     var urlEdit = '#urlAttachedFileEdit';
     var fileUploadEdit = '#fileUploadAttachedFileEdit';
+    var phanLoaiDuThaoEdit = '#phanLoaiDuThaoAttachedFileEdit';
 
     var create_modal = '#CreateAttachedFile_Modal';
     var edit_modal = '#EditAttachedFile_Modal';  
@@ -239,16 +254,53 @@
         LoadDataAttachedFile(timkiem, pageSize, 1);
     }
 
+    function getAttachedFileContainerSelector() {
+        if ($('#attachedFile_transfer_frm').length && $('#attachedFile_transfer_frm').closest('.modal.show').length) {
+            return '#attachedFile_transfer_frm';
+        }
+
+        return '#attachedFile_frm';
+    }
+
     function ClickPage(pageSelect) {
         var timkiem = $('#txtAttachedFileSearch').val();
         var pageSize = $('#PageSizeAttachedFileSearch').val();
         LoadDataAttachedFile(timkiem, pageSize, pageSelect);
     }
 
+    function isDraftFileTable() {
+        var tableName = ($('#tableName').val() || '').toLowerCase();
+        return tableName === 'hosovanbanduthao' || tableName === 'hosovanbanduthaoversion';
+    }
+
+    function getDraftVersionLabelForUpload() {
+        return ($('#DraftVersionLabelForUpload').val() || $('#DraftVersionLabel').val() || '').trim();
+    }
+
+    function syncDraftCategoryFields() {
+        var isDraft = isDraftFileTable();
+        var draftLabel = getDraftVersionLabelForUpload();
+
+        if (isDraft && draftLabel !== '') {
+            $('#draftCategoryCreateWrapper').show();
+            $('#draftCategoryEditWrapper').show();
+            $(phanLoaiDuThaoCreate).val(draftLabel);
+            if (!$(phanLoaiDuThaoEdit).val()) {
+                $(phanLoaiDuThaoEdit).val(draftLabel);
+            }
+        } else {
+            $('#draftCategoryCreateWrapper').hide();
+            $('#draftCategoryEditWrapper').hide();
+            $(phanLoaiDuThaoCreate).val('');
+            $(phanLoaiDuThaoEdit).val('');
+        }
+    }
+
     function CreateAttachedFile() {
         $(motaCreate).val('');
         //$(urlCreate).val('');
         $(fileUploadCreate).val('');
+        syncDraftCategoryFields();
         $(create_modal).modal('show');
         scannedFilePath = null;
         scannedFileName = null;
@@ -272,7 +324,11 @@
         formData.append("MoTa", $(motaCreate).val());
         //formData.append("Url", $(urlCreate).val());
         formData.append("GroupId", $('#Id').val())
-        formData.append("TableName", $('#tableName').val())        
+        formData.append("TableName", $('#tableName').val())
+
+        if (isDraftFileTable() && $(phanLoaiDuThaoCreate).val()) {
+            formData.append("PhanLoaiDuThao", $(phanLoaiDuThaoCreate).val());
+        }
 
         if (uploadOption === 'true') {
             if (fileInput.files.length > 0) {
@@ -304,7 +360,7 @@
                 },
                 success: function (data) {
                     $(create_modal).modal('hide');
-                    $('#attachedFile_frm').html(data);
+                    $(getAttachedFileContainerSelector()).html(data);
                     $('.modal-backdrop').remove();
                     //$('body').removeClass('modal-open');
                     //$('[data-toggle="tooltip"]').tooltip(); // Tooltip Bootstrap
@@ -343,7 +399,7 @@
                 pageCurrent: pageCurrent,
             },
             success: function (data) {
-                $('#attachedFile_frm').html(data);
+                $(getAttachedFileContainerSelector()).html(data);
                 hideLoadingOverlay();
                 $('.select2basic').select2();
             },
@@ -371,6 +427,8 @@
                 if (data) {
                     $(motaEdit).val(data.moTa);
                     $(urlEdit).val(data.url);
+                    $(phanLoaiDuThaoEdit).val(data.phanLoaiDuThao || getDraftVersionLabelForUpload());
+                    syncDraftCategoryFields();
                     $('#idUploadAttachedFileEdit').val(data.id);
                     if (data.fileName) {
                         let fileUrl = "/Manages/Download/AttachedFile?id=" + data.id;
@@ -406,6 +464,9 @@
 
         formData.append("GroupId", $('#Id').val())
         formData.append("TableName", $('#tableName').val())
+        if (isDraftFileTable() && $(phanLoaiDuThaoEdit).val()) {
+            formData.append("PhanLoaiDuThao", $(phanLoaiDuThaoEdit).val());
+        }
         //if (isPublic === 'true') {
         //    formData.append("Public", true);
         //}
@@ -425,7 +486,7 @@
             },
             success: function (data) {
                 $(edit_modal).modal('hide');
-                $('#attachedFile_frm').html(data);
+                $(getAttachedFileContainerSelector()).html(data);
                 $('.modal-backdrop').remove();
                 //$('body').removeClass('modal-open');
                 //$('[data-toggle="tooltip"]').tooltip(); // Tooltip Bootstrap
@@ -463,7 +524,7 @@
             },
             success: function (data) {
                 if (data) {
-                    $('#attachedFile_frm').html(data);
+                    $(getAttachedFileContainerSelector()).html(data);
                     $('#DeleteAttachedFile_Modal').modal('hide');
                     $('.modal-backdrop').remove();
                     $('.select2basic').select2();
@@ -475,4 +536,8 @@
             }
         });
     }
+
+    $(document).ready(function () {
+        syncDraftCategoryFields();
+    });
 </script>

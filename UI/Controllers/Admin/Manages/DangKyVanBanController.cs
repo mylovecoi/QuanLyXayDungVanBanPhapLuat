@@ -44,7 +44,7 @@ namespace UI.Controllers.Admin.Manages
         public async Task<IActionResult> Create()
         {
             ViewData["DanhMucVanBans"] = await _hoSoVanBanWorkflowService.GetDanhMucVanBanOptionsAsync();
-            ViewData["QuyTrinhSoanThaos"] = await _hoSoVanBanWorkflowService.GetQuyTrinhOptionsAsync();
+            ViewData["QuyTrinhSoanThaos"] = await GetDangKyWorkflowOptionsAsync();
             ViewData["WorkflowStepUrl"] = "/Manages/DangKyVanBan/LoadWorkflowSteps";
             await PopulateCreateViewDataAsync();
 
@@ -56,6 +56,7 @@ namespace UI.Controllers.Admin.Manages
                 TuNgaySoanThao = DateTime.Today,
                 DenNgaySoanThao = DateTime.Today.AddDays(7)
             };
+            model.QuyTrinhSoanThaoId = (ViewData["QuyTrinhSoanThaos"] as List<DataAccess.Entities.QuanLyDanhMuc.DanhMucQuyTrinhSoanThao>)?.FirstOrDefault()?.Id ?? Guid.Empty;
             return PartialView("Views/Admin/Manages/HoSoVanBan/_FormFields.cshtml", model);
         }
 
@@ -69,7 +70,7 @@ namespace UI.Controllers.Admin.Manages
             ViewData["FormAction"] = "/Manages/DangKyVanBan/Store";
             ViewData["SubmitLabel"] = "Thêm mới";
             ViewData["DanhMucVanBans"] = await _hoSoVanBanWorkflowService.GetDanhMucVanBanOptionsAsync();
-            ViewData["QuyTrinhSoanThaos"] = await _hoSoVanBanWorkflowService.GetQuyTrinhOptionsAsync();
+            ViewData["QuyTrinhSoanThaos"] = await GetDangKyWorkflowOptionsAsync();
             ViewData["WorkflowStepUrl"] = "/Manages/DangKyVanBan/LoadWorkflowSteps";
             ViewData["AttachedFileTableName"] = "HoSoVanBan";
             ViewData["AttachedFilePageInfo"] = FuntionGlobal.GetPageInfo(0, string.Empty, 5, 1);
@@ -83,6 +84,7 @@ namespace UI.Controllers.Admin.Manages
                 TuNgaySoanThao = DateTime.Today,
                 DenNgaySoanThao = DateTime.Today.AddDays(7)
             };
+            model.QuyTrinhSoanThaoId = (ViewData["QuyTrinhSoanThaos"] as List<DataAccess.Entities.QuanLyDanhMuc.DanhMucQuyTrinhSoanThao>)?.FirstOrDefault()?.Id ?? Guid.Empty;
 
             return View("Views/Admin/Manages/HoSoVanBan/Create.cshtml", model);
         }
@@ -106,12 +108,13 @@ namespace UI.Controllers.Admin.Manages
             ViewData["FormAction"] = "/Manages/DangKyVanBan/Update";
             ViewData["SubmitLabel"] = "Cập nhật";
             ViewData["DanhMucVanBans"] = await _hoSoVanBanWorkflowService.GetDanhMucVanBanOptionsAsync();
-            ViewData["QuyTrinhSoanThaos"] = await _hoSoVanBanWorkflowService.GetQuyTrinhOptionsAsync();
+            ViewData["QuyTrinhSoanThaos"] = await GetDangKyWorkflowOptionsAsync();
             ViewData["WorkflowStepUrl"] = "/Manages/DangKyVanBan/LoadWorkflowSteps";
             ViewData["AttachedFileTableName"] = "HoSoVanBan";
             ViewData["AttachedFilePageInfo"] = FuntionGlobal.GetPageInfo(0, string.Empty, 5, 1);
             await PopulateCreateViewDataAsync();
 
+            editModel.QuyTrinhSoanThaoId = (ViewData["QuyTrinhSoanThaos"] as List<DataAccess.Entities.QuanLyDanhMuc.DanhMucQuyTrinhSoanThao>)?.FirstOrDefault()?.Id ?? editModel.QuyTrinhSoanThaoId;
             return View("Views/Admin/Manages/HoSoVanBan/Create.cshtml", editModel);
         }
 
@@ -146,6 +149,10 @@ namespace UI.Controllers.Admin.Manages
         public async Task<IActionResult> Store(HoSoVanBanCreateModel request)
         {
             var currentUser = _authService.GetUserInfo();
+            if (request.QuyTrinhSoanThaoId == Guid.Empty)
+            {
+                request.QuyTrinhSoanThaoId = (await GetDangKyWorkflowOptionsAsync()).FirstOrDefault()?.Id ?? Guid.Empty;
+            }
             if (!(currentUser?.SSA ?? false))
             {
                 request.DonViDeNghiId = currentUser?.DanhMucDonViId;
@@ -169,6 +176,10 @@ namespace UI.Controllers.Admin.Manages
         public async Task<IActionResult> Update(HoSoVanBanCreateModel request)
         {
             var currentUser = _authService.GetUserInfo();
+            if (request.QuyTrinhSoanThaoId == Guid.Empty)
+            {
+                request.QuyTrinhSoanThaoId = (await GetDangKyWorkflowOptionsAsync()).FirstOrDefault()?.Id ?? Guid.Empty;
+            }
             if (!(currentUser?.SSA ?? false))
             {
                 request.DonViDeNghiId = currentUser?.DanhMucDonViId;
@@ -286,6 +297,11 @@ namespace UI.Controllers.Admin.Manages
         {
             var currentUser = _authService.GetUserInfo();
             return currentUser?.DanhMucDonViId != Guid.Empty ? currentUser?.DanhMucDonViId : null;
+        }
+
+        private async Task<List<DataAccess.Entities.QuanLyDanhMuc.DanhMucQuyTrinhSoanThao>> GetDangKyWorkflowOptionsAsync()
+        {
+            return await _hoSoVanBanWorkflowService.GetQuyTrinhOptionsAsync(loaiQuyTrinh: "DangKy");
         }
     }
 }

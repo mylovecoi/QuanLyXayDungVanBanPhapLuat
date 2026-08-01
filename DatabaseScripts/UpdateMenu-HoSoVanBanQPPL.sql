@@ -29,7 +29,7 @@ BEGIN
     (
         '20000000-0000-0000-0000-000000000020', @SystemUser, @Now, @SystemUser, @Now,
         2, 'Group', 0, 'VanBanQPPL', '00000000-0000-0000-0000-000000000000',
-        N'Chuc nang xay dung van ban QPPL', '', '', NULL, '',
+        N'Xây dựng văn bản QPPL', '', '', NULL, '',
         N'Kich hoat', NULL, 'fas fa-landmark'
     );
 END;
@@ -47,7 +47,7 @@ BEGIN
     (
         '20000000-0000-0000-0000-000000000021', @SystemUser, @Now, @SystemUser, @Now,
         1, 'Group', 1, 'VanBanQPPL.DangKyXayDung', '20000000-0000-0000-0000-000000000020',
-        N'Dang ky xay dung', '', '', NULL, '',
+        N'Đăng ký văn bản', '', '', NULL, '',
         N'Kich hoat', NULL, NULL
     );
 END;
@@ -65,19 +65,31 @@ BEGIN
     (
         '20000000-0000-0000-0000-000000000022', @SystemUser, @Now, @SystemUser, @Now,
         1, 'Detail', 2, 'VanBanQPPL.DangKyXayDung.DanhSachDangKy', '20000000-0000-0000-0000-000000000021',
-        N'Danh sach dang ky', 'DangKyVanBan', 'Index', NULL, 'HoSoVanBans',
+        N'Đăng ký văn bản', 'DangKyVanBan', 'Index', NULL, 'HoSoVanBans',
         N'Kich hoat', NULL, NULL
     );
 END;
 
 UPDATE RoleActions
-SET Title = N'Danh sach dang ky',
+SET Title = N'Đăng ký văn bản',
     Controller = 'DangKyVanBan',
     Action = 'Index',
     [Table] = 'HoSoVanBans',
     UpdatedBy = @SystemUser,
     UpdatedDate = @Now
 WHERE Id = '20000000-0000-0000-0000-000000000022';
+
+UPDATE RoleActions
+SET Title = N'Xây dựng văn bản QPPL',
+    UpdatedBy = @SystemUser,
+    UpdatedDate = @Now
+WHERE Id = '20000000-0000-0000-0000-000000000020';
+
+UPDATE RoleActions
+SET Title = N'Đăng ký văn bản',
+    UpdatedBy = @SystemUser,
+    UpdatedDate = @Now
+WHERE Id = '20000000-0000-0000-0000-000000000021';
 
 IF NOT EXISTS (SELECT 1 FROM RoleActions WHERE Id = '20000000-0000-0000-0000-000000000023')
 BEGIN

@@ -38,6 +38,7 @@ namespace Services.QuanLyDanhMuc
                         Id = quyTrinh.Id,
                         MaQuyTrinh = quyTrinh.MaQuyTrinh,
                         TenQuyTrinh = quyTrinh.TenQuyTrinh,
+                        LoaiQuyTrinh = quyTrinh.LoaiQuyTrinh,
                         TenLoaiVanBan = quyTrinh.DanhMucVanBanIds,
                         CapApDung = quyTrinh.CapApDung,
                         PhienBan = quyTrinh.PhienBan,
@@ -50,6 +51,7 @@ namespace Services.QuanLyDanhMuc
 
                 foreach (var item in rawItems)
                 {
+                    item.TenLoaiQuyTrinh = FormatLoaiQuyTrinhDisplay(item.LoaiQuyTrinh);
                     item.TenLoaiVanBan = ResolveDanhMucVanBanNames(item.TenLoaiVanBan, danhMucVanBanMap);
                     item.CapApDung = FormatCapApDungDisplay(item.CapApDung);
                 }
@@ -59,6 +61,7 @@ namespace Services.QuanLyDanhMuc
                     rawItems = rawItems.Where(x =>
                             x.MaQuyTrinh.Contains(search, StringComparison.OrdinalIgnoreCase) ||
                             x.TenQuyTrinh.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                            (!string.IsNullOrWhiteSpace(x.TenLoaiQuyTrinh) && x.TenLoaiQuyTrinh.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
                             (!string.IsNullOrWhiteSpace(x.TenLoaiVanBan) && x.TenLoaiVanBan.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
                             (!string.IsNullOrWhiteSpace(x.CapApDung) && x.CapApDung.Contains(search, StringComparison.OrdinalIgnoreCase)))
                         .ToList();
@@ -142,6 +145,7 @@ namespace Services.QuanLyDanhMuc
                     Id = quyTrinh.Id,
                     MaQuyTrinh = quyTrinh.MaQuyTrinh,
                     TenQuyTrinh = quyTrinh.TenQuyTrinh,
+                    LoaiQuyTrinh = string.IsNullOrWhiteSpace(quyTrinh.LoaiQuyTrinh) ? "XayDung" : quyTrinh.LoaiQuyTrinh,
                     DanhMucVanBanId = quyTrinh.DanhMucVanBanId,
                     DanhMucVanBanIds = ParseGuidList(quyTrinh.DanhMucVanBanIds, quyTrinh.DanhMucVanBanId),
                     CapApDung = quyTrinh.CapApDung,
@@ -186,10 +190,11 @@ namespace Services.QuanLyDanhMuc
                 {
                     MaQuyTrinh = request.MaQuyTrinh.Trim(),
                     TenQuyTrinh = request.TenQuyTrinh.Trim(),
+                    LoaiQuyTrinh = request.LoaiQuyTrinh,
                     DanhMucVanBanId = request.DanhMucVanBanId,
                     DanhMucVanBanIds = ConvertGuidListToString(request.DanhMucVanBanIds),
-                    CapApDung = request.CapApDung?.Trim(),
-                    PhienBan = request.PhienBan,
+                    CapApDung = string.Join(",", request.CapApDungs),
+                    PhienBan = request.PhienBan > 0 ? request.PhienBan : 1,
                     TrangThai = request.TrangThai,
                     MoTa = request.MoTa?.Trim(),
                     GhiChu = request.GhiChu?.Trim()
@@ -242,10 +247,10 @@ namespace Services.QuanLyDanhMuc
 
                 entity.MaQuyTrinh = request.MaQuyTrinh.Trim();
                 entity.TenQuyTrinh = request.TenQuyTrinh.Trim();
+                entity.LoaiQuyTrinh = request.LoaiQuyTrinh;
                 entity.DanhMucVanBanId = request.DanhMucVanBanId;
                 entity.DanhMucVanBanIds = ConvertGuidListToString(request.DanhMucVanBanIds);
-                entity.CapApDung = request.CapApDung?.Trim();
-                entity.PhienBan = request.PhienBan;
+                entity.CapApDung = string.Join(",", request.CapApDungs);
                 entity.TrangThai = request.TrangThai;
                 entity.MoTa = request.MoTa?.Trim();
                 entity.GhiChu = request.GhiChu?.Trim();
@@ -331,9 +336,10 @@ namespace Services.QuanLyDanhMuc
         {
             request.MaQuyTrinh = request.MaQuyTrinh?.Trim() ?? string.Empty;
             request.TenQuyTrinh = request.TenQuyTrinh?.Trim() ?? string.Empty;
+            request.LoaiQuyTrinh = NormalizeLoaiQuyTrinhValue(request.LoaiQuyTrinh);
             request.CapApDungs = request.CapApDungs
                 .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Select(x => x.Trim())
+                .Select(NormalizeCapApDungValue)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
@@ -392,6 +398,11 @@ namespace Services.QuanLyDanhMuc
             if (string.IsNullOrWhiteSpace(request.TenQuyTrinh))
             {
                 return new CommonResponse("error", "Ten quy trinh khong duoc de trong!");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.LoaiQuyTrinh))
+            {
+                return new CommonResponse("error", "Loai quy trinh khong duoc de trong!");
             }
 
             if (_dbContext.DanhMucQuyTrinhSoanThaos.Any(x => x.MaQuyTrinh == request.MaQuyTrinh && x.Id != id))
@@ -466,11 +477,52 @@ namespace Services.QuanLyDanhMuc
         {
             var result = (value ?? string.Empty)
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(NormalizeCapApDungValue)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             return result.Count > 0 ? result : new List<string> { "Tinh" };
+        }
+
+        private static string NormalizeCapApDungValue(string? value)
+        {
+            var normalized = (value ?? string.Empty).Trim();
+            return normalized.ToUpperInvariant() switch
+            {
+                "TỈNH" => "Tinh",
+                "TINH" => "Tinh",
+                "XÃ" => "Xa",
+                "XA" => "Xa",
+                _ => normalized
+            };
+        }
+
+        private static string NormalizeLoaiQuyTrinhValue(string? value)
+        {
+            var normalized = (value ?? string.Empty).Trim();
+            return normalized.ToUpperInvariant() switch
+            {
+                "DANGKY" => "DangKy",
+                "ĐĂNGKÝ" => "DangKy",
+                "ĐĂNG KÝ" => "DangKy",
+                "DANG_KY" => "DangKy",
+                "XAYDUNG" => "XayDung",
+                "XÂYDỰNG" => "XayDung",
+                "XÂY DỰNG" => "XayDung",
+                "XAY_DUNG" => "XayDung",
+                _ => string.IsNullOrWhiteSpace(normalized) ? "XayDung" : normalized
+            };
+        }
+
+        private static string FormatLoaiQuyTrinhDisplay(string? loaiQuyTrinh)
+        {
+            return NormalizeLoaiQuyTrinhValue(loaiQuyTrinh) switch
+            {
+                "DangKy" => "Đăng ký",
+                "XayDung" => "Xây dựng",
+                _ => loaiQuyTrinh ?? "Xây dựng"
+            };
         }
 
         private static string? ResolveDanhMucVanBanNames(string? csvIds, Dictionary<Guid, string> danhMucVanBanMap)
@@ -501,6 +553,9 @@ namespace Services.QuanLyDanhMuc
             return string.Join(", ",
                 capApDung
                     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(item => item.Equals("Tinh", StringComparison.OrdinalIgnoreCase) ? "Tỉnh" :
+                                    item.Equals("Xa", StringComparison.OrdinalIgnoreCase) ? "Xã" :
+                                    item)
                     .Distinct(StringComparer.OrdinalIgnoreCase));
         }
 

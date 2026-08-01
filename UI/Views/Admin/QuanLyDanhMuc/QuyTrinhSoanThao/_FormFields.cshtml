@@ -9,9 +9,22 @@
 @model QuyTrinhSoanThaoEditModel
 
 <input asp-for="Id" type="hidden" />
+<input asp-for="PhienBan" type="hidden" />
+
+<div class="row">
+    <div class="col-xl-4">
+        <div class="form-group">
+            <label>Loại quy trình <span class="text-danger">*</span></label>
+            <select asp-for="LoaiQuyTrinh" class="form-control">
+                <option value="DangKy">Đăng ký</option>
+                <option value="XayDung">Xây dựng</option>
+            </select>
+        </div>
+    </div>
+</div>
 
 <div class="alert alert-light-info mb-5">
-    Có thể sửa trực tiếp 7 bước chuẩn, thêm bớt bước, hoặc đổi nhánh chuyển bước ngay trong form này.
+    Có thể sửa trực tiếp các bước quy trình, thêm bớt bước hoặc đổi nhánh chuyển bước ngay trong form này.
 </div>
 
 <div class="row">
@@ -27,38 +40,32 @@
             <input asp-for="TenQuyTrinh" class="form-control" placeholder="Ví dụ: Quy trình soạn thảo VB cấp tỉnh" />
         </div>
     </div>
-    <div class="col-xl-2">
+    <div class="col-xl-4">
         <div class="form-group">
             <label>Cấp áp dụng</label>
-            <select asp-for="CapApDungs" class="form-control" multiple size="2">
-                <option value="Tinh" selected="@(Model.CapApDungs.Contains("Tinh"))">Tỉnh</option>
-                <option value="Xa" selected="@(Model.CapApDungs.Contains("Xa"))">Xã</option>
+            <select asp-for="CapApDungs" class="form-control select2multi workflow-multi-select" multiple data-placeholder="Chọn cấp áp dụng">
+                <option value="Tinh">Tỉnh</option>
+                <option value="Xa">Xã</option>
             </select>
             <small class="text-muted">Giữ phím Ctrl hoặc Shift để chọn nhiều cấp áp dụng.</small>
-        </div>
-    </div>
-    <div class="col-xl-2">
-        <div class="form-group">
-            <label>Phiên bản</label>
-            <input asp-for="PhienBan" type="number" min="1" class="form-control" />
         </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-xl-10">
+    <div class="col-xl-8">
         <div class="form-group">
             <label>Loại văn bản</label>
-            <select asp-for="DanhMucVanBanIds" class="form-control" multiple size="5">
+            <select asp-for="DanhMucVanBanIds" class="form-control select2multi workflow-multi-select" multiple data-placeholder="Chọn loại văn bản">
                 @foreach (var item in danhMucVanBans)
                 {
-                    <option value="@item.Id" selected="@(Model.DanhMucVanBanIds.Contains(item.Id))">@item.TenLoaiVanBan</option>
+                    <option value="@item.Id">@item.TenLoaiVanBan</option>
                 }
             </select>
             <small class="text-muted">Chọn một hoặc nhiều loại văn bản áp dụng cho quy trình này.</small>
         </div>
     </div>
-    <div class="col-xl-2">
+    <div class="col-xl-4">
         <div class="form-group">
             <label>Theo dõi</label>
             <select asp-for="TrangThai" class="form-control">
@@ -241,4 +248,13 @@
     <span class="d-block">- Bước "LayYKien" nên có SoLuongPhanHoiToiThieu và có thể bật YeuCauFileDinhKem.</span>
     <span class="d-block">- Bước "DanhGia" có thể đặt SoLanTraLaiToiDa = 3 và nhánh "KHONG_DAT" trở về "SOAN_THAO".</span>
     <span class="d-block">- Ở nhánh chuyển bước, nhập đúng Mã bước để liên kết chính xác.</span>
+</div>
+
+<div class="d-flex justify-content-end mt-6">
+    <a class="btn btn-light-secondary mr-3" href="@Url.Action("Index", "QuyTrinhSoanThao", new { area = "Admin" })">
+        Quay lại danh sách
+    </a>
+    <button type="submit" class="btn btn-primary">
+        <i class="la la-save"></i>Lưu dữ liệu
+    </button>
 </div>

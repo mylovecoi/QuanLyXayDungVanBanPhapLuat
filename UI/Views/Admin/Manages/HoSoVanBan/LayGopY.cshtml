@@ -1,0 +1,93 @@
+@using Services.Manages
+@model HoSoVanBanWorkflowDetailModel
+
+@{
+    var nowValue = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
+    var defaultHanXuLy = (Model.HanXuLy ?? DateTime.Today.AddDays(7)).ToString("yyyy-MM-dd");
+    var defaultNoiDung = $"Chuyển hồ sơ {Model.TenHoSo} sang bước lấy góp ý.";
+    var cheDoOptions = Model.CheDoLayYKienOptions ?? new List<SelectOptionModel>();
+    var donViOptions = Model.DonViLayYKienOptions ?? new List<DonViOptionModel>();
+}
+
+<form id="frm_laygopy">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="HoSoVanBanId" value="@Model.Id" />
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="alert alert-light-info mb-5">
+                Hồ sơ sẽ được chuyển từ bước <b>Soạn thảo văn bản</b> sang bước <b>Lấy góp ý</b>.
+            </div>
+        </div>
+
+        <div class="col-xl-6">
+            <div class="form-group">
+                <label class="font-weight-bold">Tên hồ sơ</label>
+                <input type="text" class="form-control" value="@Model.TenHoSo" readonly />
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="form-group">
+                <label class="font-weight-bold">Loại văn bản</label>
+                <input type="text" class="form-control" value="@Model.TenLoaiVanBan" readonly />
+            </div>
+        </div>
+
+        <div class="col-xl-6">
+            <div class="form-group">
+                <label class="font-weight-bold">Thời gian chuyển <span class="text-danger">*</span></label>
+                <input type="datetime-local" name="NgayPhanHoi" class="form-control" value="@nowValue" />
+            </div>
+        </div>
+        <div class="col-xl-6">
+            <div class="form-group">
+                <label class="font-weight-bold">Thời hạn xử lý bước góp ý <span class="text-danger">*</span></label>
+                <input type="date" name="HanPhanHoi" class="form-control" value="@defaultHanXuLy" />
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="form-group">
+                <label class="font-weight-bold">Chế độ lấy góp ý <span class="text-danger">*</span></label>
+                <select name="ActionMode" id="layGopYActionMode" class="form-control" onchange="ToggleLayGopYMode()">
+                    @foreach (var option in cheDoOptions)
+                    {
+                        <option value="@option.Value">@option.Text</option>
+                    }
+                </select>
+                <span class="form-text text-muted">
+                    Chọn chế độ phù hợp: đơn vị soạn thảo tự cập nhật kết quả hoặc gửi cho từng đơn vị góp ý.
+                </span>
+            </div>
+        </div>
+
+        <div class="col-xl-12 d-none" id="layGopYDonViWrapper">
+            <div class="form-group">
+                <label class="font-weight-bold">Đơn vị cần góp ý <span class="text-danger">*</span></label>
+                <select name="DonViDuocLayYKienIds" id="layGopYDonViIds" class="form-control select2multi" multiple="multiple" style="width:100%">
+                    @foreach (var option in donViOptions)
+                    {
+                        <option value="@option.Id">@option.TenDonVi</option>
+                    }
+                </select>
+                <span class="form-text text-muted">
+                    Có thể chọn một hoặc nhiều đơn vị. Khi chuyển bước, hệ thống sẽ tạo yêu cầu góp ý cho từng đơn vị được chọn.
+                </span>
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="form-group">
+                <label class="font-weight-bold">Nội dung yêu cầu / mô tả chuyển bước</label>
+                <textarea name="NoiDungYeuCau" class="form-control" rows="4">@defaultNoiDung</textarea>
+            </div>
+        </div>
+
+        <div class="col-xl-12">
+            <div class="form-group mb-0">
+                <label class="font-weight-bold">Ghi chú</label>
+                <textarea name="GhiChu" class="form-control" rows="3" placeholder="Nhập ghi chú nếu cần"></textarea>
+            </div>
+        </div>
+    </div>
+</form>

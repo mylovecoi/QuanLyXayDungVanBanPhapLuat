@@ -4,13 +4,15 @@
 
 @{
     var donViOptions = ViewData["DonViOptions"] as List<DonViOptionModel> ?? new List<DonViOptionModel>();
-    var vpUbndId = "40000000-0000-0000-0000-000000000013";
+    var defaultDonViId = Model.DefaultDonViTiepNhanId?.ToString();
+    var enableDraftTransferFiles = ViewData["EnableDraftTransferFiles"] is bool flag && flag;
+    var draftTransferFileTableName = ViewData["DraftTransferFileTableName"]?.ToString() ?? "HoSoVanBanDuThao";
 }
 
 @Html.AntiForgeryToken()
 <input type="hidden" name="HoSoVanBanId" value="@Model.HoSoVanBanId" />
 <input type="hidden" name="KetQuaXuLy" value="@Model.KetQuaXuLy" />
-<input type="hidden" name="NoiDungXuLy" value="Chuyển hồ sơ @Model.TenHoSo lên đơn vị tiếp nhận." />
+<input type="hidden" name="NoiDungXuLy" value="@Model.NoiDungXuLy" />
 
 <div class="alert alert-light-primary mb-6">
     <div><strong>Tên hồ sơ:</strong> @Model.TenHoSo</div>
@@ -24,7 +26,7 @@
                 <option value="">-- Chọn đơn vị tiếp nhận --</option>
                 @foreach (var item in donViOptions)
                 {
-                    <option value="@item.Id" selected="@(item.Id.ToString() == vpUbndId ? "selected" : null)">@item.TenDonVi</option>
+                    <option value="@item.Id" selected="@(item.Id.ToString() == defaultDonViId ? "selected" : null)">@item.TenDonVi</option>
                 }
             </select>
         </div>
@@ -45,6 +47,35 @@
         </div>
     </div>
 </div>
+
+@if (enableDraftTransferFiles)
+{
+    <input type="hidden" id="RequireDraftAttachmentBeforeTransfer" value="true" />
+    <input type="hidden" id="DraftVersionNumber" value="@Model.DraftVersionNumber" />
+    <input type="hidden" id="DraftVersionLabel" value="@Model.DraftVersionLabel" />
+    <input type="hidden" id="DraftVersionLabelForUpload" value="@Model.DraftVersionLabel" />
+
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="form-group">
+                <label class="font-weight-bold text-primary">File dự thảo dùng làm căn cứ xét duyệt</label>
+                <div class="small text-muted mb-3">
+                    Cập nhật bộ file dự thảo cuối cùng trước khi chuyển. Hệ thống sẽ dùng đúng bộ file này để lưu phiên bản và làm căn cứ so sánh các lần soạn thảo hoặc trả lại sau đó.
+                </div>
+                <div class="alert alert-light-warning mb-4">
+                    Bắt buộc phải có ít nhất 1 file <strong>@Model.DraftVersionLabel</strong> định dạng <strong>.doc</strong> hoặc <strong>.docx</strong> trước khi chuyển xét duyệt.
+                </div>
+                <input type="hidden" id="Id" value="@Model.HoSoVanBanId" />
+                <input type="hidden" id="tableName" value="@draftTransferFileTableName" />
+                <input type="hidden" id="DraftTransferFileGroupId" value="@Model.HoSoVanBanId" />
+                <input type="hidden" id="DraftTransferFileTableName" value="@draftTransferFileTableName" />
+                <div id="attachedFile_transfer_frm">
+                    <div class="text-center text-muted py-6">Đang tải danh sách file dự thảo...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <div class="row">
     <div class="col-xl-12">

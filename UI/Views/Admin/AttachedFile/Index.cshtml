@@ -1,4 +1,4 @@
-@using UI.ViewModels;
+@using UI.ViewModels
 @model List<DataAccess.Entities.Manages.AttachedFile>
 
 @{
@@ -6,8 +6,11 @@
     int pageCurrent = (ViewData["PageInfo"] as VMPageInfo)?.PageCurrent ?? 1;
     string timKiem = (ViewData["PageInfo"] as VMPageInfo)?.Search ?? "";
     string sortCurrent = (ViewData["PageInfo"] as VMPageInfo)?.Sort ?? "";
-    int record_giayto = 1;
+    int recordGiayTo = 1;
     var files = Model ?? new List<DataAccess.Entities.Manages.AttachedFile>();
+    var attachedFileTableName = ViewData["AttachedFileTableName"]?.ToString() ?? string.Empty;
+    var showDraftCategory = string.Equals(attachedFileTableName, "HoSoVanBanDuThao", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(attachedFileTableName, "HoSoVanBanDuThaoVersion", StringComparison.OrdinalIgnoreCase);
 }
 
 <div class="card card-custom" style="border: 1px solid #60aee4;">
@@ -54,7 +57,10 @@
                     <tr class="table-active">
                         <th style="text-align: center; font-weight: bold;" width="5%">#</th>
                         <th style="text-align: center; font-weight: bold;">Mô tả</th>
-                        @* <th style="text-align: center; font-weight: bold;">Đường dẫn</th> *@
+                        @if (showDraftCategory)
+                        {
+                            <th style="text-align: center; font-weight: bold;" width="18%">Phân loại dự thảo</th>
+                        }
                         <th style="text-align: center; font-weight: bold;">File đính kèm</th>
                         <th style="text-align: center; font-weight: bold;" width="10%">Thao tác</th>
                     </tr>
@@ -65,15 +71,27 @@
                         @foreach (var item in files)
                         {
                             <tr>
-                                <td style="text-align: center; vertical-align: middle">@(record_giayto++)</td>
+                                <td style="text-align: center; vertical-align: middle">@(recordGiayTo++)</td>
                                 <td style="vertical-align: middle">
                                     <div class="row">
                                         <div class="col-2"></div>
                                         <div class="col-10">@item.MoTa</div>
                                     </div>
                                 </td>
-                                @* <td style="vertical-align: middle">@item.Url</td> *@
-                                <td style="vertical-align: middle">@($"{item.FileName}")</td>
+                                @if (showDraftCategory)
+                                {
+                                    <td style="vertical-align: middle; text-align: center;">
+                                        @if (!string.IsNullOrWhiteSpace(item.PhanLoaiDuThao))
+                                        {
+                                            <span class="badge badge-light-primary">@item.PhanLoaiDuThao</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                }
+                                <td style="vertical-align: middle">@item.FileName</td>
                                 <td class="text-center text-nowrap" style="vertical-align: middle">
                                     <button type="button" onclick="EditAttachedFile('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Chỉnh sửa">
                                         <i class="icon-lg la la-edit text-success"></i>
@@ -88,7 +106,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="5" style="text-align:center">Không có thông tin</td>
+                            <td colspan="@(showDraftCategory ? 5 : 4)" style="text-align:center">Không có thông tin</td>
                         </tr>
                     }
                 </tbody>

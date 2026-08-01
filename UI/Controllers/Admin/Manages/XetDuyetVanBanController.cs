@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Services.Manages;
+using Services.ReportGenerators;
 using Services.Systems;
 using UI.Helper;
 using UI.Security;
@@ -24,7 +25,16 @@ namespace UI.Controllers.Admin.Manages
             var currentUser = _authService.GetUserInfo();
             var isSSA = currentUser?.SSA ?? false;
             var selectedDonViId = await ApplyDonViFilterViewDataAsync(DonViId);
-            var model = await _hoSoVanBanWorkflowService.GetDanhSachTheoBuocAsync(TimKiem, "BUOC_06_TRINH_THAM_QUYEN", isSSA ? selectedDonViId : null, PageSize, PageCurrent, true);
+            var model = await _hoSoVanBanWorkflowService.GetDanhSachTheoBuocAsync(
+                TimKiem,
+                "BUOC_03_THAM_DINH_VAN_BAN",
+                isSSA ? selectedDonViId : null,
+                PageSize,
+                PageCurrent,
+                true,
+                null,
+                "XayDung");
+
             if (model.Status == "error")
             {
                 ViewData["Messages"] = model.Message;
@@ -33,13 +43,91 @@ namespace UI.Controllers.Admin.Manages
                 return View("Views/Shared/Error.cshtml");
             }
 
-            ViewData["Title"] = "Xét duyệt văn bản";
-            ViewData["Role"] = "VanBanQPPL.XayDungVanBan.XetDuyetVanBan";
+            ViewData["Title"] = "Thẩm định văn bản";
+            ViewData["Role"] = "VanBanQPPL.DanhGiaVanBan.XetDuyetVanBan";
             ViewData["RoutePrefix"] = "/Manages/XetDuyetVanBan";
             ViewData["HideDonViFilter"] = !isSSA;
-            ViewData["ReceiveModeMessage"] = "Đang xem các hồ sơ đã gửi đến đơn vị của bạn, kể cả những hồ sơ đơn vị bạn đã xử lý và chuyển tiếp.";
+            ViewData["ReceiveModeMessage"] = "Đang xem danh sách hồ sơ xử lý ở bước Thẩm định văn bản sau khi đơn vị soạn thảo chuyển dự thảo sang bước tiếp theo.";
             ViewData["PageInfo"] = FuntionGlobal.GetPageInfo(model.TotalRecord, TimKiem, PageSize, PageCurrent);
             return View("Views/Admin/Manages/HoSoVanBan/Index.cshtml", model.Data);
+        }
+
+        [HttpGet("Manages/XetDuyetVanBan/WorkflowPage")]
+        [AuthorizeAction("Edit", "XetDuyetVanBan", "Index")]
+        public async Task<IActionResult> WorkflowPage(Guid id)
+        {
+            ViewData["Title"] = "Thẩm định văn bản";
+            ViewData["PageTitle"] = "Xét duyệt văn bản";
+            ViewData["PageSubtitle"] = "Cập nhật kết quả thẩm định trên màn hình nghiệp vụ riêng.";
+            ViewData["RoutePrefix"] = "/Manages/XetDuyetVanBan";
+            ViewData["WorkflowActionTitle"] = "Thẩm định văn bản";
+            ViewData["ReviewMode"] = "DuThao";
+            ViewData["ForceWorkflowAction"] = "true";
+            ViewData["WorkflowPageMode"] = "true";
+            ViewData["CompactWorkflowPage"] = "true";
+
+            var model = await _hoSoVanBanWorkflowService.GetChiTietAsync(id);
+            if (model.Status == "error")
+            {
+                ViewData["Messages"] = model.Message;
+                ViewData["Controller"] = "XetDuyetVanBan";
+                ViewData["Action"] = "Index";
+                return View("Views/Shared/Error.cshtml");
+            }
+
+            return View("Views/Admin/Manages/XetDuyetVanBan/WorkflowPage.cshtml", model.Data);
+        }
+
+        [HttpGet("Manages/XetDuyetVanBan/SoSanhDuThao")]
+        [AuthorizeAction("Index", "XetDuyetVanBan", "Index")]
+        public async Task<IActionResult> SoSanhDuThao(Guid id, Guid? sourceFileId = null, Guid? targetFileId = null)
+        {
+            ViewData["Title"] = "So sánh dự thảo";
+            var model = await _hoSoVanBanWorkflowService.GetSoSanhDuThaoAsync(id, sourceFileId, targetFileId);
+            if (model.Status == "error")
+            {
+                ViewData["Messages"] = model.Message;
+                ViewData["Controller"] = "XetDuyetVanBan";
+                ViewData["Action"] = "Index";
+                return View("Views/Shared/Error.cshtml");
+            }
+
+            return View("Views/Admin/Manages/XetDuyetVanBan/SoSanhDuThao.cshtml", model.Data);
+        }
+
+        [HttpGet("Manages/XetDuyetVanBan/ExportSoSanhDuThaoWord")]
+        [AuthorizeAction("Index", "XetDuyetVanBan", "Index")]
+        public async Task<IActionResult> ExportSoSanhDuThaoWord(Guid id, Guid? sourceFileId = null, Guid? targetFileId = null)
+        {
+            var response = await _hoSoVanBanWorkflowService.GetSoSanhDuThaoAsync(id, sourceFileId, targetFileId);
+            if (response.Status == "error" || response.Data is not HoSoVanBanDraftCompareModel model)
+            {
+                ViewData["Messages"] = response.Message;
+                ViewData["Controller"] = "XetDuyetVanBan";
+                ViewData["Action"] = "Index";
+                return View("Views/Shared/Error.cshtml");
+            }
+
+            var fileName = $"SoSanhDuThao_{model.HoSoVanBanId:N}.docx";
+            var fileBytes = HoSoVanBanDraftCompareWordReportGenerator.GenerateReport(model);
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", fileName);
+        }
+
+        [HttpGet("Manages/XetDuyetVanBan/ExportSoSanhDuThaoPdf")]
+        [AuthorizeAction("Index", "XetDuyetVanBan", "Index")]
+        public async Task<IActionResult> ExportSoSanhDuThaoPdf(Guid id, Guid? sourceFileId = null, Guid? targetFileId = null)
+        {
+            ViewData["Title"] = "Xuất PDF so sánh dự thảo";
+            var response = await _hoSoVanBanWorkflowService.GetSoSanhDuThaoAsync(id, sourceFileId, targetFileId);
+            if (response.Status == "error")
+            {
+                ViewData["Messages"] = response.Message;
+                ViewData["Controller"] = "XetDuyetVanBan";
+                ViewData["Action"] = "Index";
+                return View("Views/Shared/Error.cshtml");
+            }
+
+            return View("Views/Admin/Manages/XetDuyetVanBan/SoSanhDuThaoPdf.cshtml", response.Data);
         }
 
         [HttpPost("Manages/XetDuyetVanBan/Show")]
@@ -48,8 +136,30 @@ namespace UI.Controllers.Admin.Manages
         public async Task<IActionResult> Show(Guid id)
         {
             ViewData["RoutePrefix"] = "/Manages/XetDuyetVanBan";
-            ViewData["WorkflowActionTitle"] = "Xét duyệt văn bản trình cơ quan có thẩm quyền";
-            ViewData["WorkflowActionButton"] = "Gửi kết quả đồng ý/trả lại";
+            ViewData["HideWorkflowAction"] = "true";
+
+            var model = await _hoSoVanBanWorkflowService.GetChiTietAsync(id);
+            if (model.Status == "error")
+            {
+                ViewData["Messages"] = model.Message;
+                ViewData["Controller"] = "XetDuyetVanBan";
+                ViewData["Action"] = "Index";
+                return View("Views/Shared/Error.cshtml");
+            }
+
+            return PartialView("Views/Admin/Manages/HoSoVanBan/Show.cshtml", model.Data);
+        }
+
+        [HttpPost("Manages/XetDuyetVanBan/WorkflowAction")]
+        [ValidateAntiForgeryToken]
+        [AuthorizeAction("Index", "XetDuyetVanBan", "Index")]
+        public async Task<IActionResult> WorkflowAction(Guid id)
+        {
+            ViewData["RoutePrefix"] = "/Manages/XetDuyetVanBan";
+            ViewData["WorkflowActionTitle"] = "Thẩm định văn bản";
+            ViewData["ReviewMode"] = "DuThao";
+            ViewData["ForceWorkflowAction"] = "true";
+
             var model = await _hoSoVanBanWorkflowService.GetChiTietAsync(id);
             if (model.Status == "error")
             {
@@ -79,21 +189,43 @@ namespace UI.Controllers.Admin.Manages
             return PartialView("Views/Admin/Manages/HoSoVanBan/Timeline.cshtml", model.Data);
         }
 
+        [HttpGet("Manages/XetDuyetVanBan/ChuyenPheDuyetModel")]
+        [AuthorizeAction("Edit", "XetDuyetVanBan", "Index")]
+        public async Task<JsonResult> ChuyenPheDuyetModel(Guid id)
+        {
+            var model = await _hoSoVanBanWorkflowService.GetChuyenPheDuyetModelAsync(id);
+            return Json(new
+            {
+                status = model.Status,
+                message = model.Message,
+                data = model.Data
+            });
+        }
+
         [HttpPost("Manages/XetDuyetVanBan/NhanHoSo")]
         [ValidateAntiForgeryToken]
         [AuthorizeAction("Edit", "XetDuyetVanBan", "Index")]
-        public async Task<JsonResult> NhanHoSo(Guid id, string actionType = "NHAN_HO_SO")
+        public async Task<JsonResult> NhanHoSo(Guid id, string actionType = "NHAN_HO_SO", string? noiDungXuLy = null, string? ghiChu = null)
         {
-            var model = await _hoSoVanBanWorkflowService.NhanHoSoAsync(id, actionType);
+            var model = await _hoSoVanBanWorkflowService.NhanHoSoAsync(id, actionType, noiDungXuLy, ghiChu);
             return Json(new { status = model.Status, message = model.Message });
         }
 
-        [HttpPost("Manages/XetDuyetVanBan/HoanThanhXuLy")]
+        [HttpPost("Manages/XetDuyetVanBan/TraLaiHoSo")]
         [ValidateAntiForgeryToken]
         [AuthorizeAction("Edit", "XetDuyetVanBan", "Index")]
-        public async Task<JsonResult> HoanThanhXuLy(HoSoVanBanXuLyStepModel request)
+        public async Task<JsonResult> TraLaiHoSo(Guid id, string lyDoTraLai, string? ghiChu = null)
         {
-            var model = await _hoSoVanBanWorkflowService.HoanThanhXuLyAsync(request);
+            var model = await _hoSoVanBanWorkflowService.TraLaiDanhGiaAsync(id, lyDoTraLai, ghiChu);
+            return Json(new { status = model.Status, message = model.Message });
+        }
+
+        [HttpPost("Manages/XetDuyetVanBan/HoanThanhDanhGia")]
+        [ValidateAntiForgeryToken]
+        [AuthorizeAction("Edit", "XetDuyetVanBan", "Index")]
+        public async Task<JsonResult> HoanThanhDanhGia(HoSoVanBanDanhGiaStepModel request)
+        {
+            var model = await _hoSoVanBanWorkflowService.HoanThanhDanhGiaAsync(request);
             return Json(new { status = model.Status, message = model.Message });
         }
 

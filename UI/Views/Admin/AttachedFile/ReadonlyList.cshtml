@@ -15,6 +15,10 @@
                 </div>
                 <div class="readonly-file-content">
                     <div class="readonly-file-name">@(string.IsNullOrWhiteSpace(item.FileName) ? "Tệp đính kèm" : item.FileName)</div>
+                    @if (!string.IsNullOrWhiteSpace(item.PhanLoaiDuThao))
+                    {
+                        <div class="readonly-file-note">@item.PhanLoaiDuThao</div>
+                    }
                     @if (!string.IsNullOrWhiteSpace(item.MoTa))
                     {
                         <div class="readonly-file-note">@item.MoTa</div>
@@ -28,6 +32,6 @@
 else
 {
     <div class="empty-attachment-state">
-        Chưa có file đính kèm được gán vào hồ sơ.
+        Chưa có file đính kèm được gắn vào hồ sơ.
     </div>
 }

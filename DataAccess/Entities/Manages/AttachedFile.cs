@@ -36,6 +36,9 @@ namespace DataAccess.Entities.Manages
         [StringLength(500)]
         public string? MoTa { get; set; }
 
+        [StringLength(50)]
+        public string? PhanLoaiDuThao { get; set; }
+
         public string? Status { get; set; } = "CXD";
 
         public bool Public { get; set; } = false;

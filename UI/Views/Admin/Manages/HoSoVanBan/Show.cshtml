@@ -1,5 +1,4 @@
 @using Services.Manages
-
 @model HoSoVanBanWorkflowDetailModel
 
 @{
@@ -12,12 +11,17 @@
     var approvalReviewMode = ViewData["ApprovalReviewMode"]?.ToString();
     var isDangKyApprovalMode = approvalReviewMode == "DangKy" && Model.MaBuocHienTai == "BUOC_02_THONG_NHAT";
     var isXetDuyetDangKy = string.Equals(routePrefix, "/Manages/XetDuyetDangKy", StringComparison.OrdinalIgnoreCase);
-    var isPheDuyetDangKy = string.Equals(routePrefix, "/Manages/PheDuyetDangKy", StringComparison.OrdinalIgnoreCase);
+    var reviewMode = ViewData["ReviewMode"]?.ToString();
+    var isXetDuyetDuThao = string.Equals(routePrefix, "/Manages/XetDuyetDuThao", StringComparison.OrdinalIgnoreCase);
+    var isXetDuyetVanBan = string.Equals(routePrefix, "/Manages/XetDuyetVanBan", StringComparison.OrdinalIgnoreCase);
+    var isDanhGiaVanBanList = string.Equals(routePrefix, "/Manages/DanhGiaVanBan", StringComparison.OrdinalIgnoreCase);
+    var forceWorkflowAction = string.Equals(ViewData["ForceWorkflowAction"]?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
     var hideWorkflowAction = string.Equals(ViewData["HideWorkflowAction"]?.ToString(), "true", StringComparison.OrdinalIgnoreCase)
-        || !Model.CanXuLyBuocHienTai;
-    var isCompactApprovalView = isPheDuyetDangKy && isDangKyApprovalMode && !hideWorkflowAction;
-    var waitingReceive = Model.CanNhanHoSo;
-    var showInternalActionButtons = !waitingReceive && isXetDuyetDangKy && Model.TrangThaiNghiepVuTiepNhan == "NHAN_HO_SO";
+        || (!forceWorkflowAction && !Model.CanXuLyBuocHienTai);
+    var isCompactWorkflowPage = string.Equals(ViewData["CompactWorkflowPage"]?.ToString(), "true", StringComparison.OrdinalIgnoreCase);
+    var isCompactApprovalView = isXetDuyetDangKy && isDangKyApprovalMode && !hideWorkflowAction;
+    var isDraftReviewMode = (isXetDuyetDuThao || isXetDuyetVanBan) && reviewMode == "DuThao" && !hideWorkflowAction;
+    var showDraftReadonlySection = isDraftReviewMode || isDanhGiaVanBanList || isXetDuyetVanBan;
 }
 
 @Html.AntiForgeryToken()
@@ -105,65 +109,6 @@
         word-break: break-word;
     }
 
-    .readonly-file-list {
-        display: grid;
-        gap: 12px;
-    }
-
-    .readonly-file-item {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 14px 16px;
-        border: 1px solid #e9edf5;
-        border-radius: 14px;
-        background: #f8fbff;
-        text-decoration: none;
-        transition: all .2s ease;
-    }
-
-    .readonly-file-item:hover {
-        transform: translateY(-1px);
-        border-color: #8dc6ff;
-        box-shadow: 0 10px 22px rgba(54, 153, 255, 0.12);
-        text-decoration: none;
-    }
-
-    .readonly-file-icon {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        background: #e8f3ff;
-        color: #3699ff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        flex-shrink: 0;
-    }
-
-    .readonly-file-content {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .readonly-file-name {
-        font-weight: 700;
-        color: #181c32;
-    }
-
-    .readonly-file-note {
-        margin-top: 4px;
-        color: #7e8299;
-        font-size: 13px;
-    }
-
-    .readonly-file-action {
-        color: #3699ff;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
     .empty-attachment-state {
         padding: 18px;
         border-radius: 14px;
@@ -173,16 +118,78 @@
         border: 1px dashed #dbe3ef;
     }
 
+    .draft-version-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .draft-version-card {
+        border: 1px solid #e7ebf3;
+        border-radius: 14px;
+        background: #f8fbff;
+        padding: 16px 18px;
+    }
+
+    .draft-version-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+
+    .draft-version-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #181c32;
+    }
+
+    .draft-version-meta {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .draft-version-meta-item {
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #fff;
+        border: 1px solid #edf1f7;
+    }
+
+    .draft-version-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #7e8299;
+        margin-bottom: 4px;
+        font-weight: 700;
+    }
+
+    .draft-version-value {
+        font-size: 14px;
+        color: #181c32;
+        word-break: break-word;
+    }
+
+    .workflow-action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
     @@media (max-width: 991.98px) {
         .hoso-detail-summary,
-        .hoso-info-grid {
+        .hoso-info-grid,
+        .draft-version-meta {
             grid-template-columns: 1fr;
         }
     }
 </style>
 
 <div class="hoso-detail-shell">
-    @if (!isCompactApprovalView)
+    @if (!isCompactApprovalView && !isCompactWorkflowPage)
     {
         <div class="hoso-detail-summary">
             <div class="hoso-summary-card">
@@ -231,7 +238,7 @@
                 </div>
                 <div class="hoso-info-item">
                     <div class="hoso-info-label">Ngày nhận hồ sơ</div>
-                    <div class="hoso-info-value">@(Model.DaNhanHoSo && Model.NgayNhanHienTai.HasValue ? FuntionGlobal.ConvertDateTimeToStr(Model.NgayNhanHienTai.Value) : "Chưa nhận")</div>
+                    <div class="hoso-info-value">@(Model.NgayNhanHienTai.HasValue ? FuntionGlobal.ConvertDateTimeToStr(Model.NgayNhanHienTai.Value) : "-")</div>
                 </div>
                 <div class="hoso-info-item">
                     <div class="hoso-info-label">Hạn xử lý</div>
@@ -271,106 +278,194 @@
         </div>
     }
 
-    @if (Model.BuocHienTaiId.HasValue && !hideWorkflowAction)
+    @if (Model.BuocHienTaiId.HasValue && !hideWorkflowAction && isDangKyApprovalMode)
     {
         <div class="hoso-action-card">
             <div class="hoso-section-title">@workflowActionTitle</div>
 
-            @if (waitingReceive && isXetDuyetDangKy)
-            {
-                <div class="alert alert-warning mb-6">
-                    Hồ sơ đã chuyển đến đơn vị tiếp nhận nhưng chưa được xác nhận nhận hồ sơ.
-                </div>
-                <button type="button" class="btn btn-success" onclick="OpenNhanHoSo('@Model.Id')">Nhận hồ sơ</button>
-            }
-            else if (waitingReceive)
-            {
-                <div class="alert alert-warning mb-6">
-                    Hồ sơ đã chuyển đến đơn vị tiếp nhận nhưng chưa được xác nhận nhận hồ sơ.
-                </div>
-                <button type="button" class="btn btn-success" onclick="NhanHoSo('@Model.Id', 'NHAN_HO_SO')">Nhận hồ sơ</button>
-            }
+            <div class="alert alert-light-warning mb-6">
+                Chọn phê duyệt kết quả để hoàn thành quy trình đăng ký. Nếu cần trả lại, hãy dùng nút Trả lại ở danh sách hồ sơ.
+            </div>
 
-            @if (showInternalActionButtons)
-            {
-                <div class="alert alert-light-info mb-6">
-                    Sau khi nhận hồ sơ, đơn vị tiếp nhận có thể ghi nhận tiếp thao tác nội bộ trước khi xử lý bước chính thức.
-                </div>
-                <div class="d-flex flex-wrap gap-2 mb-4">
-                    <button type="button" class="btn btn-warning mr-2 mb-2" onclick="NhanHoSo('@Model.Id', 'CHUYEN_PHE_DUYET')">Chuyển phê duyệt</button>
-                    <button type="button" class="btn btn-danger mb-2" onclick="OpenTraLaiHoSo('@Model.Id')">Trả lại</button>
-                </div>
-            }
-
-            @if (!waitingReceive && isDangKyApprovalMode && isPheDuyetDangKy)
-            {
-                <div class="alert alert-light-warning mb-6">
-                    Chọn phê duyệt để chuyển hồ sơ sang bước 3. Nếu cần trả lại, hãy dùng nút Trả lại ở danh sách hồ sơ.
-                </div>
-
-                <div class="card border mb-6">
-                    <div class="card-body">
-                        <form id="frm_step_approve_dangky">
-                            <input type="hidden" name="HoSoVanBanId" value="@Model.Id" />
-                            <input type="hidden" name="KetQuaXuLy" value="DONG_Y" />
-                            <input type="hidden" name="AttachedFileGroupId" value="@Model.Id" />
-                            <div class="row">
-                                <div class="col-xl-4">
-                                    <div class="form-group">
-                                        <label>Thời gian phê duyệt</label>
-                                        <input type="datetime-local" name="NgayXuLy" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
-                                    </div>
-                                </div>
-                                <div class="col-xl-8">
-                                    <div class="form-group">
-                                        <label>Thời hạn hoàn thành xây dựng văn bản</label>
-                                        <input type="date" name="HanXuLy" class="form-control" />
-                                    </div>
+            <div class="card border mb-6">
+                <div class="card-body">
+                    <form id="frm_step_approve_dangky">
+                        <input type="hidden" name="HoSoVanBanId" value="@Model.Id" />
+                        <input type="hidden" name="KetQuaXuLy" value="DONG_Y" />
+                        <input type="hidden" name="AttachedFileGroupId" value="@Model.Id" />
+                        <div class="row">
+                            <div class="col-xl-4">
+                                <div class="form-group">
+                                    <label>Thời gian phê duyệt</label>
+                                    <input type="datetime-local" name="NgayXuLy" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-xl-6">
-                                    <div class="form-group">
-                                        <label>Nội dung phê duyệt</label>
-                                        <textarea name="NoiDungXuLy" class="form-control" rows="3"></textarea>
-                                    </div>
-                                </div>
-                                <div class="col-xl-6">
-                                    <div class="form-group">
-                                        <label>Ghi chú</label>
-                                        <textarea name="GhiChu" class="form-control" rows="3"></textarea>
-                                    </div>
+                            <div class="col-xl-8">
+                                <div class="form-group">
+                                    <label>Thời hạn hoàn thành xây dựng văn bản</label>
+                                    <input type="date" name="HanXuLy" class="form-control" />
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>File đính kèm bổ sung (nếu có)</label>
-                                <div class="small text-muted mb-3">
-                                    File được gắn theo đúng hồ sơ hiện tại và sẽ đi cùng hồ sơ khi chuyển sang bước tiếp theo.
-                                </div>
-                                <input type="hidden" id="ApprovalFileGroupId" value="@Model.Id" />
-                                <input type="hidden" id="ApprovalFileTableName" value="HoSoVanBan" />
-                                <div id="approvalAttachedFileEditor">
-                                    <div class="empty-attachment-state">Đang tải khu vực đính kèm file...</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xl-6">
+                                <div class="form-group">
+                                    <label>Nội dung phê duyệt</label>
+                                    <textarea name="NoiDungXuLy" class="form-control" rows="3"></textarea>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-success" onclick="submitApprovalDangKy('approve')">Phê duyệt</button>
-                        </form>
-                    </div>
+                            <div class="col-xl-6">
+                                <div class="form-group">
+                                    <label>Ghi chú</label>
+                                    <textarea name="GhiChu" class="form-control" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>File đính kèm bổ sung (nếu có)</label>
+                            <div class="small text-muted mb-3">
+                                File được gắn theo đúng hồ sơ hiện tại và sẽ đi cùng hồ sơ khi hoàn thành quy trình.
+                            </div>
+                            <input type="hidden" id="Id" value="@Model.Id" />
+                            <input type="hidden" id="tableName" value="HoSoVanBan" />
+                            <input type="hidden" id="ApprovalFileGroupId" value="@Model.Id" />
+                            <input type="hidden" id="ApprovalFileTableName" value="HoSoVanBan" />
+                            <div id="attachedFile_frm">
+                                <div class="empty-attachment-state">Đang tải khu vực đính kèm file...</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success" onclick="submitApprovalDangKy()">Phê duyệt kết quả</button>
+                    </form>
                 </div>
+            </div>
+        </div>
+    }
+
+    @if (showDraftReadonlySection)
+    {
+        <div class="hoso-attachment-card">
+            <div class="hoso-section-title">File dự thảo hiện tại</div>
+            <div id="draftAttachedFileReadonlyContainer">
+                <div class="empty-attachment-state">Đang tải file dự thảo...</div>
+            </div>
+        </div>
+
+        <div class="hoso-attachment-card">
+            <div class="hoso-section-title">Lịch sử phiên bản dự thảo</div>
+            @if (Model.CacVersionDuThao.Any())
+            {
+                <div class="draft-version-list">
+                    @foreach (var version in Model.CacVersionDuThao)
+                    {
+                        var filesContainerId = $"draftVersionFiles_{version.Id:N}";
+                        <div class="draft-version-card">
+                            <div class="draft-version-header">
+                                <div>
+                                    <div class="draft-version-title">@version.TenVersion</div>
+                                    <div class="text-muted small">@version.LoaiVersion</div>
+                                </div>
+                                <span class="badge badge-light-danger">Trả lại: @version.SoLanTraLai lần</span>
+                            </div>
+                            <div class="draft-version-meta">
+                                <div class="draft-version-meta-item">
+                                    <div class="draft-version-label">Ngày tạo</div>
+                                    <div class="draft-version-value">@FuntionGlobal.ConvertDateTimeToStr(version.NgayTaoVersion)</div>
+                                </div>
+                                <div class="draft-version-meta-item">
+                                    <div class="draft-version-label">Đơn vị lưu</div>
+                                    <div class="draft-version-value">@(string.IsNullOrWhiteSpace(version.TenDonViTao) ? "-" : version.TenDonViTao)</div>
+                                </div>
+                                <div class="draft-version-meta-item">
+                                    <div class="draft-version-label">Ghi chú</div>
+                                    <div class="draft-version-value">@(string.IsNullOrWhiteSpace(version.GhiChu) ? "-" : version.GhiChu)</div>
+                                </div>
+                            </div>
+                            <div id="@filesContainerId">
+                                <div class="empty-attachment-state">Đang tải file của phiên bản này...</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-attachment-state">Chưa phát sinh phiên bản dự thảo nào được lưu lại.</div>
             }
         </div>
+
+        @if (Model.BuocHienTaiId.HasValue && isDraftReviewMode)
+        {
+            var reviewFileGroupId = Guid.NewGuid();
+            <div class="hoso-action-card">
+                <div class="hoso-section-title">@workflowActionTitle</div>
+                <div class="alert alert-light-info mb-6">
+                    Đơn vị thẩm định có thể kết luận đạt để chuyển bước tiếp theo hoặc trả lại dự thảo tối đa 3 lần để đơn vị soạn thảo chỉnh sửa lại.
+                </div>
+                <form id="frm_step_review_duthao">
+                    <input type="hidden" name="HoSoVanBanId" value="@Model.Id" />
+                    <input type="hidden" name="AttachedFileGroupId" value="@reviewFileGroupId" />
+                    <div class="row">
+                        <div class="col-xl-4">
+                            <div class="form-group">
+                                <label>Kết quả thẩm định</label>
+                                <select name="KetQuaDanhGia" class="form-control">
+                                    <option value="DAT">Đạt</option>
+                                    <option value="KHONG_DAT_LAN_1">Không đạt - trả lại lần 1</option>
+                                    <option value="KHONG_DAT_LAN_2">Không đạt - trả lại lần 2</option>
+                                    <option value="KHONG_DAT_LAN_3">Không đạt - trả lại lần 3</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xl-8">
+                            <div class="form-group">
+                                <label>Ghi chú</label>
+                                <input type="text" name="GhiChu" class="form-control" placeholder="Nhập ghi chú xử lý nếu có" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-6">
+                            <div class="form-group">
+                                <label>Nội dung thẩm định</label>
+                                <textarea name="NoiDungDanhGia" class="form-control" rows="4" placeholder="Kết luận, nội dung thẩm định"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="form-group">
+                                <label>Yêu cầu chỉnh sửa</label>
+                                <textarea name="YeuCauChinhSua" class="form-control" rows="4" placeholder="Nêu rõ nội dung cần chỉnh sửa khi trả lại dự thảo"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>File đính kèm thẩm định</label>
+                        <div class="small text-muted mb-3">
+                            Có thể đính kèm phiếu thẩm định, tài liệu góp ý nội bộ hoặc bản nhận xét để lưu cùng lần thẩm định này.
+                        </div>
+                        <input type="hidden" id="Id" value="@reviewFileGroupId" />
+                        <input type="hidden" id="tableName" value="HoSoVanBanDanhGia" />
+                        <input type="hidden" id="DraftReviewFileGroupId" value="@reviewFileGroupId" />
+                        <input type="hidden" id="DraftReviewFileTableName" value="HoSoVanBanDanhGia" />
+                        <div id="attachedFile_frm">
+                            <div class="empty-attachment-state">Đang tải khu vực đính kèm file...</div>
+                        </div>
+                    </div>
+                    <div class="workflow-action-buttons">
+                        <button type="button" class="btn btn-warning" onclick="submitDraftReview()">Gửi kết quả thẩm định</button>
+                    </div>
+                </form>
+            </div>
+        }
     }
 </div>
 
 <script>
-    function submitApprovalDangKy(actionType) {
-        const formId = actionType === 'return' ? 'frm_step_return_dangky' : 'frm_step_approve_dangky';
-        const form = document.getElementById(formId);
-        if (!form) {
-            return;
-        }
+    function submitApprovalDangKy() {
+        submitCurrentStep('@($"{routePrefix}/HoanThanhXuLy")', 'frm_step_approve_dangky');
+    }
 
-        submitCurrentStep('@($"{routePrefix}/HoanThanhXuLy")', formId);
+    function submitDraftReview() {
+        submitCurrentStep('@($"{routePrefix}/HoanThanhDanhGia")', 'frm_step_review_duthao');
     }
 
     function submitCurrentStep(url, formId) {
@@ -379,6 +474,7 @@
             return;
         }
 
+        const workflowPageMode = '@(ViewData["WorkflowPageMode"]?.ToString() ?? "false")'.toLowerCase() === 'true';
         const token = document.querySelector('#frm_show input[name="__RequestVerificationToken"]')?.value
             || document.querySelector('input[name="__RequestVerificationToken"]')?.value;
 
@@ -392,10 +488,16 @@
             success: function (res) {
                 if (res.status === 'success') {
                     toastr.success(res.message || 'Thành công');
-                    Show('@Model.Id');
-                    window.setTimeout(function () {
-                        window.location.reload();
-                    }, 500);
+                    if (workflowPageMode) {
+                        window.setTimeout(function () {
+                            window.location.href = '@routePrefix';
+                        }, 300);
+                    } else {
+                        $('#Show_Modal').modal('hide');
+                        window.setTimeout(function () {
+                            window.location.reload();
+                        }, 300);
+                    }
                 } else {
                     toastr.error(res.message || 'Có lỗi xảy ra');
                 }
@@ -407,12 +509,17 @@
     }
 
     function loadAttachedFilesReadonly() {
+        const container = $('#attachedFileReadonlyContainer');
+        if (!container.length) {
+            return;
+        }
+
         const url = '@Url.Action("GetAttachedFilesReadonly", "AttachedFile")' + '?GroupId=@Model.Id&TableName=HoSoVanBan';
-        $('#attachedFileReadonlyContainer').load(url);
+        container.load(url);
     }
 
     function loadApprovalAttachedFilesEditor() {
-        const container = $('#approvalAttachedFileEditor');
+        const container = $('#attachedFile_frm');
         const groupId = $('#ApprovalFileGroupId').val();
         const tableName = $('#ApprovalFileTableName').val();
         if (!container.length || !groupId || !tableName) {
@@ -428,6 +535,72 @@
         });
     }
 
+    function loadDraftAttachedFilesReadonly() {
+        const container = $('#draftAttachedFileReadonlyContainer');
+        if (!container.length) {
+            return;
+        }
+
+        const url = '@Url.Action("GetAttachedFilesReadonly", "AttachedFile")' + '?GroupId=@Model.Id&TableName=HoSoVanBanDuThao';
+        container.load(url);
+    }
+
+    function loadDraftVersionFilesReadonly() {
+        @foreach (var version in Model.CacVersionDuThao)
+        {
+            var filesContainerId = $"draftVersionFiles_{version.Id:N}";
+            <text>
+            $('#@filesContainerId').load('@Url.Action("GetAttachedFilesReadonly", "AttachedFile")?GroupId=@version.AttachedFileGroupId&TableName=HoSoVanBanDuThaoVersion');
+            </text>
+        }
+    }
+
+    function loadDraftReviewAttachedFilesEditor() {
+        const container = $('#attachedFile_frm');
+        const groupId = $('#DraftReviewFileGroupId').val();
+        const tableName = $('#DraftReviewFileTableName').val();
+        if (!container.length || !groupId || !tableName) {
+            return;
+        }
+
+        $('#Id').val(groupId);
+        $('#tableName').val(tableName);
+
+        const url = '@Url.Action("GetAttachedFiles", "AttachedFile")' + '?GroupId=' + groupId + '&TableName=' + tableName;
+        container.load(url, function () {
+            $('.select2basic').select2();
+        });
+    }
+
+    function initXetDuyetVanBanForm() {
+        if ('@routePrefix' !== '/Manages/XetDuyetVanBan') {
+            return;
+        }
+
+        const select = document.querySelector('#frm_step_review_duthao select[name="KetQuaDanhGia"]');
+        if (select) {
+            const firstOption = select.querySelector('option');
+            if (firstOption) {
+                firstOption.textContent = 'Lưu thẩm định';
+            }
+            select.value = 'THAM_DINH_XONG';
+        }
+
+        const submitButton = document.querySelector('#frm_step_review_duthao button.btn-warning');
+        if (submitButton) {
+            submitButton.textContent = 'Lưu thẩm định';
+        }
+
+        const returnButtonOverride = document.getElementById('btnTraLaiHoSoXetDuyet');
+        if (returnButtonOverride) {
+            returnButtonOverride.remove();
+        }
+    }
+
     loadAttachedFilesReadonly();
     loadApprovalAttachedFilesEditor();
+    loadDraftAttachedFilesReadonly();
+    loadDraftVersionFilesReadonly();
+    loadDraftReviewAttachedFilesEditor();
+    initXetDuyetVanBanForm();
 </script>

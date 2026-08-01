@@ -7,6 +7,8 @@ namespace Services.QuanLyDanhMuc
         public Guid Id { get; set; }
         public string MaQuyTrinh { get; set; } = string.Empty;
         public string TenQuyTrinh { get; set; } = string.Empty;
+        public string LoaiQuyTrinh { get; set; } = "XayDung";
+        public string? TenLoaiQuyTrinh { get; set; }
         public string? TenLoaiVanBan { get; set; }
         public string? CapApDung { get; set; }
         public int PhienBan { get; set; }
@@ -20,10 +22,11 @@ namespace Services.QuanLyDanhMuc
         public Guid Id { get; set; }
         public string MaQuyTrinh { get; set; } = string.Empty;
         public string TenQuyTrinh { get; set; } = string.Empty;
+        public string LoaiQuyTrinh { get; set; } = "XayDung";
         public Guid? DanhMucVanBanId { get; set; }
         public List<Guid> DanhMucVanBanIds { get; set; } = new();
-        public string? CapApDung { get; set; } = "Tỉnh";
-        public List<string> CapApDungs { get; set; } = new() { "Tỉnh" };
+        public string? CapApDung { get; set; } = "Tinh";
+        public List<string> CapApDungs { get; set; } = new() { "Tinh" };
         public int PhienBan { get; set; } = 1;
         public bool TrangThai { get; set; } = true;
         public string? MoTa { get; set; }
@@ -73,19 +76,20 @@ namespace Services.QuanLyDanhMuc
         {
             return new QuyTrinhSoanThaoEditModel
             {
-                CapApDung = "Tỉnh",
-                CapApDungs = new List<string> { "Tỉnh" },
+                LoaiQuyTrinh = "XayDung",
+                CapApDung = "Tinh",
+                CapApDungs = new List<string> { "Tinh" },
                 PhienBan = 1,
                 TrangThai = true,
                 BuocQuyTrinhs = new List<QuyTrinhSoanThaoBuocModel>
                 {
-                    new() { MaBuoc = "LAP_DE_NGHI", TenBuoc = "Lập đề nghị/Đăng ký danh mục", ThuTuSapXep = 1, LoaiBuoc = "KhoiTao", CachHoanThanh = "Tạo hồ sơ và trình đề nghị", SoNgayXuLyTieuChuan = 3, SoNgayCanhBaoSapHan = 1 },
-                    new() { MaBuoc = "THONG_NHAT", TenBuoc = "Tiếp nhận/Xét duyệt đăng ký", ThuTuSapXep = 2, LoaiBuoc = "PheDuyet", CachHoanThanh = "Đồng ý hoặc không đồng ý cho xây dựng", SoNgayXuLyTieuChuan = 2, SoNgayCanhBaoSapHan = 1, DonViTiepNhanMacDinhId = QuyTrinhSoanThaoBuocModel.VanPhongUbndTinhDonViId },
-                    new() { MaBuoc = "SOAN_THAO", TenBuoc = "Soạn thảo văn bản", ThuTuSapXep = 3, LoaiBuoc = "XuLy", CachHoanThanh = "Hoàn thành bản dự thảo", ChoPhepQuayLui = true, SoNgayXuLyTieuChuan = 5, SoNgayCanhBaoSapHan = 2 },
-                    new() { MaBuoc = "LAY_Y_KIEN", TenBuoc = "Lấy ý kiến", ThuTuSapXep = 4, LoaiBuoc = "LayYKien", CachHoanThanh = "Nhận phản hồi và đính kèm file", SoLuongPhanHoiToiThieu = 1, YeuCauFileDinhKem = true, SoNgayXuLyTieuChuan = 7, SoNgayCanhBaoSapHan = 2 },
-                    new() { MaBuoc = "DANH_GIA", TenBuoc = "Thẩm định/Đánh giá", ThuTuSapXep = 5, LoaiBuoc = "DanhGia", CachHoanThanh = "Đạt hoặc Không đạt", ChoPhepQuayLui = true, YeuCauFileDinhKem = true, SoLanTraLaiToiDa = 3, SoNgayXuLyTieuChuan = 5, SoNgayCanhBaoSapHan = 2 },
-                    new() { MaBuoc = "TRINH_CO_QUAN", TenBuoc = "Trình cơ quan có thẩm quyền", ThuTuSapXep = 6, LoaiBuoc = "PheDuyet", CachHoanThanh = "Trình phê duyệt văn bản", SoNgayXuLyTieuChuan = 3, SoNgayCanhBaoSapHan = 1, DonViTiepNhanMacDinhId = QuyTrinhSoanThaoBuocModel.SoTuPhapDonViId },
-                    new() { MaBuoc = "BAN_HANH", TenBuoc = "Ban hành", ThuTuSapXep = 7, LoaiBuoc = "BanHanh", CachHoanThanh = "Văn bản được ban hành", YeuCauFileDinhKem = true, SoNgayXuLyTieuChuan = 2, SoNgayCanhBaoSapHan = 1, DonViTiepNhanMacDinhId = QuyTrinhSoanThaoBuocModel.VanPhongUbndTinhDonViId }
+                    new() { MaBuoc = "LAP_DE_NGHI", TenBuoc = "Lap de nghi/Dang ky danh muc", ThuTuSapXep = 1, LoaiBuoc = "KhoiTao", CachHoanThanh = "Tao ho so va trinh de nghi", SoNgayXuLyTieuChuan = 3, SoNgayCanhBaoSapHan = 1 },
+                    new() { MaBuoc = "THONG_NHAT", TenBuoc = "Tiep nhan/Xet duyet dang ky", ThuTuSapXep = 2, LoaiBuoc = "PheDuyet", CachHoanThanh = "Dong y hoac khong dong y cho xay dung", SoNgayXuLyTieuChuan = 2, SoNgayCanhBaoSapHan = 1, DonViTiepNhanMacDinhId = QuyTrinhSoanThaoBuocModel.VanPhongUbndTinhDonViId },
+                    new() { MaBuoc = "SOAN_THAO", TenBuoc = "Soan thao van ban", ThuTuSapXep = 3, LoaiBuoc = "XuLy", CachHoanThanh = "Hoan thanh ban du thao", ChoPhepQuayLui = true, SoNgayXuLyTieuChuan = 5, SoNgayCanhBaoSapHan = 2 },
+                    new() { MaBuoc = "LAY_Y_KIEN", TenBuoc = "Lay y kien", ThuTuSapXep = 4, LoaiBuoc = "LayYKien", CachHoanThanh = "Nhan phan hoi va dinh kem file", SoLuongPhanHoiToiThieu = 1, YeuCauFileDinhKem = true, SoNgayXuLyTieuChuan = 7, SoNgayCanhBaoSapHan = 2 },
+                    new() { MaBuoc = "DANH_GIA", TenBuoc = "Tham dinh/Danh gia", ThuTuSapXep = 5, LoaiBuoc = "DanhGia", CachHoanThanh = "Dat hoac Khong dat", ChoPhepQuayLui = true, YeuCauFileDinhKem = true, SoLanTraLaiToiDa = 3, SoNgayXuLyTieuChuan = 5, SoNgayCanhBaoSapHan = 2 },
+                    new() { MaBuoc = "TRINH_CO_QUAN", TenBuoc = "Trinh co quan co tham quyen", ThuTuSapXep = 6, LoaiBuoc = "PheDuyet", CachHoanThanh = "Trinh phe duyet van ban", SoNgayXuLyTieuChuan = 3, SoNgayCanhBaoSapHan = 1, DonViTiepNhanMacDinhId = QuyTrinhSoanThaoBuocModel.SoTuPhapDonViId },
+                    new() { MaBuoc = "BAN_HANH", TenBuoc = "Ban hanh", ThuTuSapXep = 7, LoaiBuoc = "BanHanh", CachHoanThanh = "Van ban duoc ban hanh", YeuCauFileDinhKem = true, SoNgayXuLyTieuChuan = 2, SoNgayCanhBaoSapHan = 1, DonViTiepNhanMacDinhId = QuyTrinhSoanThaoBuocModel.VanPhongUbndTinhDonViId }
                 },
                 ChuyenBuocs = new List<QuyTrinhSoanThaoChuyenBuocModel>
                 {
@@ -95,7 +99,7 @@ namespace Services.QuanLyDanhMuc
                     new() { TuBuocMa = "SOAN_THAO", DenBuocMa = "LAY_Y_KIEN", DieuKienKetQua = "HOAN_THANH_DU_THAO", LaNhanhMacDinh = true },
                     new() { TuBuocMa = "LAY_Y_KIEN", DenBuocMa = "DANH_GIA", DieuKienKetQua = "DA_GAN_KET_QUA_Y_KIEN", LaNhanhMacDinh = true },
                     new() { TuBuocMa = "DANH_GIA", DenBuocMa = "TRINH_CO_QUAN", DieuKienKetQua = "DAT", LaNhanhMacDinh = true },
-                    new() { TuBuocMa = "DANH_GIA", DenBuocMa = "SOAN_THAO", DieuKienKetQua = "KHONG_DAT", LaNhanhMacDinh = false, MoTa = "Trả lại đơn vị soạn thảo tối đa 3 lần" },
+                    new() { TuBuocMa = "DANH_GIA", DenBuocMa = "SOAN_THAO", DieuKienKetQua = "KHONG_DAT", LaNhanhMacDinh = false, MoTa = "Tra lai don vi soan thao toi da 3 lan" },
                     new() { TuBuocMa = "TRINH_CO_QUAN", DenBuocMa = "BAN_HANH", DieuKienKetQua = "TRINH_THANH_CONG", LaNhanhMacDinh = true }
                 }
             };

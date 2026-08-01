@@ -1,0 +1,153 @@
+@using Services.Manages
+@model HoSoVanBanLayYKienFormModel
+
+@{
+    var pageTitle = ViewData["PageTitle"]?.ToString() ?? "Phản hồi góp ý";
+    var pageSubtitle = ViewData["PageSubtitle"]?.ToString() ?? "Cập nhật kết quả góp ý của đơn vị.";
+    var tableName = "HoSoVanBanLayYKien";
+}
+
+@section custom_script {
+    <script>
+        function loadHoSoFilesReadonly() {
+            const url = '@Url.Action("GetAttachedFilesReadonly", "AttachedFile")' + '?GroupId=@Model.HoSoVanBanId&TableName=HoSoVanBan';
+            $('#hoso_file_readonly').load(url);
+        }
+
+        function loadLayYKienFiles() {
+            const url = '@Url.Action("GetAttachedFiles", "AttachedFile")'
+                + '?GroupId=@Model.AttachedFileGroupId&TableName=@tableName';
+            $('#attachedFile_frm').load(url, function () {
+                $('.select2basic').select2();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadHoSoFilesReadonly();
+            loadLayYKienFiles();
+        });
+    </script>
+}
+
+<div class="card card-custom">
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <div>
+                <h3 class="card-label mb-1"><b>@pageTitle</b></h3>
+                <div class="text-muted">@pageSubtitle</div>
+            </div>
+        </div>
+        <div class="card-toolbar">
+            <a href="/Manages/LayYKienVanBan" class="btn btn-light-primary font-weight-bold">Quay lại danh sách</a>
+        </div>
+    </div>
+    <div class="card-body pt-2">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        }
+        @if (ViewData["Messages"] != null)
+        {
+            <div class="alert alert-danger">@ViewData["Messages"]</div>
+        }
+
+        <div class="alert alert-light-info mb-6">
+            Hồ sơ: <b>@Model.TenHoSo</b>
+            @if (!string.IsNullOrWhiteSpace(Model.TenLoaiVanBan))
+            {
+                <span> | Loại văn bản: @Model.TenLoaiVanBan</span>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.TenDonViSoanThao))
+            {
+                <span> | Đơn vị soạn thảo: @Model.TenDonViSoanThao</span>
+            }
+        </div>
+
+        <form method="post" action="/Manages/LayYKienVanBan/PhanHoi">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="HoSoVanBanId" value="@Model.HoSoVanBanId" />
+            <input type="hidden" name="ActionMode" value="PHAN_HOI_DON_VI" />
+            <input type="hidden" name="DonViDuocLayYKienId" value="@Model.DonViDuocLayYKienId" />
+            <input type="hidden" name="AttachedFileGroupId" value="@Model.AttachedFileGroupId" />
+            <input type="hidden" id="Id" value="@Model.AttachedFileGroupId" />
+            <input type="hidden" id="tableName" value="@tableName" />
+
+            <div class="card border mb-6">
+                <div class="card-body">
+                    <h5 class="mb-4 text-primary">Nội dung yêu cầu góp ý</h5>
+                    <div class="row">
+                        <div class="col-xl-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Hạn phản hồi</label>
+                                <input type="date" class="form-control" value="@(Model.HanPhanHoi?.ToString("yyyy-MM-dd"))" readonly />
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold">Nội dung yêu cầu</label>
+                                <textarea class="form-control" rows="4" readonly>@Model.NoiDungYeuCau</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border mb-6">
+                <div class="card-body">
+                    <h5 class="mb-4 text-primary">Kết quả phản hồi của đơn vị</h5>
+                    <div class="row">
+                        <div class="col-xl-4">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Ngày phản hồi</label>
+                                <input type="date" name="NgayPhanHoi" class="form-control" value="@(Model.NgayPhanHoi?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" />
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Kết quả</label>
+                                <select name="TrangThaiPhanHoi" class="form-control">
+                                    <option value="DA_CO_Y_KIEN" selected>Đã có ý kiến</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Nội dung phản hồi</label>
+                                <textarea name="NoiDungPhanHoi" class="form-control" rows="5">@Model.NoiDungPhanHoi</textarea>
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold">Ghi chú</label>
+                                <textarea name="GhiChu" class="form-control" rows="3">@Model.GhiChu</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border mb-6">
+                <div class="card-body">
+                    <h5 class="mb-4 text-primary">File hồ sơ đã đính kèm</h5>
+                    <div id="hoso_file_readonly">
+                        <div class="text-center text-muted py-6">Đang tải file hồ sơ...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border mb-6">
+                <div class="card-body">
+                    <h5 class="mb-4 text-primary">File phản hồi góp ý</h5>
+                    <div id="attachedFile_frm">
+                        <div class="text-center text-muted py-6">Đang tải khu vực file đính kèm...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <a href="/Manages/LayYKienVanBan" class="btn btn-light-danger font-weight-bold mr-3">Đóng</a>
+                <button type="submit" class="btn btn-primary font-weight-bold">Lưu phản hồi góp ý</button>
+            </div>
+        </form>
+    </div>
+</div>

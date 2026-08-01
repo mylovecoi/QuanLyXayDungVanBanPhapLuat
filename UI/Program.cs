@@ -110,6 +110,7 @@ builder.Services.AddScoped<IQuyTrinhSoanThaoService, QuyTrinhSoanThaoService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVanBanPhapLuatService, VanBanPhapLuatService>();
 builder.Services.AddScoped<IHoSoVanBanWorkflowService, HoSoVanBanWorkflowService>();
+builder.Services.AddScoped<IHoSoVanBanDuThaoService, HoSoVanBanDuThaoService>();
 builder.Services.AddScoped<IAttachedFileService, AttachedFileService>();
 builder.Services.AddScoped<IThuTucHanhChinhService, ThuTucHanhChinhService>();
 

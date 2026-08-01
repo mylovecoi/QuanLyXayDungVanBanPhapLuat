@@ -902,7 +902,7 @@ VALUES
     '11111111-1111-1111-1111-111111111111',
     @Now,
     2, 'Group', 0, 'VanBanQPPL', '00000000-0000-0000-0000-000000000000',
-    N'Chức năng xây dựng văn bản QPPL', '', '', NULL, '',
+    N'Xây dựng văn bản QPPL', '', '', NULL, '',
     N'Kích hoạt', NULL, 'fas fa-landmark'
 ),
 (
@@ -912,7 +912,7 @@ VALUES
     '11111111-1111-1111-1111-111111111111',
     @Now,
     1, 'Group', 1, 'VanBanQPPL.DangKyXayDung', '20000000-0000-0000-0000-000000000020',
-    N'Đăng ký xây dựng', '', '', NULL, '',
+    N'Đăng ký văn bản', '', '', NULL, '',
     N'Kích hoạt', NULL, NULL
 ),
 (
@@ -922,7 +922,7 @@ VALUES
     '11111111-1111-1111-1111-111111111111',
     @Now,
     1, 'Detail', 2, 'VanBanQPPL.DangKyXayDung.DanhSachDangKy', '20000000-0000-0000-0000-000000000021',
-    N'Danh sách đăng ký', 'DangPhatTrien', 'DangKyXayDung', NULL, 'DangPhatTrien',
+    N'Đăng ký văn bản', 'DangKyVanBan', 'Index', NULL, 'HoSoVanBans',
     N'Kích hoạt', NULL, NULL
 ),
 (
@@ -961,8 +961,8 @@ VALUES
     @Now,
     '11111111-1111-1111-1111-111111111111',
     @Now,
-    1, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.DanhSachVanBan', '20000000-0000-0000-0000-000000000025',
-    N'Danh sách văn bản', 'HoSoVanBan', 'Index', NULL, 'HoSoVanBans',
+    1, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.SoanThaoVanBan', '20000000-0000-0000-0000-000000000025',
+    N'Soạn thảo văn bản', 'HoSoVanBan', 'Index', NULL, 'HoSoVanBans',
     N'Kích hoạt', NULL, NULL
 ),
 (
@@ -971,8 +971,8 @@ VALUES
     @Now,
     '11111111-1111-1111-1111-111111111111',
     @Now,
-    2, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.XayDungVanBan', '20000000-0000-0000-0000-000000000025',
-    N'Xây dựng văn bản', 'DangPhatTrien', 'XayDungVanBan', NULL, 'DangPhatTrien',
+    2, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.GopYDanhGia', '20000000-0000-0000-0000-000000000025',
+    N'Góp ý đánh giá', 'DangPhatTrien', 'GopYDanhGia', NULL, 'DangPhatTrien',
     N'Kích hoạt', NULL, NULL
 ),
 (
@@ -981,8 +981,48 @@ VALUES
     @Now,
     '11111111-1111-1111-1111-111111111111',
     @Now,
-    3, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.GiaHanXayDung', '20000000-0000-0000-0000-000000000025',
-    N'Gia hạn thời gian xây dựng', 'DangPhatTrien', 'GiaHanXayDung', NULL, 'DangPhatTrien',
+    3, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.DuThaoVanBan', '20000000-0000-0000-0000-000000000025',
+    N'Xét duyệt soạn thảo', 'DuThaoVanBan', 'Index', NULL, 'HoSoVanBans',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000043',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    4, 'Group', 2, 'VanBanQPPL.XayDungVanBan.DuThaoVanBan', '20000000-0000-0000-0000-000000000025',
+    N'Dự thảo văn bản', '', '', NULL, '',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000044',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    1, 'Detail', 3, 'VanBanQPPL.XayDungVanBan.DuThaoVanBan.DanhSachVanBanDuThao', '20000000-0000-0000-0000-000000000043',
+    N'Danh sách văn bản dự thảo', 'DuThaoVanBan', 'Index', NULL, 'HoSoVanBans',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000045',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    2, 'Detail', 3, 'VanBanQPPL.XayDungVanBan.DuThaoVanBan.XetDuyetDuThao', '20000000-0000-0000-0000-000000000043',
+    N'Xét duyệt dự thảo', 'XetDuyetDuThao', 'Index', NULL, 'HoSoVanBans',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000046',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    3, 'Detail', 3, 'VanBanQPPL.XayDungVanBan.DuThaoVanBan.PheDuyetDuThao', '20000000-0000-0000-0000-000000000043',
+    N'Phê duyệt dự thảo', 'PheDuyetDuThao', 'Index', NULL, 'HoSoVanBans',
     N'Kích hoạt', NULL, NULL
 ),
 (
@@ -991,8 +1031,8 @@ VALUES
     @Now,
     '11111111-1111-1111-1111-111111111111',
     @Now,
-    4, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.XetDuyetVanBan', '20000000-0000-0000-0000-000000000025',
-    N'Xét duyệt văn bản', 'DangPhatTrien', 'XetDuyetVanBan', NULL, 'DangPhatTrien',
+    3, 'Group', 1, 'VanBanQPPL.DanhGiaVanBan', '20000000-0000-0000-0000-000000000020',
+    N'Đánh giá văn bản', '', '', NULL, '',
     N'Kích hoạt', NULL, NULL
 ),
 (
@@ -1001,8 +1041,88 @@ VALUES
     @Now,
     '11111111-1111-1111-1111-111111111111',
     @Now,
-    5, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.PheDuyetVanBan', '20000000-0000-0000-0000-000000000025',
-    N'Phê duyệt văn bản', 'DangPhatTrien', 'PheDuyetVanBan', NULL, 'DangPhatTrien',
+    1, 'Detail', 2, 'VanBanQPPL.DanhGiaVanBan.DanhSachVanBan', '20000000-0000-0000-0000-000000000029',
+    N'Danh sách văn bản', 'DanhGiaVanBan', 'Index', NULL, 'HoSoVanBans',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000035',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    2, 'Detail', 2, 'VanBanQPPL.DanhGiaVanBan.XetDuyetVanBan', '20000000-0000-0000-0000-000000000029',
+    N'Xét duyệt văn bản', 'XetDuyetVanBan', 'Index', NULL, 'HoSoVanBans',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000036',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    3, 'Detail', 2, 'VanBanQPPL.DanhGiaVanBan.PheDuyetVanBan', '20000000-0000-0000-0000-000000000029',
+    N'Phê duyệt văn bản', 'PheDuyetVanBan', 'Index', NULL, 'HoSoVanBans',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000037',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    4, 'Group', 1, 'VanBanQPPL.BanHanhVanBan', '20000000-0000-0000-0000-000000000020',
+    N'Ban hành văn bản', '', '', NULL, '',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000038',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    1, 'Detail', 2, 'VanBanQPPL.BanHanhVanBan.DanhSachVanBan', '20000000-0000-0000-0000-000000000037',
+    N'Danh sách văn bản', 'VanBanPhapLuat', 'Index', NULL, 'VanBanPhapLuat',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000039',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    2, 'Detail', 2, 'VanBanQPPL.BanHanhVanBan.XetDuyetVanBan', '20000000-0000-0000-0000-000000000037',
+    N'Xét duyệt văn bản', 'DangPhatTrien', 'XetDuyetBanHanhVanBan', NULL, 'DangPhatTrien',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000040',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    3, 'Detail', 2, 'VanBanQPPL.BanHanhVanBan.BanHanhVanBan', '20000000-0000-0000-0000-000000000037',
+    N'Ban hành văn bản', 'DangPhatTrien', 'BanHanhVanBan', NULL, 'DangPhatTrien',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000041',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    5, 'Group', 1, 'VanBanQPPL.GiaHanThoiGianXayDung', '20000000-0000-0000-0000-000000000020',
+    N'Gia hạn thời gian xây dựng', '', '', NULL, '',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000042',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    1, 'Detail', 2, 'VanBanQPPL.GiaHanThoiGianXayDung.DanhSachVanBan', '20000000-0000-0000-0000-000000000041',
+    N'Danh sách văn bản', 'DangPhatTrien', 'DanhSachGiaHanXayDung', NULL, 'DangPhatTrien',
     N'Kích hoạt', NULL, NULL
 ),
 (

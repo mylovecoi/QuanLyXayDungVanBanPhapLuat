@@ -1,0 +1,4 @@
+Restore point before workflow schema changes
+Date: 2026-07-24
+Commit: 43b07e55935ef431215b044a34141ace6303baf9
+Purpose: Baseline before adding flexible soan thao workflow tables

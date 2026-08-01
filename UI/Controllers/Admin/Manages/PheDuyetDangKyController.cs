@@ -31,7 +31,8 @@ namespace UI.Controllers.Admin.Manages
                 PageSize,
                 PageCurrent,
                 true,
-                new[] { "CHUYEN_PHE_DUYET", "NHAN_VA_CHUYEN_PHE_DUYET" });
+                new[] { "CHUYEN_PHE_DUYET", "NHAN_VA_CHUYEN_PHE_DUYET" },
+                "DangKy");
 
             if (model.Status == "error")
             {

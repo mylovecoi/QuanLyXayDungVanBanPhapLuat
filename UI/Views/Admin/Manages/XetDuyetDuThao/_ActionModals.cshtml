@@ -1,0 +1,601 @@
+@{
+    var routePrefix = ViewData["RoutePrefix"]?.ToString() ?? "/Manages/XetDuyetDuThao";
+}
+
+<div class="modal fade" id="NhanHoSoDanhGia_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Nhận hồ sơ
+                    <span class="d-block text-muted pt-2 font-size-sm">Xác nhận tiếp nhận hồ sơ chờ xử lý</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form id="frm_nhanhoso_danhgia">
+                <div class="modal-body">
+                    <input type="hidden" id="NhanHoSoDanhGiaId" />
+                    <div class="form-group">
+                        <label class="font-weight-bold">Nội dung tiếp nhận</label>
+                        <textarea id="NoiDungNhanHoSoDanhGia" class="form-control" rows="3" placeholder="Nhập nội dung tiếp nhận hồ sơ nếu cần"></textarea>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold">Ghi chú</label>
+                        <textarea id="GhiChuNhanHoSoDanhGia" class="form-control" rows="2" placeholder="Thông tin bổ sung nếu cần"></textarea>
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-success font-weight-bold" onclick="SubmitNhanHoSoDanhGia()">Nhận hồ sơ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="TraLaiDanhGia_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Trả lại hồ sơ
+                    <span class="d-block text-muted pt-2 font-size-sm">Nhập lý do để trả hồ sơ về bước trước</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form id="frm_tralai_danhgia">
+                <div class="modal-body">
+                    <input type="hidden" id="TraLaiDanhGiaId" />
+                    <div class="form-group">
+                        <label class="font-weight-bold">Lý do trả lại <span class="text-danger">*</span></label>
+                        <textarea id="LyDoTraLaiDanhGia" class="form-control" rows="4" placeholder="Nhập rõ lý do trả lại hồ sơ"></textarea>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold">Ghi chú</label>
+                        <textarea id="GhiChuTraLaiDanhGia" class="form-control" rows="2" placeholder="Thông tin bổ sung nếu cần"></textarea>
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-danger font-weight-bold" onclick="SubmitTraLaiThamDinh()">Trả lại hồ sơ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ChuyenDanhGia_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Chuyển hồ sơ
+                    <span class="d-block text-muted pt-2 font-size-sm">Cập nhật thông tin trước khi chuyển hồ sơ sang màn hình thẩm định</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form id="frm_chuyen_danhgia">
+                <div class="modal-body">
+                    <input type="hidden" id="ChuyenDanhGiaId" />
+                    <div class="form-group">
+                        <label class="font-weight-bold">Thời gian chuyển <span class="text-danger">*</span></label>
+                        <input type="datetime-local" id="NgayChuyenDanhGia" class="form-control" />
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold">Thời hạn xử lý <span class="text-danger">*</span></label>
+                        <input type="date" id="HanXuLyChuyenDanhGia" class="form-control" />
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-warning font-weight-bold" onclick="SubmitChuyenDanhGia()">Chuyển hồ sơ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ChuyenPheDuyet_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Chuyển phê duyệt
+                    <span class="d-block text-muted pt-2 font-size-sm">Cập nhật thông tin trước khi chuyển hồ sơ sang bước phê duyệt văn bản</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form id="frm_chuyen_pheduyet">
+                <div class="modal-body">
+                    <input type="hidden" id="ChuyenPheDuyetId" />
+                    <div class="form-group">
+                        <label class="font-weight-bold">Thời gian chuyển <span class="text-danger">*</span></label>
+                        <input type="datetime-local" id="NgayChuyenPheDuyet" class="form-control" />
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold">Thời hạn xử lý <span class="text-danger">*</span></label>
+                        <input type="date" id="HanXuLyChuyenPheDuyet" class="form-control" />
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-warning font-weight-bold" onclick="SubmitChuyenPheDuyet()">Chuyển phê duyệt</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="ChuyenBanHanh_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Chuyển ban hành
+                    <span class="d-block text-muted pt-2 font-size-sm">Cập nhật thông tin trước khi chuyển hồ sơ sang bước ban hành văn bản</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form id="frm_chuyen_banhanh">
+                <div class="modal-body">
+                    <input type="hidden" id="ChuyenBanHanhId" />
+                    <div class="form-group">
+                        <label class="font-weight-bold">Thời gian chuyển <span class="text-danger">*</span></label>
+                        <input type="datetime-local" id="NgayChuyenBanHanh" class="form-control" />
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold">Thời hạn xử lý <span class="text-danger">*</span></label>
+                        <input type="date" id="HanXuLyChuyenBanHanh" class="form-control" />
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-warning font-weight-bold" onclick="SubmitChuyenBanHanh()">Hoàn thành/Chuyển ban hành</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function OpenThamDinhVanBan(id) {
+        if ('@routePrefix' === '/Manages/XetDuyetVanBan') {
+            window.location.href = '/Manages/XetDuyetVanBan/WorkflowPage?id=' + id;
+            return;
+        }
+
+        OpenWorkflowAction(id);
+    }
+
+    function OpenTraLaiThamDinh(id) {
+        $('#TraLaiDanhGiaId').val(id);
+        $('#LyDoTraLaiDanhGia').val('');
+        $('#GhiChuTraLaiDanhGia').val('');
+        $('#TraLaiDanhGia_Modal').modal('show');
+    }
+
+    function SubmitTraLaiThamDinh() {
+        if ('@routePrefix' === '/Manages/XetDuyetVanBan') {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+            const id = $('#TraLaiDanhGiaId').val();
+            const lyDoTraLai = $('#LyDoTraLaiDanhGia').val();
+            const ghiChu = $('#GhiChuTraLaiDanhGia').val();
+
+            if (!lyDoTraLai || !lyDoTraLai.trim()) {
+                toastr.warning('Bạn cần nhập lý do trả lại hồ sơ.', 'Cảnh báo!');
+                return;
+            }
+
+            $.ajax({
+                url: '/Manages/XetDuyetVanBan/TraLaiHoSo',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: csrfToken,
+                    id: id,
+                    lyDoTraLai: lyDoTraLai,
+                    ghiChu: ghiChu
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        toastr.success(response.message, 'Thành công!');
+                        $('#TraLaiDanhGia_Modal').modal('hide');
+                        window.location.reload();
+                        return;
+                    }
+
+                    toastr.error(response.message, 'Lỗi!');
+                },
+                error: function () {
+                    toastr.error('Không thể trả lại hồ sơ!', 'Lỗi!');
+                }
+            });
+            return;
+        }
+
+        SubmitTraLaiDanhGia();
+    }
+
+    function toDateInputValue(date) {
+        const pad = (value) => value.toString().padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    }
+
+    function toDateTimeLocalValue(date) {
+        const pad = (value) => value.toString().padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function OpenNhanHoSoDanhGia(id) {
+        $('#NhanHoSoDanhGiaId').val(id);
+        $('#NoiDungNhanHoSoDanhGia').val('');
+        $('#GhiChuNhanHoSoDanhGia').val('');
+        $('#NhanHoSoDanhGia_Modal').modal('show');
+    }
+
+    function SubmitNhanHoSoDanhGia() {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        const id = $('#NhanHoSoDanhGiaId').val();
+        const noiDungXuLy = $('#NoiDungNhanHoSoDanhGia').val();
+        const ghiChu = $('#GhiChuNhanHoSoDanhGia').val();
+
+        $.ajax({
+            url: '@($"{routePrefix}/NhanHoSo")',
+            type: 'POST',
+            data: {
+                __RequestVerificationToken: csrfToken,
+                id: id,
+                actionType: 'NHAN_HO_SO',
+                noiDungXuLy: noiDungXuLy,
+                ghiChu: ghiChu
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    toastr.success(response.message, 'Thành công!');
+                    $('#NhanHoSoDanhGia_Modal').modal('hide');
+                    if ('@routePrefix' === '/Manages/DanhGiaVanBan') {
+                        window.setTimeout(function () {
+                            window.location.href = '/Manages/XetDuyetVanBan';
+                        }, 300);
+                    } else {
+                        window.location.reload();
+                    }
+                    return;
+                }
+
+                toastr.error(response.message, 'Lỗi!');
+            },
+            error: function () {
+                toastr.error('Không thể nhận hồ sơ!', 'Lỗi!');
+            }
+        });
+    }
+
+    function OpenTraLaiDanhGia(id) {
+        $('#TraLaiDanhGiaId').val(id);
+        $('#LyDoTraLaiDanhGia').val('');
+        $('#GhiChuTraLaiDanhGia').val('');
+        $('#TraLaiDanhGia_Modal').modal('show');
+    }
+
+    function SubmitTraLaiDanhGia() {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        const id = $('#TraLaiDanhGiaId').val();
+        const lyDoTraLai = $('#LyDoTraLaiDanhGia').val();
+        const ghiChu = $('#GhiChuTraLaiDanhGia').val();
+
+        if (!lyDoTraLai || !lyDoTraLai.trim()) {
+            toastr.warning('Bạn cần nhập lý do trả lại hồ sơ.', 'Cảnh báo!');
+            return;
+        }
+
+        $.ajax({
+            url: '@($"{routePrefix}/TraLaiHoSo")',
+            type: 'POST',
+            data: {
+                __RequestVerificationToken: csrfToken,
+                id: id,
+                lyDoTraLai: lyDoTraLai,
+                ghiChu: ghiChu
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    toastr.success(response.message, 'Thành công!');
+                    $('#TraLaiDanhGia_Modal').modal('hide');
+                    window.location.reload();
+                    return;
+                }
+
+                toastr.error(response.message, 'Lỗi!');
+            },
+            error: function () {
+                toastr.error('Không thể trả lại hồ sơ!', 'Lỗi!');
+            }
+        });
+    }
+
+    function ChuyenXetDuyetDanhGia(id, suggestedDeadline) {
+        if ('@routePrefix' === '/Manages/DanhGiaVanBan') {
+            $('#ChuyenDanhGiaId').val(id);
+            $.ajax({
+                url: '/Manages/DanhGiaVanBan/ChuyenDanhGiaModel',
+                type: 'GET',
+                data: { id: id },
+                success: function (response) {
+                    const now = new Date();
+                    const defaultDeadline = new Date(now);
+                    defaultDeadline.setDate(defaultDeadline.getDate() + 7);
+
+                    if (response.status === 'success' && response.data) {
+                        const model = response.data;
+                        $('#NgayChuyenDanhGia').val(model.ngayXuLy
+                            ? toDateTimeLocalValue(new Date(model.ngayXuLy))
+                            : toDateTimeLocalValue(now));
+                        $('#HanXuLyChuyenDanhGia').val(model.hanXuLy
+                            ? toDateInputValue(new Date(model.hanXuLy))
+                            : (suggestedDeadline || toDateInputValue(defaultDeadline)));
+                    } else {
+                        $('#NgayChuyenDanhGia').val(toDateTimeLocalValue(now));
+                        $('#HanXuLyChuyenDanhGia').val(suggestedDeadline || toDateInputValue(defaultDeadline));
+                    }
+
+                    $('#ChuyenDanhGia_Modal').modal('show');
+                },
+                error: function () {
+                    const now = new Date();
+                    const defaultDeadline = new Date(now);
+                    defaultDeadline.setDate(defaultDeadline.getDate() + 7);
+                    $('#NgayChuyenDanhGia').val(toDateTimeLocalValue(now));
+                    $('#HanXuLyChuyenDanhGia').val(suggestedDeadline || toDateInputValue(defaultDeadline));
+                    $('#ChuyenDanhGia_Modal').modal('show');
+                }
+            });
+            return;
+        }
+
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '@($"{routePrefix}/NhanHoSo")',
+            type: 'POST',
+            data: {
+                __RequestVerificationToken: csrfToken,
+                id: id,
+                actionType: 'CHUYEN_XET_DUYET_DANH_GIA'
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    if ('@routePrefix' === '/Manages/DanhGiaVanBan') {
+                        toastr.success(response.message || 'Chuyển hồ sơ thành công!', 'Thành công!');
+                        window.location.reload();
+                        return;
+                    }
+
+                    OpenThamDinhVanBan(id);
+                    return;
+                }
+
+                toastr.error(response.message, 'Lỗi!');
+            },
+            error: function () {
+                toastr.error('Không thể chuyển hồ sơ sang màn hình thẩm định văn bản!', 'Lỗi!');
+            }
+        });
+    }
+
+    function SubmitChuyenDanhGia() {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        const id = $('#ChuyenDanhGiaId').val();
+        const ngayXuLy = $('#NgayChuyenDanhGia').val();
+        const hanXuLy = $('#HanXuLyChuyenDanhGia').val();
+
+        if (!ngayXuLy) {
+            toastr.warning('Bạn cần nhập thời gian chuyển hồ sơ.', 'Cảnh báo!');
+            return;
+        }
+
+        if (!hanXuLy) {
+            toastr.warning('Bạn cần nhập thời hạn xử lý.', 'Cảnh báo!');
+            return;
+        }
+
+        $.ajax({
+            url: '@($"{routePrefix}/NhanHoSo")',
+            type: 'POST',
+            data: {
+                __RequestVerificationToken: csrfToken,
+                id: id,
+                actionType: 'CHUYEN_XET_DUYET_DANH_GIA',
+                ngayXuLy: ngayXuLy,
+                hanXuLy: hanXuLy
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    toastr.success(response.message || 'Chuyển hồ sơ thành công!', 'Thành công!');
+                    $('#ChuyenDanhGia_Modal').modal('hide');
+                    window.location.reload();
+                    return;
+                }
+
+                toastr.error(response.message, 'Lỗi!');
+            },
+            error: function () {
+                toastr.error('Không thể chuyển hồ sơ sang màn hình thẩm định văn bản!', 'Lỗi!');
+            }
+        });
+    }
+
+    function OpenChuyenPheDuyetVanBan(id, suggestedDeadline) {
+        if ('@routePrefix' !== '/Manages/XetDuyetVanBan') {
+            return;
+        }
+
+        $('#ChuyenPheDuyetId').val(id);
+        $.ajax({
+            url: '/Manages/XetDuyetVanBan/ChuyenPheDuyetModel',
+            type: 'GET',
+            data: { id: id },
+            success: function (response) {
+                const now = new Date();
+                const defaultDeadline = new Date(now);
+                defaultDeadline.setDate(defaultDeadline.getDate() + 7);
+
+                if (response.status === 'success' && response.data) {
+                    const model = response.data;
+                    $('#NgayChuyenPheDuyet').val(model.ngayXuLy
+                        ? toDateTimeLocalValue(new Date(model.ngayXuLy))
+                        : toDateTimeLocalValue(now));
+                    $('#HanXuLyChuyenPheDuyet').val(model.hanXuLy
+                        ? toDateInputValue(new Date(model.hanXuLy))
+                        : (suggestedDeadline || toDateInputValue(defaultDeadline)));
+                } else {
+                    toastr.error(response.message || 'Không thể khởi tạo dữ liệu chuyển phê duyệt.', 'Lỗi!');
+                    return;
+                }
+
+                $('#ChuyenPheDuyet_Modal').modal('show');
+            },
+            error: function () {
+                const now = new Date();
+                const defaultDeadline = new Date(now);
+                defaultDeadline.setDate(defaultDeadline.getDate() + 7);
+                $('#NgayChuyenPheDuyet').val(toDateTimeLocalValue(now));
+                $('#HanXuLyChuyenPheDuyet').val(suggestedDeadline || toDateInputValue(defaultDeadline));
+                $('#ChuyenPheDuyet_Modal').modal('show');
+            }
+        });
+    }
+
+    function SubmitChuyenPheDuyet() {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        const id = $('#ChuyenPheDuyetId').val();
+        const ngayXuLy = $('#NgayChuyenPheDuyet').val();
+        const hanXuLy = $('#HanXuLyChuyenPheDuyet').val();
+
+        if (!ngayXuLy) {
+            toastr.warning('Bạn cần nhập thời gian chuyển hồ sơ.', 'Cảnh báo!');
+            return;
+        }
+
+        if (!hanXuLy) {
+            toastr.warning('Bạn cần nhập thời hạn xử lý.', 'Cảnh báo!');
+            return;
+        }
+
+        $.ajax({
+            url: '/Manages/XetDuyetVanBan/NhanHoSo',
+            type: 'POST',
+            data: {
+                __RequestVerificationToken: csrfToken,
+                id: id,
+                actionType: 'CHUYEN_PHE_DUYET',
+                ngayXuLy: ngayXuLy,
+                hanXuLy: hanXuLy
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    toastr.success(response.message || 'Chuyển phê duyệt thành công!', 'Thành công!');
+                    $('#ChuyenPheDuyet_Modal').modal('hide');
+                    window.location.reload();
+                    return;
+                }
+
+                toastr.error(response.message, 'Lỗi!');
+            },
+            error: function () {
+                toastr.error('Không thể chuyển hồ sơ sang bước phê duyệt văn bản!', 'Lỗi!');
+            }
+        });
+    }
+
+    function OpenChuyenBanHanhVanBan(id, suggestedDeadline) {
+        if ('@routePrefix' !== '/Manages/PheDuyetVanBan') {
+            return;
+        }
+
+        $('#ChuyenBanHanhId').val(id);
+        $.ajax({
+            url: '/Manages/PheDuyetVanBan/ChuyenBanHanhModel',
+            type: 'GET',
+            data: { id: id },
+            success: function (response) {
+                const now = new Date();
+                const defaultDeadline = new Date(now);
+                defaultDeadline.setDate(defaultDeadline.getDate() + 7);
+
+                if (response.status === 'success' && response.data) {
+                    const model = response.data;
+                    $('#NgayChuyenBanHanh').val(model.ngayXuLy
+                        ? toDateTimeLocalValue(new Date(model.ngayXuLy))
+                        : toDateTimeLocalValue(now));
+                    $('#HanXuLyChuyenBanHanh').val(model.hanXuLy
+                        ? toDateInputValue(new Date(model.hanXuLy))
+                        : (suggestedDeadline || toDateInputValue(defaultDeadline)));
+                } else {
+                    toastr.error(response.message || 'Không thể khởi tạo dữ liệu chuyển ban hành.', 'Lỗi!');
+                    return;
+                }
+
+                $('#ChuyenBanHanh_Modal').modal('show');
+            },
+            error: function () {
+                const now = new Date();
+                const defaultDeadline = new Date(now);
+                defaultDeadline.setDate(defaultDeadline.getDate() + 7);
+                $('#NgayChuyenBanHanh').val(toDateTimeLocalValue(now));
+                $('#HanXuLyChuyenBanHanh').val(suggestedDeadline || toDateInputValue(defaultDeadline));
+                $('#ChuyenBanHanh_Modal').modal('show');
+            }
+        });
+    }
+
+    function SubmitChuyenBanHanh() {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        const id = $('#ChuyenBanHanhId').val();
+        const ngayXuLy = $('#NgayChuyenBanHanh').val();
+        const hanXuLy = $('#HanXuLyChuyenBanHanh').val();
+
+        if (!ngayXuLy) {
+            toastr.warning('Bạn cần nhập thời gian chuyển hồ sơ.', 'Cảnh báo!');
+            return;
+        }
+
+        if (!hanXuLy) {
+            toastr.warning('Bạn cần nhập thời hạn xử lý.', 'Cảnh báo!');
+            return;
+        }
+
+        $.ajax({
+            url: '/Manages/PheDuyetVanBan/NhanHoSo',
+            type: 'POST',
+            data: {
+                __RequestVerificationToken: csrfToken,
+                id: id,
+                actionType: 'CHUYEN_BAN_HANH',
+                ngayXuLy: ngayXuLy,
+                hanXuLy: hanXuLy
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    toastr.success(response.message || 'Chuyển ban hành thành công!', 'Thành công!');
+                    $('#ChuyenBanHanh_Modal').modal('hide');
+                    window.location.reload();
+                    return;
+                }
+
+                toastr.error(response.message, 'Lỗi!');
+            },
+            error: function () {
+                toastr.error('Không thể chuyển hồ sơ sang bước ban hành văn bản!', 'Lỗi!');
+            }
+        });
+    }
+</script>

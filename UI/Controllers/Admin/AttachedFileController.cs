@@ -21,6 +21,7 @@ namespace UI.Controllers.Admin.Manages
             PageCurrent = PageCurrent < 1 ? 1 : PageCurrent;
             var model = await _attachedFileService.GetAttachedFilesAsync(GroupId, TableName, TimKiem, PageSize, PageCurrent);
             ViewData["PageInfo"] = FuntionGlobal.GetPageInfo(model.TotalRecord, TimKiem, PageSize, PageCurrent);
+            ViewData["AttachedFileTableName"] = TableName;
             return PartialView("~/Views/Admin/AttachedFile/Index.cshtml", model.Data as List<AttachedFile> ?? new List<AttachedFile>());
         }
 

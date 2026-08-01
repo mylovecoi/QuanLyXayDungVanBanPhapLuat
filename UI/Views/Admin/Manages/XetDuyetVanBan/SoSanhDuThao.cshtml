@@ -1,0 +1,256 @@
+@using Services.Manages
+@model HoSoVanBanDraftCompareModel
+
+@{
+    ViewData["Title"] ??= "So sánh dự thảo";
+    var groupedFileOptions = Model.FileOptions
+        .GroupBy(x => string.IsNullOrWhiteSpace(x.NguonHienThi) ? "Dự thảo" : x.NguonHienThi)
+        .ToList();
+}
+
+<style>
+    .compare-shell { display:grid; gap:20px; }
+    .compare-header-card, .compare-diff-card {
+        border: 1px solid #e7ebf3;
+        border-radius: 16px;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+        box-shadow: 0 10px 26px rgba(27, 39, 94, 0.06);
+    }
+    .compare-header-card { padding: 22px; }
+    .compare-diff-card { padding: 0; overflow: hidden; }
+    .compare-meta { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; margin-top:18px; }
+    .compare-meta-item { padding:14px 16px; border-radius:12px; background:#f8faff; border:1px solid #edf1f7; }
+    .compare-meta-label { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#7e8299; margin-bottom:6px; font-weight:700; }
+    .compare-meta-value { font-size:15px; color:#181c32; }
+    .compare-toolbar { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .compare-form-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:16px; margin-top:18px; }
+    .compare-summary { display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap:14px; margin-top:18px; }
+    .compare-summary-item { padding:14px 16px; border-radius:12px; border:1px solid #edf1f7; background:#fff; }
+    .compare-summary-item.same { background:#f8fafc; }
+    .compare-summary-item.added { background:#f0fdf4; }
+    .compare-summary-item.removed { background:#fff1f2; }
+    .compare-summary-item.changed { background:#fffbeb; }
+    .compare-summary-item.total { background:#eef4ff; }
+    .compare-summary-number { font-size:24px; font-weight:800; color:#181c32; }
+    .compare-summary-label { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#7e8299; margin-bottom:8px; font-weight:700; }
+    .compare-table { width:100%; border-collapse: collapse; }
+    .compare-table th, .compare-table td { border-bottom: 1px solid #eef2f7; padding: 12px 14px; vertical-align: top; }
+    .compare-table th { background:#f5f8fd; color:#3f4254; font-weight:700; }
+    .compare-line-same { background:#ffffff; }
+    .compare-line-changed { background:#fff8dd; }
+    .compare-line-added { background:#e8fff3; }
+    .compare-line-removed { background:#fff5f8; }
+    .compare-text { white-space: pre-wrap; word-break: break-word; font-size:14px; color:#181c32; }
+    .compare-inline-added {
+        background: #c9f7d7;
+        color: #0d6832;
+        border-radius: 6px;
+        padding: 1px 3px;
+        font-weight: 700;
+    }
+    .compare-inline-removed {
+        background: #ffe2e5;
+        color: #b42318;
+        border-radius: 6px;
+        padding: 1px 3px;
+        font-weight: 700;
+    }
+    .compare-inline-changed {
+        background: #fff0b3;
+        color: #7a4f01;
+        border-radius: 6px;
+        padding: 1px 3px;
+        font-weight: 700;
+    }
+    .compare-inline-empty {
+        color: #7e8299;
+        font-style: italic;
+    }
+    @@media (max-width: 991.98px) {
+        .compare-meta, .compare-form-grid, .compare-summary { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="card card-custom">
+    <div class="card-header flex-wrap border-0 pt-6 pb-0">
+        <div class="card-title">
+            <h3 class="card-label">
+                <b>SO SÁNH DỰ THẢO</b>
+                <span class="d-block text-muted pt-2 font-size-sm">Mở các file dự thảo đã gửi và đối chiếu nội dung phục vụ thẩm định.</span>
+            </h3>
+        </div>
+        <div class="card-toolbar">
+            <a href="/Manages/XetDuyetVanBan/ExportSoSanhDuThaoWord?id=@Model.HoSoVanBanId&sourceFileId=@Model.SourceFileId&targetFileId=@Model.TargetFileId" class="btn btn-success font-weight-bold mr-2">Xuất Word</a>
+            <a href="/Manages/XetDuyetVanBan/ExportSoSanhDuThaoPdf?id=@Model.HoSoVanBanId&sourceFileId=@Model.SourceFileId&targetFileId=@Model.TargetFileId" target="_blank" class="btn btn-danger font-weight-bold mr-2">Xuất PDF</a>
+            <a href="/Manages/XetDuyetVanBan/WorkflowPage?id=@Model.HoSoVanBanId" class="btn btn-light-info font-weight-bold mr-2">Quay lại xử lý</a>
+            <a href="/Manages/XetDuyetVanBan" class="btn btn-light-primary font-weight-bold">Quay lại danh sách</a>
+        </div>
+    </div>
+    <div class="card-body pt-0">
+        <hr />
+
+        <div class="compare-shell">
+            <div class="compare-header-card">
+                <div class="compare-toolbar">
+                    <div>
+                        <h4 class="mb-2 text-dark font-weight-bold">@Model.TenHoSo</h4>
+                        <div class="text-muted">Chọn 2 file dự thảo `.docx` để so sánh nội dung theo từng dòng văn bản.</div>
+                    </div>
+                </div>
+
+                <div class="compare-meta">
+                    <div class="compare-meta-item">
+                        <div class="compare-meta-label">Loại văn bản</div>
+                        <div class="compare-meta-value">@(string.IsNullOrWhiteSpace(Model.TenLoaiVanBan) ? "-" : Model.TenLoaiVanBan)</div>
+                    </div>
+                    <div class="compare-meta-item">
+                        <div class="compare-meta-label">Quy trình</div>
+                        <div class="compare-meta-value">@(string.IsNullOrWhiteSpace(Model.TenQuyTrinh) ? "-" : Model.TenQuyTrinh)</div>
+                    </div>
+                    <div class="compare-meta-item">
+                        <div class="compare-meta-label">Số file dự thảo</div>
+                        <div class="compare-meta-value">@Model.FileOptions.Count</div>
+                    </div>
+                </div>
+
+                @if (Model.CoTheSoSanh && Model.DiffRows.Any())
+                {
+                    <div class="compare-summary">
+                        <div class="compare-summary-item total">
+                            <div class="compare-summary-label">Tổng số dòng</div>
+                            <div class="compare-summary-number">@Model.TongSoDong</div>
+                        </div>
+                        <div class="compare-summary-item same">
+                            <div class="compare-summary-label">Giống nhau</div>
+                            <div class="compare-summary-number">@Model.SoDongGiongNhau</div>
+                        </div>
+                        <div class="compare-summary-item added">
+                            <div class="compare-summary-label">Thêm</div>
+                            <div class="compare-summary-number">@Model.SoDongThem</div>
+                        </div>
+                        <div class="compare-summary-item removed">
+                            <div class="compare-summary-label">Xóa</div>
+                            <div class="compare-summary-number">@Model.SoDongXoa</div>
+                        </div>
+                        <div class="compare-summary-item changed">
+                            <div class="compare-summary-label">Sửa</div>
+                            <div class="compare-summary-number">@Model.SoDongSua</div>
+                        </div>
+                    </div>
+                }
+
+                <form method="get" action="/Manages/XetDuyetVanBan/SoSanhDuThao" class="mt-6">
+                    <input type="hidden" name="id" value="@Model.HoSoVanBanId" />
+                    <div class="compare-form-grid">
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold">Chọn file dự thảo 1</label>
+                            <select name="sourceFileId" class="form-control">
+                                @foreach (var group in groupedFileOptions)
+                                {
+                                    <optgroup label="@group.Key">
+                                        @foreach (var item in group)
+                                        {
+                                            <option value="@item.FileId" selected="@(Model.SourceFileId == item.FileId ? "selected" : null)">@item.NhanHienThi</option>
+                                        }
+                                    </optgroup>
+                                }
+                            </select>
+                            <span class="form-text text-muted">Danh sách lấy từ các file dự thảo đã upload của hồ sơ.</span>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold">Chọn file dự thảo 2</label>
+                            <select name="targetFileId" class="form-control">
+                                @foreach (var group in groupedFileOptions)
+                                {
+                                    <optgroup label="@group.Key">
+                                        @foreach (var item in group)
+                                        {
+                                            <option value="@item.FileId" selected="@(Model.TargetFileId == item.FileId ? "selected" : null)">@item.NhanHienThi</option>
+                                        }
+                                    </optgroup>
+                                }
+                            </select>
+                            <span class="form-text text-muted">Bạn có thể chọn ví dụ: Dự thảo lần 1 và Dự thảo lần 3 để đối chiếu.</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary font-weight-bold">So sánh văn bản</button>
+                    </div>
+                </form>
+
+                @if (!string.IsNullOrWhiteSpace(Model.CanhBao))
+                {
+                    <div class="alert alert-warning mt-6 mb-0">@Model.CanhBao</div>
+                }
+            </div>
+
+            @if (Model.SourceFile != null && Model.TargetFile != null)
+            {
+                <div class="compare-header-card">
+                    <div class="row">
+                        <div class="col-xl-6">
+                            <div class="compare-meta-item h-100">
+                                <div class="compare-meta-label">File gốc</div>
+                                <div class="compare-meta-value font-weight-bold">@Model.SourceFile.FileName</div>
+                                <div class="text-muted mt-2">@Model.SourceFile.NguonHienThi</div>
+                                @if (!string.IsNullOrWhiteSpace(Model.SourceFile.PhanLoaiDuThao))
+                                {
+                                    <div class="text-info mt-1">@Model.SourceFile.PhanLoaiDuThao</div>
+                                }
+                                <div class="mt-3">
+                                    <a href="/Manages/Download/AttachedFile?id=@Model.SourceFile.FileId" target="_blank" class="btn btn-light-primary btn-sm">Mở file gốc</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-6">
+                            <div class="compare-meta-item h-100">
+                                <div class="compare-meta-label">File so sánh</div>
+                                <div class="compare-meta-value font-weight-bold">@Model.TargetFile.FileName</div>
+                                <div class="text-muted mt-2">@Model.TargetFile.NguonHienThi</div>
+                                @if (!string.IsNullOrWhiteSpace(Model.TargetFile.PhanLoaiDuThao))
+                                {
+                                    <div class="text-info mt-1">@Model.TargetFile.PhanLoaiDuThao</div>
+                                }
+                                <div class="mt-3">
+                                    <a href="/Manages/Download/AttachedFile?id=@Model.TargetFile.FileId" target="_blank" class="btn btn-light-primary btn-sm">Mở file so sánh</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (Model.CoTheSoSanh && Model.DiffRows.Any())
+            {
+                <div class="compare-diff-card">
+                    <table class="compare-table">
+                        <thead>
+                            <tr>
+                                <th style="width:80px;">Dòng</th>
+                                <th style="width:50%;">Văn bản gốc</th>
+                                <th style="width:50%;">Văn bản so sánh</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.DiffRows)
+                            {
+                                var rowClass = row.Status switch
+                                {
+                                    "added" => "compare-line-added",
+                                    "removed" => "compare-line-removed",
+                                    "changed" => "compare-line-changed",
+                                    _ => "compare-line-same"
+                                };
+                                <tr class="@rowClass">
+                                    <td class="text-center font-weight-bold">@row.Index</td>
+                                    <td><div class="compare-text">@Html.Raw(row.LeftHtml)</div></td>
+                                    <td><div class="compare-text">@Html.Raw(row.RightHtml)</div></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

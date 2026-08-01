@@ -211,6 +211,22 @@ namespace DataAccess
                 .WithMany()
                 .HasForeignKey(x => x.NguoiPhanHoiId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<HoSoVanBanDuThao>()
+                .HasOne<HoSoVanBan>()
+                .WithMany()
+                .HasForeignKey(x => x.HoSoVanBanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<HoSoVanBanDuThao>()
+                .HasIndex(x => x.HoSoVanBanId)
+                .IsUnique();
+
+            modelBuilder.Entity<HoSoVanBanDuThaoVersion>()
+                .HasOne<HoSoVanBan>()
+                .WithMany()
+                .HasForeignKey(x => x.HoSoVanBanId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public override int SaveChanges()
@@ -303,6 +319,8 @@ namespace DataAccess
         public DbSet<HoSoVanBanLayYKien> HoSoVanBanLayYKiens { get; set; }
         public DbSet<HoSoVanBanDanhGia> HoSoVanBanDanhGias { get; set; }
         public DbSet<HoSoVanBanPhanHoiDanhGia> HoSoVanBanPhanHoiDanhGias { get; set; }
+        public DbSet<HoSoVanBanDuThao> HoSoVanBanDuThaos { get; set; }
+        public DbSet<HoSoVanBanDuThaoVersion> HoSoVanBanDuThaoVersions { get; set; }
         public DbSet<Notification> Notifications { get; set; }       
         public DbSet<ThuTucHanhChinh> ThuTucHanhChinhs { get; set; }       
         #endregion

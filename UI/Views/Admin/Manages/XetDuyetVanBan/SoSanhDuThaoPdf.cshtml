@@ -1,0 +1,116 @@
+@using Services.Manages
+@model HoSoVanBanDraftCompareModel
+
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Xuất PDF so sánh dự thảo</title>
+    <style>
+        body { font-family: Arial, Helvetica, sans-serif; margin: 24px; color: #111827; }
+        .page-header { text-align:center; margin-bottom:20px; }
+        .page-header .nation { font-size:18px; font-weight:700; text-transform:uppercase; }
+        .page-header .motto { font-size:15px; font-weight:700; margin-top:4px; }
+        .page-header .title { font-size:24px; font-weight:700; margin-top:18px; text-transform:uppercase; }
+        .meta { margin-bottom: 18px; }
+        .meta div { margin-bottom: 6px; }
+        .summary { width:100%; border-collapse:collapse; margin-bottom:18px; font-size:13px; }
+        .summary td { border:1px solid #d1d5db; padding:8px 10px; }
+        .summary .label { font-weight:700; background:#eef2f7; width:22%; }
+        .summary .val { font-weight:700; width:28%; }
+        .summary .green { background:#f0fdf4; }
+        .summary .red { background:#fff1f2; }
+        .summary .yellow { background:#fffbeb; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #d1d5db; padding: 8px; vertical-align: top; }
+        th { background: #e5e7eb; }
+        .same { background: #ffffff; }
+        .changed { background: #fff8dd; }
+        .added { background: #e8fff3; }
+        .removed { background: #fff5f8; }
+        .compare-inline-added { background: #c9f7d7; color: #0d6832; padding: 1px 3px; border-radius: 4px; font-weight: 700; }
+        .compare-inline-removed { background: #ffe2e5; color: #b42318; padding: 1px 3px; border-radius: 4px; font-weight: 700; }
+        .compare-inline-changed { background: #fff0b3; color: #7a4f01; padding: 1px 3px; border-radius: 4px; font-weight: 700; }
+        .compare-inline-empty { color: #6b7280; font-style: italic; }
+        .text { white-space: pre-wrap; word-break: break-word; }
+        .section-title { font-size:16px; font-weight:700; margin:18px 0 10px; }
+        @@media print {
+            .no-print { display: none !important; }
+            body { margin: 10mm; }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="no-print" style="margin-bottom:16px;">
+        <button onclick="window.print()">In / Lưu PDF</button>
+        <button onclick="window.close()">Đóng</button>
+    </div>
+
+    <div class="page-header">
+        <div class="nation">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+        <div class="motto">Độc lập - Tự do - Hạnh phúc</div>
+        <div class="title">Biên bản so sánh dự thảo văn bản</div>
+    </div>
+
+    <div class="meta">
+        <div><strong>1. Hồ sơ:</strong> @Model.TenHoSo</div>
+        <div><strong>2. Loại văn bản:</strong> @(string.IsNullOrWhiteSpace(Model.TenLoaiVanBan) ? "-" : Model.TenLoaiVanBan)</div>
+        <div><strong>3. Quy trình:</strong> @(string.IsNullOrWhiteSpace(Model.TenQuyTrinh) ? "-" : Model.TenQuyTrinh)</div>
+        <div><strong>4. File gốc:</strong> @(Model.SourceFile?.NhanHienThi ?? "-")</div>
+        <div><strong>5. File so sánh:</strong> @(Model.TargetFile?.NhanHienThi ?? "-")</div>
+    </div>
+
+    <div class="section-title">I. Tổng hợp kết quả so sánh</div>
+    <table class="summary">
+        <tr>
+            <td class="label">Tổng số dòng</td>
+            <td class="val">@Model.TongSoDong</td>
+            <td class="label">Số dòng giống nhau</td>
+            <td class="val">@Model.SoDongGiongNhau</td>
+        </tr>
+        <tr>
+            <td class="label green">Số dòng thêm</td>
+            <td class="val green">@Model.SoDongThem</td>
+            <td class="label red">Số dòng xóa</td>
+            <td class="val red">@Model.SoDongXoa</td>
+        </tr>
+        <tr>
+            <td class="label yellow">Số dòng sửa</td>
+            <td class="val yellow">@Model.SoDongSua</td>
+            <td class="label">Ngày xuất báo cáo</td>
+            <td class="val">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</td>
+        </tr>
+    </table>
+
+    <div class="section-title">II. Bảng đối chiếu chi tiết</div>
+    <table>
+        <thead>
+            <tr>
+                <th style="width:70px;">Dòng</th>
+                <th>Văn bản gốc</th>
+                <th>Văn bản so sánh</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var row in Model.DiffRows)
+            {
+                var rowClass = row.Status switch
+                {
+                    "added" => "added",
+                    "removed" => "removed",
+                    "changed" => "changed",
+                    _ => "same"
+                };
+                <tr class="@rowClass">
+                    <td>@row.Index</td>
+                    <td><div class="text">@Html.Raw(row.LeftHtml)</div></td>
+                    <td><div class="text">@Html.Raw(row.RightHtml)</div></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

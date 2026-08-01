@@ -69,6 +69,7 @@ namespace Services.Manages
                     GroupId = request.GroupId,
                     TableName = request.TableName,
                     MoTa = request.MoTa,
+                    PhanLoaiDuThao = request.PhanLoaiDuThao,
                     Url = request.Url,
                     Public = request.Public,
                     Status = "CXD",
@@ -181,6 +182,7 @@ namespace Services.Manages
                     }
                 }
                 data.MoTa = request.MoTa;
+                data.PhanLoaiDuThao = request.PhanLoaiDuThao;
                 data.Url = request.Url;
                 data.Public = request.Public;
                 _dbContext.AttachedFiles.Update(data);

@@ -1,0 +1,172 @@
+@using Services.Manages
+@model HoSoVanBanDuThaoEditModel
+
+@{
+    var pageTitle = ViewData["PageTitle"]?.ToString() ?? "Cập nhật kết quả dự thảo";
+    var pageSubtitle = ViewData["PageSubtitle"]?.ToString() ?? "Đơn vị cập nhật kết quả dự thảo lên phần mềm.";
+}
+
+@section custom_style {
+    <style>
+        .draft-page .card {
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .draft-page .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f4c81;
+        }
+
+        .draft-page .section-subtitle {
+            color: #7e8299;
+        }
+
+        .draft-page .info-block {
+            border: 1px solid #e7ebf3;
+            border-radius: 16px;
+            background: #fff;
+            padding: 20px 22px;
+            margin-top: 18px;
+        }
+
+        .draft-page .brief-bar {
+            border-radius: 14px;
+            background: linear-gradient(90deg, #eef7ff 0%, #f8fbff 100%);
+            border: 1px solid #d8e9fb;
+            padding: 14px 16px;
+            color: #1f3c5b;
+            font-weight: 600;
+        }
+
+        .draft-page .result-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: #e8fff3;
+            color: #0f8a4b;
+            font-weight: 700;
+        }
+    </style>
+}
+
+@section custom_script {
+    <script>
+        function loadDraftFiles() {
+            const url = '@Url.Action("GetAttachedFiles", "AttachedFile")'
+                + '?GroupId=@Model.HoSoVanBanId&TableName=@Model.DraftFileTableName';
+            $('#attachedFile_frm').load(url, function () {
+                $('.select2basic').select2();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadDraftFiles();
+        });
+    </script>
+}
+
+<div class="draft-page">
+    <div class="card card-custom">
+        <div class="card-header border-0 pt-6">
+            <div class="card-title">
+                <div>
+                    <h3 class="card-label mb-1"><b>@pageTitle</b></h3>
+                    <div class="text-muted">@pageSubtitle</div>
+                </div>
+            </div>
+            <div class="card-toolbar">
+                <a href="/Manages/DuThaoVanBan" class="btn btn-light-primary font-weight-bold">Quay lại danh sách</a>
+            </div>
+        </div>
+        <div class="card-body pt-2">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+            @if (ViewData["Messages"] != null)
+            {
+                <div class="alert alert-danger">@ViewData["Messages"]</div>
+            }
+
+            <div class="brief-bar mb-6">
+                Hồ sơ: <span class="font-weight-bold">@Model.TenHoSo</span>
+                @if (!string.IsNullOrWhiteSpace(Model.TenLoaiVanBan))
+                {
+                    <span> | Loại văn bản: @Model.TenLoaiVanBan</span>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.TenDonViSoanThao))
+                {
+                    <span> | Đơn vị soạn thảo: @Model.TenDonViSoanThao</span>
+                }
+            </div>
+
+            <form id="draftForm" method="post" action="/Manages/HoSoVanBanDuThao/Save">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+                <input type="hidden" name="HoSoVanBanId" value="@Model.HoSoVanBanId" />
+                <input type="hidden" name="DonViSoanThaoId" value="@Model.DonViSoanThaoId" />
+                <input type="hidden" name="TenHoSo" value="@Model.TenHoSo" />
+                <input type="hidden" name="TenDuThao" value="@Model.TenHoSo" />
+                <input type="hidden" name="SoLanDuThao" value="@(Model.SoLanDuThao < 1 ? 1 : Model.SoLanDuThao)" />
+                <input type="hidden" name="TrangThaiDuThao" value="DA_HOAN_THANH_DU_THAO" />
+                <input type="hidden" name="ActionMode" value="SAVE" />
+                <input type="hidden" name="KetQuaThucHien" value="DA_HOAN_THANH_DU_THAO" />
+                <input type="hidden" name="DaDuDieuKienChuyenBuoc" value="true" />
+                <input type="hidden" id="Id" value="@Model.HoSoVanBanId" />
+                <input type="hidden" id="tableName" value="@Model.DraftFileTableName" />
+
+                <div class="info-block">
+                    <div class="section-title">Kết quả dự thảo</div>
+                    <div class="section-subtitle mb-5">Đơn vị soạn thảo cập nhật kết quả dự thảo đã thực hiện bên ngoài lên phần mềm.</div>
+                    <div class="row">
+                        <div class="col-xl-4">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Ngày cập nhật kết quả</label>
+                                <input type="date" class="form-control" name="NgayCapNhatDuThao" value="@(Model.NgayCapNhatDuThao?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" />
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Ngày hoàn thành</label>
+                                <input type="date" class="form-control" name="NgayBaoCaoKetQua" value="@(Model.NgayBaoCaoKetQua?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" />
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="form-group">
+                                <label class="font-weight-bold d-block">Kết quả thực hiện</label>
+                                <div class="result-pill mt-2">Hoàn thành</div>
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Mô tả nội dung dự thảo</label>
+                                <textarea class="form-control" name="NoiDungTomTat" rows="5">@(!string.IsNullOrWhiteSpace(Model.NoiDungTomTat) ? Model.NoiDungTomTat : Model.NoiDungBaoCao)</textarea>
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold">Ghi chú</label>
+                                <textarea class="form-control" name="GhiChu" rows="3">@Model.GhiChu</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-block">
+                    <div class="section-title">File dự thảo</div>
+                    <div class="section-subtitle mb-5">Các file từ hồ sơ lấy ý kiến góp ý đã được chuyển sang đây. Đơn vị soạn thảo có thể bổ sung thêm file dự thảo hoặc tài liệu liên quan.</div>
+                    <div id="attachedFile_frm">
+                        <div class="text-center text-muted py-8">Đang tải danh sách file dự thảo...</div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-8">
+                    <a href="/Manages/DuThaoVanBan" class="btn btn-light-danger font-weight-bold mr-3">Đóng</a>
+                    <button type="submit" class="btn btn-primary font-weight-bold">Cập nhật kết quả dự thảo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,6 +1,7 @@
 @using DataAccess.Entities.QuanLyDanhMuc
 @using Services.Manages
 @using System.Text.Json
+@model HoSoVanBanCreateModel
 
 @{
     var danhMucVanBans = ViewData["DanhMucVanBans"] as List<DanhMucVanBan> ?? new List<DanhMucVanBan>();
@@ -8,6 +9,8 @@
     var donViOptions = ViewData["CreateDonViOptions"] as List<DonViOptionModel> ?? new List<DonViOptionModel>();
     var createIsSSA = ViewData["CreateIsSSA"] is bool flag && flag;
     var workflowStepUrl = ViewData["WorkflowStepUrl"]?.ToString() ?? "/Manages/HoSoVanBan/LoadWorkflowSteps";
+    var isSingleWorkflow = quyTrinhSoanThaos.Count == 1;
+    var donViLabel = ViewData["DonViLabel"]?.ToString() ?? "Đơn vị đề nghị";
     var initialStepRowsJson = JsonSerializer.Serialize(
         Model.BuocThoiHans
             .OrderBy(x => x.ThuTuSapXep)
@@ -23,8 +26,6 @@
             }));
 }
 
-@model HoSoVanBanCreateModel
-
 @Html.AntiForgeryToken()
 <input asp-for="Id" type="hidden" />
 <input asp-for="AttachedFileGroupId" type="hidden" />
@@ -33,11 +34,11 @@
 <div class="row">
     <div class="col-xl-6">
         <div class="form-group">
-            <label>Đơn vị đề nghị <span class="text-danger">*</span></label>
+            <label>@donViLabel <span class="text-danger">*</span></label>
             @if (createIsSSA)
             {
                 <select asp-for="DonViDeNghiId" class="form-control">
-                    <option value="">-- Chọn đơn vị đề nghị --</option>
+                    <option value="">-- Chọn đơn vị --</option>
                     @foreach (var item in donViOptions)
                     {
                         <option value="@item.Id" selected="@(Model.DonViDeNghiId.HasValue && Model.DonViDeNghiId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
@@ -47,7 +48,7 @@
             else
             {
                 <select class="form-control" disabled>
-                    <option value="">-- Chọn đơn vị đề nghị --</option>
+                    <option value="">-- Chọn đơn vị --</option>
                     @foreach (var item in donViOptions)
                     {
                         <option value="@item.Id" selected="@(Model.DonViDeNghiId.HasValue && Model.DonViDeNghiId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
@@ -84,13 +85,24 @@
     <div class="col-xl-6">
         <div class="form-group">
             <label>Quy trình soạn thảo <span class="text-danger">*</span></label>
-            <select asp-for="QuyTrinhSoanThaoId" class="form-control">
-                <option value="">-- Chọn quy trình --</option>
-                @foreach (var item in quyTrinhSoanThaos)
-                {
-                    <option value="@item.Id" data-vanbanid="@item.DanhMucVanBanId" selected="@(Model.QuyTrinhSoanThaoId == item.Id ? "selected" : null)">@item.TenQuyTrinh (@item.CapApDung)</option>
-                }
-            </select>
+            @if (isSingleWorkflow)
+            {
+                var workflow = quyTrinhSoanThaos[0];
+                <select class="form-control" disabled>
+                    <option value="@workflow.Id">@workflow.TenQuyTrinh (@workflow.CapApDung)</option>
+                </select>
+                <input type="hidden" asp-for="QuyTrinhSoanThaoId" value="@workflow.Id" />
+            }
+            else
+            {
+                <select asp-for="QuyTrinhSoanThaoId" class="form-control">
+                    <option value="">-- Chọn quy trình --</option>
+                    @foreach (var item in quyTrinhSoanThaos)
+                    {
+                        <option value="@item.Id" data-vanbanid="@item.DanhMucVanBanId" selected="@(Model.QuyTrinhSoanThaoId == item.Id ? "selected" : null)">@item.TenQuyTrinh (@item.CapApDung)</option>
+                    }
+                </select>
+            }
             <span id="QuyTrinhSoanThaoIdError" class="text-danger"></span>
         </div>
     </div>
@@ -261,6 +273,10 @@
         }
 
         function filterQuyTrinh() {
+            if (@(isSingleWorkflow ? "true" : "false")) {
+                return;
+            }
+
             const selectedVanBanId = danhMucVanBan.value;
             Array.from(quyTrinh.options).forEach(function (option, index) {
                 if (index === 0) {

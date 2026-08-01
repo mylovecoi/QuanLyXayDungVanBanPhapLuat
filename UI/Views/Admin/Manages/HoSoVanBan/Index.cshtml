@@ -1,5 +1,6 @@
 @using Services.Manages
 @using UI.ViewModels
+@model IEnumerable<HoSoVanBanListItemModel>
 
 @{
     var session = HttpContextAccessor?.HttpContext?.Session;
@@ -15,10 +16,18 @@
     var hideDonViFilter = ViewData["HideDonViFilter"] is bool hide && hide;
     var receiveModeMessage = ViewData["ReceiveModeMessage"]?.ToString();
     var routePrefix = ViewData["RoutePrefix"]?.ToString() ?? "/Manages/HoSoVanBan";
-    var allowCreate = string.Equals(routePrefix, "/Manages/DangKyVanBan", StringComparison.OrdinalIgnoreCase);
+    var allowCreate = string.Equals(routePrefix, "/Manages/DangKyVanBan", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(routePrefix, "/Manages/DuThaoVanBan", StringComparison.OrdinalIgnoreCase);
     var isXetDuyetDangKy = string.Equals(routePrefix, "/Manages/XetDuyetDangKy", StringComparison.OrdinalIgnoreCase);
-    var isPheDuyetDangKy = string.Equals(routePrefix, "/Manages/PheDuyetDangKy", StringComparison.OrdinalIgnoreCase);
     var isDangKyVanBan = string.Equals(routePrefix, "/Manages/DangKyVanBan", StringComparison.OrdinalIgnoreCase);
+    var isSoanThaoVanBan = string.Equals(routePrefix, "/Manages/HoSoVanBan", StringComparison.OrdinalIgnoreCase);
+    var isLayYKienVanBan = string.Equals(routePrefix, "/Manages/LayYKienVanBan", StringComparison.OrdinalIgnoreCase);
+    var isDuThaoVanBan = string.Equals(routePrefix, "/Manages/DuThaoVanBan", StringComparison.OrdinalIgnoreCase);
+    var isXetDuyetDuThao = string.Equals(routePrefix, "/Manages/XetDuyetDuThao", StringComparison.OrdinalIgnoreCase);
+    var isXetDuyetVanBan = string.Equals(routePrefix, "/Manages/XetDuyetVanBan", StringComparison.OrdinalIgnoreCase);
+    var isPheDuyetVanBan = string.Equals(routePrefix, "/Manages/PheDuyetVanBan", StringComparison.OrdinalIgnoreCase);
+    var isDanhGiaVanBanList = string.Equals(routePrefix, "/Manages/DanhGiaVanBan", StringComparison.OrdinalIgnoreCase);
+    var isDanhGiaVanBan = isXetDuyetDuThao || isXetDuyetVanBan || isDanhGiaVanBanList;
 
     string GetTienDoLabel(HoSoVanBanListItemModel item) => item.TrangThaiTienDo switch
     {
@@ -31,8 +40,6 @@
         _ => string.IsNullOrWhiteSpace(item.TenTrangThaiTienDo) ? "-" : item.TenTrangThaiTienDo
     };
 }
-
-@model IEnumerable<HoSoVanBanListItemModel>
 
 @section custom_script {
     <script>
@@ -72,6 +79,18 @@
             var pageCurrent = '&PageCurrent=' + pageSelect;
             window.location.href = currentPathUrl + timKiem + pageSize + donViId + pageCurrent;
         }
+
+        function ChuyenLayYKien(id) {
+            OpenChuyenLayGopY(id);
+        }
+
+        function ChuyenXetDuyetDuThao(id) {
+            OpenChuyenHoSo(id);
+        }
+
+        function ChuyenPheDuyetVanBan(id, suggestedDeadline) {
+            OpenChuyenPheDuyetVanBan(id, suggestedDeadline);
+        }
     </script>
 }
 
@@ -98,7 +117,7 @@
     <div class="card-body pt-0">
         <hr />
 
-        @if (!string.IsNullOrWhiteSpace(receiveModeMessage))
+        @if (!isSoanThaoVanBan && !string.IsNullOrWhiteSpace(receiveModeMessage))
         {
             <div class="alert alert-light-info d-flex align-items-center mb-6">
                 <i class="la la-inbox icon-xl mr-3 text-info"></i>
@@ -227,13 +246,17 @@
                                 </td>
                                 <td class="align-middle">
                                     <div>@item.TenBuocHienTai</div>
-                                    @if (item.CanNhanHoSo)
-                                    {
-                                        <div class="text-warning font-weight-bold mt-1">Chưa nhận hồ sơ</div>
-                                    }
-                                    else if (isXetDuyetDangKy && !string.IsNullOrWhiteSpace(item.TenTrangThaiNghiepVuTiepNhan))
+                                    @if (isXetDuyetDangKy && !string.IsNullOrWhiteSpace(item.TenTrangThaiNghiepVuTiepNhan))
                                     {
                                         <div class="text-info font-weight-bold mt-1">@item.TenTrangThaiNghiepVuTiepNhan</div>
+                                    }
+                                    else if (isDanhGiaVanBan && !item.DaNhanHoSo)
+                                    {
+                                        <div class="text-warning font-weight-bold mt-1">Chờ nhận hồ sơ</div>
+                                    }
+                                    else if (!isDangKyVanBan && !isSoanThaoVanBan && !isLayYKienVanBan && item.CanNhanHoSo)
+                                    {
+                                        <div class="text-warning font-weight-bold mt-1">Chưa nhận hồ sơ</div>
                                     }
                                 </td>
                                 <td class="align-middle">
@@ -243,9 +266,7 @@
                                 <td class="text-center align-middle">
                                     @if (isDangKyVanBan && item.TrangThaiNghiepVuTiepNhan == "TRA_LAI_HO_SO")
                                     {
-                                        <span class="badge" style="background-color:#DC3545;color:#FFFFFF;padding:8px 12px;">
-                                            Bị trả lại
-                                        </span>
+                                        <span class="badge" style="background-color:#DC3545;color:#FFFFFF;padding:8px 12px;">Bị trả lại</span>
                                     }
                                     else if (!string.IsNullOrWhiteSpace(item.TenTrangThai))
                                     {
@@ -275,33 +296,127 @@
                                     </div>
                                 </td>
                                 <td class="text-center align-middle">
-                                    @if (session != null && FuntionGlobal.CheckPermission(session, role, "Index"))
+                                    @if (isDuThaoVanBan)
                                     {
-                                    @if (item.CanNhanHoSo)
-                                    {
-                                            <button type="button" onclick="@(isXetDuyetDangKy ? $"OpenNhanHoSo('{item.Id}')" : $"NhanHoSo('{item.Id}', 'NHAN_HO_SO')")" class="btn btn-sm btn-clean btn-icon" title="Nhận hồ sơ">
-                                                <i class="icon-lg la la-inbox text-success"></i>
+                                        @if (session != null && FuntionGlobal.CheckPermission(session, role, "Index"))
+                                        {
+                                            @if (FuntionGlobal.CheckPermission(session, role, "Edit") && item.CanXuLyBuocHienTai)
+                                            {
+                                                <button type="button" onclick="window.location.href='/Manages/HoSoVanBanDuThao/EditPage?id=@item.Id'" class="btn btn-sm btn-clean btn-icon" title="Cập nhật dự thảo">
+                                                    <i class="icon-lg la la-file-text text-warning"></i>
+                                                </button>
+                                                <button type="button" onclick="ChuyenXetDuyetDuThao('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Chuyển xét duyệt dự thảo">
+                                                    <i class="icon-lg la la-share-square text-success"></i>
+                                                </button>
+                                            }
+                                            <button type="button" onclick="Show('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Xem chi tiết">
+                                                <i class="icon-lg la la-eye text-primary"></i>
+                                            </button>
+                                            <button type="button" onclick="ShowTimeline('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Xem timeline">
+                                                <i class="icon-lg la la-stream text-info"></i>
                                             </button>
                                         }
-                                        @if (isXetDuyetDangKy && item.TrangThaiNghiepVuTiepNhan == "NHAN_HO_SO")
+                                    }
+                                    else if (session != null && FuntionGlobal.CheckPermission(session, role, "Index"))
+                                    {
+                                        @if (isDanhGiaVanBanList &&
+                                             item.MaBuocHienTai == "BUOC_02_GUI_THAM_DINH" &&
+                                             FuntionGlobal.CheckPermission(session, role, "Edit"))
                                         {
-                                            <button type="button" onclick="NhanHoSo('@item.Id', 'CHUYEN_PHE_DUYET')" class="btn btn-sm btn-clean btn-icon" title="Chuyển phê duyệt">
-                                                <i class="icon-lg la la-share-square text-warning"></i>
+                                            @if (item.CanNhanHoSo)
+                                            {
+                                                <button type="button" onclick="OpenNhanHoSoDanhGia('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Nhận hồ sơ">
+                                                    <i class="icon-lg la la-inbox text-success"></i>
+                                                </button>
+                                                <button type="button" onclick="OpenTraLaiDanhGia('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Trả lại hồ sơ">
+                                                    <i class="icon-lg la la-reply text-danger"></i>
+                                                </button>
+                                            }
+                                            else if (item.DaNhanHoSo && item.CanXuLyBuocHienTai)
+                                            {
+                                                <button type="button" onclick="ChuyenXetDuyetDanhGia('@item.Id', '@(item.HanXuLy.HasValue ? item.HanXuLy.Value.ToString("yyyy-MM-dd") : string.Empty)')" class="btn btn-sm btn-clean btn-icon" title="Chuyển hồ sơ">
+                                                    <i class="icon-lg la la-share-square text-warning"></i>
+                                                </button>
+                                            }
+                                        }
+
+                                        @if (isXetDuyetVanBan && FuntionGlobal.CheckPermission(session, role, "Edit") && item.CanXuLyBuocHienTai)
+                                        {
+                                            <button type="button" onclick="OpenThamDinhVanBan('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Xét duyệt hồ sơ">
+                                                <i class="icon-lg la la-edit text-success"></i>
                                             </button>
-                                            <button type="button" onclick="OpenTraLaiHoSo('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Trả lại">
+                                            @if (item.DaCoBanGhiDanhGia)
+                                            {
+                                                <button type="button" onclick="ChuyenPheDuyetVanBan('@item.Id', '@(item.HanXuLy.HasValue ? item.HanXuLy.Value.ToString("yyyy-MM-dd") : string.Empty)')" class="btn btn-sm btn-clean btn-icon" title="Chuyển phê duyệt">
+                                                    <i class="icon-lg la la-share-square text-warning"></i>
+                                                </button>
+                                            }
+                                            <button type="button" onclick="OpenTraLaiThamDinh('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Trả lại hồ sơ">
                                                 <i class="icon-lg la la-reply text-danger"></i>
                                             </button>
+                                            <button type="button" onclick="window.location.href='/Manages/XetDuyetVanBan/SoSanhDuThao?id=@item.Id'" class="btn btn-sm btn-clean btn-icon" title="So sánh dự thảo">
+                                                <i class="icon-lg la la-columns text-info"></i>
+                                            </button>
                                         }
-                                        @if (isPheDuyetDangKy &&
-                                             item.MaBuocHienTai == "BUOC_02_THONG_NHAT" &&
-                                             item.CanXuLyBuocHienTai &&
-                                             !item.CanNhanHoSo)
+
+                                        @if (isPheDuyetVanBan && FuntionGlobal.CheckPermission(session, role, "Edit") && item.CanXuLyBuocHienTai)
                                         {
-                                            <button type="button" onclick="OpenWorkflowAction('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Phê duyệt">
+                                            <button type="button" onclick="window.location.href='/Manages/PheDuyetVanBan/WorkflowPage?id=@item.Id'" class="btn btn-sm btn-clean btn-icon" title="Phê duyệt hồ sơ">
+                                                <i class="icon-lg la la-edit text-success"></i>
+                                            </button>
+                                            <button type="button" onclick="OpenChuyenBanHanhVanBan('@item.Id', '@(item.HanXuLy.HasValue ? item.HanXuLy.Value.ToString("yyyy-MM-dd") : string.Empty)')" class="btn btn-sm btn-clean btn-icon" title="Hoàn thành/Chuyển ban hành">
+                                                <i class="icon-lg la la-share-square text-warning"></i>
+                                            </button>
+                                        }
+
+                                        @if ((isSoanThaoVanBan || isDuThaoVanBan) && FuntionGlobal.CheckPermission(session, role, "Edit") && item.CanXuLyBuocHienTai)
+                                        {
+                                            <button type="button" onclick="window.location.href='/Manages/HoSoVanBanDuThao/EditPage?id=@item.Id'" class="btn btn-sm btn-clean btn-icon" title="Cập nhật dự thảo">
+                                                <i class="icon-lg la la-file-text text-warning"></i>
+                                            </button>
+                                        }
+                                        @if (isSoanThaoVanBan && item.CanXuLyBuocHienTai && item.DaCoDuThao)
+                                        {
+                                            <button type="button" onclick="ChuyenLayYKien('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Chuyển lấy ý kiến">
+                                                <i class="icon-lg la la-share-square text-success"></i>
+                                            </button>
+                                        }
+                                        @if (isDuThaoVanBan && item.CanXuLyBuocHienTai)
+                                        {
+                                            <button type="button" onclick="ChuyenXetDuyetDuThao('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Chuyển xét duyệt dự thảo">
+                                                <i class="icon-lg la la-share-square text-success"></i>
+                                            </button>
+                                        }
+                                        @if (isLayYKienVanBan && item.CoThePhanHoiLayYKien)
+                                        {
+                                            <button type="button" onclick="window.location.href='/Manages/LayYKienVanBan/PhanHoi?id=@item.Id'" class="btn btn-sm btn-clean btn-icon" title="Phản hồi góp ý">
+                                                <i class="icon-lg la la-commenting text-warning"></i>
+                                            </button>
+                                        }
+                                        @if (isLayYKienVanBan && item.CoTheTongHopLayYKien)
+                                        {
+                                            <button type="button" onclick="window.location.href='/Manages/LayYKienVanBan/TongHop?id=@item.Id'" class="btn btn-sm btn-clean btn-icon" title="Tổng hợp góp ý">
+                                                <i class="icon-lg la la-check-square text-success"></i>
+                                            </button>
+                                        }
+                                        @if (isXetDuyetDangKy &&
+                                             item.MaBuocHienTai == "BUOC_02_THONG_NHAT" &&
+                                             item.CanXuLyBuocHienTai)
+                                        {
+                                            <button type="button" onclick="OpenWorkflowAction('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Phê duyệt kết quả">
                                                 <i class="icon-lg la la-check-circle text-success"></i>
                                             </button>
                                             <button type="button" onclick="OpenTraLaiHoSo('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Trả lại">
                                                 <i class="icon-lg la la-reply text-danger"></i>
+                                            </button>
+                                        }
+                                        @if (isXetDuyetDangKy && item.NgayHoanThanh.HasValue)
+                                        {
+                                            <button type="button" onclick="TaoHoSoSoanThao('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Tạo hồ sơ soạn thảo">
+                                                <i class="icon-lg la la-files-o text-success"></i>
+                                            </button>
+                                            <button type="button" onclick="HuyXetDuyetDangKy('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Hủy xét duyệt">
+                                                <i class="icon-lg la la-undo text-warning"></i>
                                             </button>
                                         }
                                         <button type="button" onclick="Show('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Xem chi tiết">
@@ -311,9 +426,10 @@
                                             <i class="icon-lg la la-stream text-info"></i>
                                         </button>
                                     }
+
                                     @if (session != null &&
                                          FuntionGlobal.CheckPermission(session, role, "Edit") &&
-                                         string.Equals(routePrefix, "/Manages/DangKyVanBan", StringComparison.OrdinalIgnoreCase) &&
+                                         isDangKyVanBan &&
                                          item.CanXuLyBuocHienTai &&
                                          item.MaBuocHienTai == "BUOC_01_DANG_KY")
                                     {
@@ -343,3 +459,7 @@
 </div>
 
 @await Html.PartialAsync("~/Views/Admin/Manages/HoSoVanBan/Modal.cshtml")
+@if (isDanhGiaVanBan)
+{
+    @await Html.PartialAsync("~/Views/Admin/Manages/XetDuyetDuThao/_ActionModals.cshtml")
+}

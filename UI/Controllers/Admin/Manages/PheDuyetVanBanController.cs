@@ -62,6 +62,31 @@ namespace UI.Controllers.Admin.Manages
             return PartialView("Views/Admin/Manages/HoSoVanBan/Show.cshtml", model.Data);
         }
 
+        [HttpGet("Manages/PheDuyetVanBan/WorkflowPage")]
+        [AuthorizeAction("Edit", "PheDuyetVanBan", "Index")]
+        public async Task<IActionResult> WorkflowPage(Guid id)
+        {
+            ViewData["Title"] = "Phê duyệt văn bản";
+            ViewData["PageTitle"] = "Phê duyệt văn bản";
+            ViewData["PageSubtitle"] = "Cập nhật kết quả phê duyệt trên màn hình nghiệp vụ riêng.";
+            ViewData["RoutePrefix"] = "/Manages/PheDuyetVanBan";
+            ViewData["WorkflowActionTitle"] = "Phê duyệt văn bản";
+            ViewData["ForceWorkflowAction"] = "true";
+            ViewData["WorkflowPageMode"] = "true";
+            ViewData["CompactWorkflowPage"] = "true";
+
+            var model = await _hoSoVanBanWorkflowService.GetChiTietAsync(id);
+            if (model.Status == "error")
+            {
+                ViewData["Messages"] = model.Message;
+                ViewData["Controller"] = "PheDuyetVanBan";
+                ViewData["Action"] = "Index";
+                return View("Views/Shared/Error.cshtml");
+            }
+
+            return View("Views/Admin/Manages/PheDuyetVanBan/WorkflowPage.cshtml", model.Data);
+        }
+
         [HttpPost("Manages/PheDuyetVanBan/Timeline")]
         [ValidateAntiForgeryToken]
         [AuthorizeAction("Index", "PheDuyetVanBan", "Index")]
@@ -79,12 +104,20 @@ namespace UI.Controllers.Admin.Manages
             return PartialView("Views/Admin/Manages/HoSoVanBan/Timeline.cshtml", model.Data);
         }
 
+        [HttpGet("Manages/PheDuyetVanBan/ChuyenBanHanhModel")]
+        [AuthorizeAction("Edit", "PheDuyetVanBan", "Index")]
+        public async Task<JsonResult> ChuyenBanHanhModel(Guid id)
+        {
+            var model = await _hoSoVanBanWorkflowService.GetChuyenBanHanhModelAsync(id);
+            return Json(new { status = model.Status, message = model.Message, data = model.Data });
+        }
+
         [HttpPost("Manages/PheDuyetVanBan/NhanHoSo")]
         [ValidateAntiForgeryToken]
         [AuthorizeAction("Edit", "PheDuyetVanBan", "Index")]
-        public async Task<JsonResult> NhanHoSo(Guid id, string actionType = "NHAN_HO_SO")
+        public async Task<JsonResult> NhanHoSo(Guid id, string actionType = "NHAN_HO_SO", DateTime? ngayXuLy = null, DateTime? hanXuLy = null)
         {
-            var model = await _hoSoVanBanWorkflowService.NhanHoSoAsync(id, actionType);
+            var model = await _hoSoVanBanWorkflowService.NhanHoSoAsync(id, actionType, null, null, ngayXuLy, hanXuLy);
             return Json(new { status = model.Status, message = model.Message });
         }
 

@@ -21,8 +21,19 @@ namespace UI.Controllers.Admin.Manages
             PageCurrent = PageCurrent < 1 ? 1 : PageCurrent;
             PageSize = PageSize < 5 ? 5 : PageSize > 100 ? 100 : PageSize;
 
+            var currentUser = _authService.GetUserInfo();
+            var isSSA = currentUser?.SSA ?? false;
             var selectedDonViId = await ApplyDonViFilterViewDataAsync(DonViId);
-            var model = await _hoSoVanBanWorkflowService.GetDanhSachAsync(TimKiem, selectedDonViId, PageSize, PageCurrent);
+            var model = await _hoSoVanBanWorkflowService.GetDanhSachTheoBuocAsync(
+                TimKiem,
+                "SOAN_THAO",
+                isSSA ? selectedDonViId : null,
+                PageSize,
+                PageCurrent,
+                true,
+                null,
+                "XayDung");
+
             if (model.Status == "error")
             {
                 ViewData["Messages"] = model.Message;
@@ -31,9 +42,11 @@ namespace UI.Controllers.Admin.Manages
                 return View("Views/Shared/Error.cshtml");
             }
 
-            ViewData["Title"] = "Hồ sơ văn bản";
-            ViewData["Role"] = "VanBanQPPL.XayDungVanBan.DanhSachVanBan";
+            ViewData["Title"] = "Soạn thảo văn bản";
+            ViewData["Role"] = "VanBanQPPL.XayDungVanBan.SoanThaoVanBan";
             ViewData["RoutePrefix"] = "/Manages/HoSoVanBan";
+            ViewData["HideDonViFilter"] = !isSSA;
+            ViewData["ReceiveModeMessage"] = "Đang xem các hồ sơ đã được chuyển từ bước 2 sang bước soạn thảo theo đơn vị tiếp nhận.";
             ViewData["PageInfo"] = FuntionGlobal.GetPageInfo(model.TotalRecord, TimKiem, PageSize, PageCurrent);
             return View("Views/Admin/Manages/HoSoVanBan/Index.cshtml", model.Data);
         }
@@ -43,7 +56,7 @@ namespace UI.Controllers.Admin.Manages
         public async Task<IActionResult> Create()
         {
             ViewData["DanhMucVanBans"] = await _hoSoVanBanWorkflowService.GetDanhMucVanBanOptionsAsync();
-            ViewData["QuyTrinhSoanThaos"] = await _hoSoVanBanWorkflowService.GetQuyTrinhOptionsAsync();
+            ViewData["QuyTrinhSoanThaos"] = await _hoSoVanBanWorkflowService.GetQuyTrinhOptionsAsync(loaiQuyTrinh: "XayDung");
 
             var model = new HoSoVanBanCreateModel
             {
@@ -91,6 +104,7 @@ namespace UI.Controllers.Admin.Manages
                 return View("Views/Shared/Error.cshtml");
             }
 
+            ViewData["HideWorkflowAction"] = "true";
             return PartialView("Views/Admin/Manages/HoSoVanBan/Show.cshtml", model.Data);
         }
 
@@ -111,6 +125,23 @@ namespace UI.Controllers.Admin.Manages
             return PartialView("Views/Admin/Manages/HoSoVanBan/Timeline.cshtml", model.Data);
         }
 
+        [HttpPost("Manages/HoSoVanBan/LayGopYAction")]
+        [ValidateAntiForgeryToken]
+        [AuthorizeAction("Edit", "HoSoVanBan", "Index")]
+        public async Task<IActionResult> LayGopYAction(Guid id)
+        {
+            var model = await _hoSoVanBanWorkflowService.GetChiTietAsync(id);
+            if (model.Status == "error")
+            {
+                ViewData["Messages"] = model.Message;
+                ViewData["Controller"] = "HoSoVanBan";
+                ViewData["Action"] = "Index";
+                return View("Views/Shared/Error.cshtml");
+            }
+
+            return PartialView("Views/Admin/Manages/HoSoVanBan/LayGopY.cshtml", model.Data);
+        }
+
         [HttpPost("Manages/HoSoVanBan/NhanHoSo")]
         [ValidateAntiForgeryToken]
         [AuthorizeAction("Edit", "HoSoVanBan", "Index")]
@@ -122,7 +153,7 @@ namespace UI.Controllers.Admin.Manages
 
         [HttpPost("Manages/HoSoVanBan/HoanThanhXuLy")]
         [ValidateAntiForgeryToken]
-        [AuthorizeAction("Edit")]
+        [AuthorizeAction("Edit", "HoSoVanBan", "Index")]
         public async Task<JsonResult> HoanThanhXuLy(HoSoVanBanXuLyStepModel request)
         {
             var model = await _hoSoVanBanWorkflowService.HoanThanhXuLyAsync(request);
@@ -131,16 +162,25 @@ namespace UI.Controllers.Admin.Manages
 
         [HttpPost("Manages/HoSoVanBan/HoanThanhLayYKien")]
         [ValidateAntiForgeryToken]
-        [AuthorizeAction("Edit")]
+        [AuthorizeAction("Edit", "HoSoVanBan", "Index")]
         public async Task<JsonResult> HoanThanhLayYKien(HoSoVanBanLayYKienStepModel request)
         {
             var model = await _hoSoVanBanWorkflowService.HoanThanhLayYKienAsync(request);
             return Json(new { status = model.Status, message = model.Message });
         }
 
+        [HttpPost("Manages/HoSoVanBan/KhoiTaoLayYKien")]
+        [ValidateAntiForgeryToken]
+        [AuthorizeAction("Index", "HoSoVanBan", "Index")]
+        public async Task<JsonResult> KhoiTaoLayYKien(HoSoVanBanLayYKienStepModel request)
+        {
+            var model = await _hoSoVanBanWorkflowService.KhoiTaoLayYKienAsync(request);
+            return Json(new { status = model.Status, message = model.Message });
+        }
+
         [HttpPost("Manages/HoSoVanBan/HoanThanhDanhGia")]
         [ValidateAntiForgeryToken]
-        [AuthorizeAction("Edit")]
+        [AuthorizeAction("Edit", "HoSoVanBan", "Index")]
         public async Task<JsonResult> HoanThanhDanhGia(HoSoVanBanDanhGiaStepModel request)
         {
             var model = await _hoSoVanBanWorkflowService.HoanThanhDanhGiaAsync(request);

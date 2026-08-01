@@ -1,0 +1,389 @@
+@using Services.Manages
+@model HoSoVanBanLayYKienFormModel
+
+@{
+    var pageTitle = ViewData["PageTitle"]?.ToString() ?? "Tổng hợp góp ý";
+    var pageSubtitle = ViewData["PageSubtitle"]?.ToString() ?? "Đơn vị soạn thảo tổng hợp ý kiến và hoàn thành bước lấy góp ý.";
+    var tableName = "HoSoVanBanLayYKienTongHop";
+    var donViOptions = Model.DonViLayYKienOptions ?? new List<DonViOptionModel>();
+    var rows = (Model.CacLayYKien ?? new List<HoSoVanBanLayYKienItemModel>())
+        .Where(x => x.DonViDuocLayYKienId.HasValue)
+        .OrderBy(x => x.TenDonViDuocLayYKien)
+        .ToList();
+    var trangThaiOptions = new List<SelectOptionModel>
+    {
+        new SelectOptionModel { Value = "DA_CO_Y_KIEN", Text = "Đã có ý kiến" },
+        new SelectOptionModel { Value = "CHO_CAP_NHAT_KET_QUA", Text = "Chờ cập nhật kết quả" },
+        new SelectOptionModel { Value = "KHONG_CO_Y_KIEN", Text = "Không có ý kiến" }
+    };
+}
+
+@section custom_script {
+    <script>
+        const tongHopDonViOptions = [
+        @for (var i = 0; i < donViOptions.Count; i++)
+        {
+            var item = donViOptions[i];
+            <text>{ id: '@item.Id', text: '@Html.Raw(System.Net.WebUtility.HtmlEncode(item.TenDonVi))' }@(i < donViOptions.Count - 1 ? "," : "")</text>
+        }
+        ];
+
+        const tongHopTrangThaiOptions = [
+        @for (var i = 0; i < trangThaiOptions.Count; i++)
+        {
+            var item = trangThaiOptions[i];
+            <text>{ value: '@item.Value', text: '@item.Text' }@(i < trangThaiOptions.Count - 1 ? "," : "")</text>
+        }
+        ];
+
+        function buildDonViOptions(selectedValue) {
+            let html = '<option value="">-- Chọn đơn vị --</option>';
+            tongHopDonViOptions.forEach(function (item) {
+                const selected = selectedValue && selectedValue.toLowerCase() === item.id.toLowerCase() ? ' selected' : '';
+                html += `<option value="${item.id}"${selected}>${item.text}</option>`;
+            });
+            return html;
+        }
+
+        function buildTrangThaiOptions(selectedValue) {
+            let html = '';
+            tongHopTrangThaiOptions.forEach(function (item) {
+                const selected = selectedValue === item.value ? ' selected' : '';
+                html += `<option value="${item.value}"${selected}>${item.text}</option>`;
+            });
+            return html;
+        }
+
+        function loadHoSoFilesReadonly() {
+            const url = '@Url.Action("GetAttachedFilesReadonly", "AttachedFile")' + '?GroupId=@Model.HoSoVanBanId&TableName=HoSoVanBan';
+            $('#hoso_file_readonly').load(url);
+        }
+
+        function loadTongHopFiles() {
+            const url = '@Url.Action("GetAttachedFiles", "AttachedFile")'
+                + '?GroupId=@Model.AttachedFileGroupId&TableName=@tableName';
+            $('#attachedFile_frm').load(url, function () {
+                $('.select2basic').select2();
+            });
+        }
+
+        function refreshTongHopRowIndexes() {
+            const rows = document.querySelectorAll('#tonghop-table-body tr[data-row]');
+            rows.forEach(function (row, index) {
+                row.querySelectorAll('[data-name]').forEach(function (input) {
+                    input.name = `CacLayYKien[${index}].${input.getAttribute('data-name')}`;
+                });
+            });
+        }
+
+        function getSelectedDonViValues(exceptRow) {
+            const values = [];
+            document.querySelectorAll('.tonghop-donvi-select').forEach(function (select) {
+                if (exceptRow && select.closest('tr') === exceptRow) {
+                    return;
+                }
+
+                if (select.value) {
+                    values.push(select.value.toLowerCase());
+                }
+            });
+
+            return values;
+        }
+
+        function validateDuplicateDonVi(currentSelect) {
+            const row = currentSelect.closest('tr');
+            const selectedValue = (currentSelect.value || '').toLowerCase();
+            if (!selectedValue) {
+                return true;
+            }
+
+            const duplicated = getSelectedDonViValues(row).includes(selectedValue);
+            if (duplicated) {
+                currentSelect.value = '';
+                $(currentSelect).trigger('change.select2');
+                alert('Đơn vị này đã được chọn ở dòng khác. Vui lòng chọn đơn vị khác.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function bindRowEvents(row) {
+            const donViSelect = row.querySelector('.tonghop-donvi-select');
+            if (donViSelect) {
+                donViSelect.addEventListener('change', function () {
+                    validateDuplicateDonVi(this);
+                });
+            }
+        }
+
+        function addTongHopRow(data) {
+            const tbody = document.getElementById('tonghop-table-body');
+            const row = document.createElement('tr');
+            row.setAttribute('data-row', '1');
+            row.innerHTML = `
+                <td>
+                    <input type="hidden" data-name="Id" value="${data.id || '00000000-0000-0000-0000-000000000000'}" />
+                    <input type="hidden" data-name="HoSoVanBanId" value="${data.hoSoVanBanId || '@Model.HoSoVanBanId'}" />
+                    <select class="form-control select2basic tonghop-donvi-select" data-name="DonViDuocLayYKienId">
+                        ${buildDonViOptions(data.donViDuocLayYKienId || '')}
+                    </select>
+                </td>
+                <td><input type="date" class="form-control" data-name="HanPhanHoi" value="${data.hanPhanHoi || ''}" /></td>
+                <td><input type="date" class="form-control" data-name="NgayPhanHoi" value="${data.ngayPhanHoi || ''}" /></td>
+                <td>
+                    <select class="form-control" data-name="TrangThaiPhanHoi">
+                        ${buildTrangThaiOptions(data.trangThaiPhanHoi || 'DA_CO_Y_KIEN')}
+                    </select>
+                </td>
+                <td><textarea class="form-control" rows="3" data-name="NoiDungPhanHoi">${data.noiDungPhanHoi || ''}</textarea></td>
+                <td><textarea class="form-control" rows="3" data-name="GhiChu">${data.ghiChu || ''}</textarea></td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-light-danger" onclick="removeTongHopRow(this)">Xóa</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+            $(row).find('.select2basic').select2();
+            bindRowEvents(row);
+            refreshTongHopRowIndexes();
+        }
+
+        function removeTongHopRow(button) {
+            const tbody = document.getElementById('tonghop-table-body');
+            button.closest('tr').remove();
+            if (!tbody.querySelector('tr[data-row]')) {
+                addTongHopRow({});
+            } else {
+                refreshTongHopRowIndexes();
+            }
+        }
+
+        function validateTongHopBeforeSubmit() {
+            const rows = document.querySelectorAll('#tonghop-table-body tr[data-row]');
+            if (!rows.length) {
+                alert('Vui lòng thêm ít nhất một đơn vị góp ý trước khi lưu.');
+                return false;
+            }
+
+            for (const row of rows) {
+                const donViSelect = row.querySelector('.tonghop-donvi-select');
+                if (!donViSelect || !donViSelect.value) {
+                    alert('Vui lòng chọn đơn vị góp ý cho tất cả các dòng trước khi lưu.');
+                    if (donViSelect) {
+                        donViSelect.focus();
+                    }
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadHoSoFilesReadonly();
+            loadTongHopFiles();
+            refreshTongHopRowIndexes();
+
+            const existingRows = document.querySelectorAll('#tonghop-table-body tr[data-row]');
+            if (!existingRows.length) {
+                addTongHopRow({});
+            } else {
+                $('#tonghop-table-body .select2basic').select2();
+                existingRows.forEach(function (row) {
+                    bindRowEvents(row);
+                });
+            }
+
+            const form = document.getElementById('tonghop-form');
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!validateTongHopBeforeSubmit()) {
+                        event.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
+}
+
+<div class="card card-custom">
+    <div class="card-header border-0 pt-6">
+        <div class="card-title">
+            <div>
+                <h3 class="card-label mb-1"><b>@pageTitle</b></h3>
+                <div class="text-muted">@pageSubtitle</div>
+            </div>
+        </div>
+        <div class="card-toolbar">
+            <a href="/Manages/LayYKienVanBan" class="btn btn-light-primary font-weight-bold">Quay lại danh sách</a>
+        </div>
+    </div>
+    <div class="card-body pt-2">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        }
+        @if (ViewData["Messages"] != null)
+        {
+            <div class="alert alert-danger">@ViewData["Messages"]</div>
+        }
+
+        <div class="alert alert-light-primary mb-6">
+            Hồ sơ: <b>@Model.TenHoSo</b>
+            @if (!string.IsNullOrWhiteSpace(Model.TenLoaiVanBan))
+            {
+                <span> | Loại văn bản: @Model.TenLoaiVanBan</span>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.TenDonViSoanThao))
+            {
+                <span> | Đơn vị soạn thảo: @Model.TenDonViSoanThao</span>
+            }
+        </div>
+
+        <form id="tonghop-form" method="post" action="/Manages/LayYKienVanBan/TongHop">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="HoSoVanBanId" value="@Model.HoSoVanBanId" />
+            <input type="hidden" name="ActionMode" value="TONG_HOP_Y_KIEN" />
+            <input type="hidden" name="TrangThaiPhanHoi" value="DA_GAN_KET_QUA_Y_KIEN" />
+            <input type="hidden" name="AttachedFileGroupId" value="@Model.AttachedFileGroupId" />
+            <input type="hidden" id="Id" value="@Model.AttachedFileGroupId" />
+            <input type="hidden" id="tableName" value="@tableName" />
+
+            <div class="card border mb-6">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="mb-1 text-primary">Danh sách ý kiến theo từng đơn vị</h5>
+                            <div class="text-muted">
+                                Đơn vị soạn thảo có thể tự nhập ý kiến của từng đơn vị trong trường hợp cập nhật kết quả thủ công.
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-light-primary btn-sm" onclick="addTongHopRow({})">Thêm dòng</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th width="20%">Đơn vị góp ý</th>
+                                    <th width="11%">Hạn phản hồi</th>
+                                    <th width="11%">Ngày phản hồi</th>
+                                    <th width="14%">Trạng thái</th>
+                                    <th width="24%">Nội dung góp ý của đơn vị</th>
+                                    <th width="15%">Ghi chú</th>
+                                    <th width="5%">Tác vụ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tonghop-table-body">
+                                @for (var i = 0; i < rows.Count; i++)
+                                {
+                                    var item = rows[i];
+                                    <tr data-row="1">
+                                        <td>
+                                            <input type="hidden" data-name="Id" value="@item.Id" />
+                                            <input type="hidden" data-name="HoSoVanBanId" value="@item.HoSoVanBanId" />
+                                            <select class="form-control select2basic tonghop-donvi-select" data-name="DonViDuocLayYKienId">
+                                                <option value="">-- Chọn đơn vị --</option>
+                                                @foreach (var donVi in donViOptions)
+                                                {
+                                                    if (item.DonViDuocLayYKienId == donVi.Id)
+                                                    {
+                                                        <option value="@donVi.Id" selected>@donVi.TenDonVi</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@donVi.Id">@donVi.TenDonVi</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="date" class="form-control" data-name="HanPhanHoi" value="@(item.HanPhanHoi?.ToString("yyyy-MM-dd") ?? string.Empty)" />
+                                        </td>
+                                        <td>
+                                            <input type="date" class="form-control" data-name="NgayPhanHoi" value="@(item.NgayPhanHoi?.ToString("yyyy-MM-dd") ?? string.Empty)" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control" data-name="TrangThaiPhanHoi">
+                                                @foreach (var trangThai in trangThaiOptions)
+                                                {
+                                                    if (string.Equals(item.TrangThaiPhanHoi, trangThai.Value, StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        <option value="@trangThai.Value" selected>@trangThai.Text</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@trangThai.Value">@trangThai.Text</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <textarea class="form-control" rows="3" data-name="NoiDungPhanHoi">@item.NoiDungPhanHoi</textarea>
+                                        </td>
+                                        <td>
+                                            <textarea class="form-control" rows="3" data-name="GhiChu">@item.GhiChu</textarea>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-sm btn-light-danger" onclick="removeTongHopRow(this)">Xóa</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border mb-6">
+                <div class="card-body">
+                    <h5 class="mb-4 text-primary">Kết quả tổng hợp góp ý</h5>
+                    <div class="row">
+                        <div class="col-xl-4">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Ngày tổng hợp</label>
+                                <input type="date" name="NgayPhanHoi" class="form-control" value="@(Model.NgayPhanHoi?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))" />
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Nội dung tổng hợp</label>
+                                <textarea name="NoiDungPhanHoi" class="form-control" rows="5">@Model.NoiDungPhanHoi</textarea>
+                            </div>
+                        </div>
+                        <div class="col-xl-12">
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold">Ghi chú</label>
+                                <textarea name="GhiChu" class="form-control" rows="3">@Model.GhiChu</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border mb-6">
+                <div class="card-body">
+                    <h5 class="mb-4 text-primary">File hồ sơ đã đính kèm</h5>
+                    <div id="hoso_file_readonly">
+                        <div class="text-center text-muted py-6">Đang tải file hồ sơ...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border mb-6">
+                <div class="card-body">
+                    <h5 class="mb-4 text-primary">File tổng hợp góp ý</h5>
+                    <div id="attachedFile_frm">
+                        <div class="text-center text-muted py-6">Đang tải khu vực file đính kèm...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <a href="/Manages/LayYKienVanBan" class="btn btn-light-danger font-weight-bold mr-3">Đóng</a>
+                <button type="submit" class="btn btn-primary font-weight-bold">Hoàn thành bước lấy góp ý</button>
+            </div>
+        </form>
+    </div>
+</div>

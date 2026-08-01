@@ -1,0 +1,26 @@
+@using Services.Manages
+@model HoSoVanBanWorkflowDetailModel
+
+@{
+    ViewData["Title"] ??= "Thẩm định văn bản";
+    var pageTitle = ViewData["PageTitle"]?.ToString() ?? "Xét duyệt văn bản";
+    var pageSubtitle = ViewData["PageSubtitle"]?.ToString() ?? "Cập nhật kết quả thẩm định trên màn hình nghiệp vụ riêng.";
+}
+
+<div class="card card-custom">
+    <div class="card-header flex-wrap border-0 pt-6 pb-0">
+        <div class="card-title">
+            <h3 class="card-label">
+                <b>@pageTitle.ToUpper()</b>
+                <span class="d-block text-muted pt-2 font-size-sm">@pageSubtitle</span>
+            </h3>
+        </div>
+        <div class="card-toolbar">
+            <a href="/Manages/XetDuyetVanBan" class="btn btn-light-primary font-weight-bold">Quay lại danh sách</a>
+        </div>
+    </div>
+    <div class="card-body pt-0">
+        <hr />
+        @await Html.PartialAsync("~/Views/Admin/Manages/HoSoVanBan/Show.cshtml", Model)
+    </div>
+</div>

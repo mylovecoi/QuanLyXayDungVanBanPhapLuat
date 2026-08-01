@@ -1,0 +1,399 @@
+@using DataAccess.Entities.QuanLyDanhMuc
+@using Services.Manages
+@using System.Text.Json
+@model HoSoVanBanTaoSoanThaoTuDangKyModel
+
+@{
+    var workflowOptions = ViewData["WorkflowOptions"] as List<DanhMucQuyTrinhSoanThao> ?? new List<DanhMucQuyTrinhSoanThao>();
+    var donViOptions = ViewData["DonViOptions"] as List<DonViOptionModel> ?? new List<DonViOptionModel>();
+    var isSSA = ViewData["IsSSA"] is bool flag && flag;
+    var workflowStepUrl = ViewData["WorkflowStepUrl"]?.ToString() ?? "/Manages/XetDuyetDangKy/LoadWorkflowSteps";
+    var pageTitle = ViewData["PageTitle"]?.ToString() ?? "Tạo hồ sơ soạn thảo từ đăng ký";
+    var pageSubtitle = ViewData["PageSubtitle"]?.ToString() ?? "Hệ thống sẽ dùng workflow hồ sơ soạn thảo riêng cho chức năng này.";
+    var initialStepRowsJson = JsonSerializer.Serialize(
+        Model.BuocThoiHans
+            .OrderBy(x => x.ThuTuSapXep)
+            .Select(x => new
+            {
+                buocQuyTrinhId = x.BuocQuyTrinhId,
+                maBuoc = x.MaBuoc,
+                tenBuoc = x.TenBuoc,
+                thuTuSapXep = x.ThuTuSapXep,
+                soNgayXuLy = x.SoNgayXuLy,
+                soNgayCanhBaoSapHan = x.SoNgayCanhBaoSapHan,
+                ghiChu = x.GhiChu
+            }));
+}
+
+@section custom_style {
+    <style>
+        .draft-create-page .card {
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .draft-create-page .summary-box {
+            border: 1px solid #dce8f5;
+            background: linear-gradient(90deg, #f4f9ff 0%, #fbfdff 100%);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 24px;
+        }
+    </style>
+}
+
+@section custom_script {
+    <script>
+        function submitCreateDraftFromDangKy() {
+            const form = document.getElementById('frm_create_draft_from_dangky');
+            if (!form) {
+                return;
+            }
+
+            const quyTrinh = form.querySelector('#QuyTrinhSoanThaoId');
+            const donVi = form.querySelector('#DonViSoanThaoId');
+            const tuNgay = form.querySelector('#TuNgaySoanThao');
+            const denNgay = form.querySelector('#DenNgaySoanThao');
+
+            if (!quyTrinh || !quyTrinh.value) {
+                toastr.error('Bạn phải chọn workflow hồ sơ soạn thảo.');
+                return;
+            }
+
+            if (!donVi || !donVi.value) {
+                toastr.error('Bạn phải chọn đơn vị soạn thảo.');
+                return;
+            }
+
+            if (!tuNgay || !tuNgay.value) {
+                toastr.error('Bạn phải nhập từ ngày soạn thảo.');
+                return;
+            }
+
+            if (!denNgay || !denNgay.value) {
+                toastr.error('Bạn phải nhập thời hạn hoàn thành.');
+                return;
+            }
+
+            if (denNgay.value < tuNgay.value) {
+                toastr.error('Thời hạn hoàn thành phải lớn hơn hoặc bằng từ ngày soạn thảo.');
+                return;
+            }
+
+            form.submit();
+        }
+
+        (function () {
+            const quyTrinh = document.getElementById('QuyTrinhSoanThaoId');
+            const deadlineBody = document.getElementById('workflow-step-deadlines-body');
+            const tuNgaySoanThao = document.getElementById('TuNgaySoanThao');
+            const denNgaySoanThao = document.getElementById('DenNgaySoanThao');
+            const tongSoNgayXuLy = document.getElementById('tong-so-ngay-xu-ly');
+            const tongSoNgaySoanThao = document.getElementById('tong-so-ngay-soan-thao');
+            const ketQuaKiemTraThoiGian = document.getElementById('ket-qua-kiem-tra-thoi-gian');
+            let initialStepRows = @Html.Raw(initialStepRowsJson);
+            const initialWorkflowId = quyTrinh ? quyTrinh.value : '';
+
+            if (!quyTrinh || !deadlineBody) {
+                return;
+            }
+
+            function normalizeDate(dateValue) {
+                if (!dateValue) {
+                    return null;
+                }
+
+                const date = new Date(dateValue + 'T00:00:00');
+                return Number.isNaN(date.getTime()) ? null : date;
+            }
+
+            function tinhTongSoNgayXuLy() {
+                return Array.from(deadlineBody.querySelectorAll('input[name$=".SoNgayXuLy"]'))
+                    .map(function (input) { return Number(input.value); })
+                    .filter(function (value) { return Number.isFinite(value) && value > 0; })
+                    .reduce(function (total, value) { return total + value; }, 0);
+            }
+
+            function tinhTongSoNgaySoanThao() {
+                const fromDate = normalizeDate(tuNgaySoanThao ? tuNgaySoanThao.value : '');
+                const toDate = normalizeDate(denNgaySoanThao ? denNgaySoanThao.value : '');
+
+                if (!fromDate || !toDate) {
+                    return null;
+                }
+
+                const diffInMs = toDate.getTime() - fromDate.getTime();
+                const diffInDays = Math.floor(diffInMs / 86400000) + 1;
+                return diffInDays > 0 ? diffInDays : 0;
+            }
+
+            function capNhatTongNgayXuLy() {
+                const totalStepDays = tinhTongSoNgayXuLy();
+                const totalDraftDays = tinhTongSoNgaySoanThao();
+
+                if (tongSoNgayXuLy) {
+                    tongSoNgayXuLy.textContent = totalStepDays.toString();
+                }
+
+                if (tongSoNgaySoanThao) {
+                    tongSoNgaySoanThao.textContent = totalDraftDays === null ? '0' : totalDraftDays.toString();
+                }
+
+                if (!ketQuaKiemTraThoiGian) {
+                    return;
+                }
+
+                ketQuaKiemTraThoiGian.className = 'font-weight-bold';
+
+                if (totalDraftDays === null) {
+                    ketQuaKiemTraThoiGian.classList.add('text-muted');
+                    ketQuaKiemTraThoiGian.textContent = 'Chọn từ ngày và thời hạn hoàn thành để hệ thống kiểm tra.';
+                    return;
+                }
+
+                if (totalDraftDays === 0) {
+                    ketQuaKiemTraThoiGian.classList.add('text-danger');
+                    ketQuaKiemTraThoiGian.textContent = 'Thời hạn hoàn thành phải lớn hơn hoặc bằng từ ngày soạn thảo.';
+                    return;
+                }
+
+                const chenhLech = totalDraftDays - totalStepDays;
+                if (chenhLech >= 0) {
+                    ketQuaKiemTraThoiGian.classList.add('text-success');
+                    ketQuaKiemTraThoiGian.textContent = `Đủ thời gian thực hiện. Còn dư ${chenhLech} ngày so với tổng số ngày xử lý.`;
+                    return;
+                }
+
+                ketQuaKiemTraThoiGian.classList.add('text-danger');
+                ketQuaKiemTraThoiGian.textContent = `Không đủ thời gian thực hiện. Thiếu ${Math.abs(chenhLech)} ngày so với tổng số ngày xử lý.`;
+            }
+
+            function renderDeadlineRows(items) {
+                if (!items || !items.length) {
+                    deadlineBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Workflow này chưa có bước nào.</td></tr>';
+                    capNhatTongNgayXuLy();
+                    return;
+                }
+
+                deadlineBody.innerHTML = items.map(function (item, index) {
+                    return `
+                        <tr>
+                            <td class="text-center align-middle">
+                                ${item.thuTuSapXep}
+                                <input type="hidden" name="BuocThoiHans[${index}].BuocQuyTrinhId" value="${item.buocQuyTrinhId}" />
+                                <input type="hidden" name="BuocThoiHans[${index}].MaBuoc" value="${item.maBuoc}" />
+                                <input type="hidden" name="BuocThoiHans[${index}].TenBuoc" value="${item.tenBuoc}" />
+                                <input type="hidden" name="BuocThoiHans[${index}].ThuTuSapXep" value="${item.thuTuSapXep}" />
+                            </td>
+                            <td class="align-middle font-weight-bold">${item.maBuoc}</td>
+                            <td class="align-middle">${item.tenBuoc}</td>
+                            <td>
+                                <input name="BuocThoiHans[${index}].SoNgayXuLy" type="number" min="1" class="form-control form-control-sm" value="${item.soNgayXuLy ?? ''}" />
+                            </td>
+                            <td>
+                                <input name="BuocThoiHans[${index}].SoNgayCanhBaoSapHan" type="number" min="0" class="form-control form-control-sm" value="${item.soNgayCanhBaoSapHan ?? ''}" />
+                            </td>
+                            <td>
+                                <input name="BuocThoiHans[${index}].GhiChu" type="text" class="form-control form-control-sm" value="${item.ghiChu ?? ''}" />
+                            </td>
+                        </tr>`;
+                }).join('');
+
+                deadlineBody.querySelectorAll('input').forEach(function (input) {
+                    input.addEventListener('input', capNhatTongNgayXuLy);
+                });
+
+                capNhatTongNgayXuLy();
+            }
+
+            async function loadWorkflowSteps(workflowId) {
+                if (!workflowId) {
+                    deadlineBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Chọn workflow để nạp thời hạn từng bước.</td></tr>';
+                    capNhatTongNgayXuLy();
+                    return;
+                }
+
+                try {
+                    const response = await fetch('@workflowStepUrl' + '?quyTrinhSoanThaoId=' + workflowId, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const items = await response.json();
+                    renderDeadlineRows(items);
+                } catch (error) {
+                    deadlineBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Không thể tải danh sách bước của workflow.</td></tr>';
+                }
+            }
+
+            quyTrinh.addEventListener('change', function () {
+                loadWorkflowSteps(this.value);
+            });
+
+            tuNgaySoanThao?.addEventListener('change', capNhatTongNgayXuLy);
+            denNgaySoanThao?.addEventListener('change', capNhatTongNgayXuLy);
+
+            if (initialStepRows && initialStepRows.length && initialWorkflowId) {
+                renderDeadlineRows(initialStepRows);
+            } else if (initialWorkflowId) {
+                loadWorkflowSteps(initialWorkflowId);
+            } else {
+                capNhatTongNgayXuLy();
+            }
+        })();
+    </script>
+}
+
+<div class="draft-create-page">
+    <div class="card card-custom">
+        <div class="card-header border-0 pt-6">
+            <div class="card-title">
+                <div>
+                    <h3 class="card-label mb-1"><b>@pageTitle</b></h3>
+                    <div class="text-muted">@pageSubtitle</div>
+                </div>
+            </div>
+            <div class="card-toolbar">
+                <a href="/Manages/XetDuyetDangKy" class="btn btn-light-primary font-weight-bold">Quay lại danh sách</a>
+            </div>
+        </div>
+        <div class="card-body pt-2">
+            @if (ViewData["Messages"] != null)
+            {
+                <div class="alert alert-danger">@ViewData["Messages"]</div>
+            }
+
+            <div class="summary-box">
+                <div class="font-weight-bold text-dark mb-2">Thông tin hồ sơ đăng ký nguồn</div>
+                <div>Hồ sơ đăng ký: <span class="font-weight-bold">@Model.TenHoSoDangKy</span></div>
+                @if (!string.IsNullOrWhiteSpace(Model.TenLoaiVanBan))
+                {
+                    <div>Loại văn bản: @Model.TenLoaiVanBan</div>
+                }
+                <div class="text-muted mt-2">Hồ sơ soạn thảo mới sẽ được liên kết ngược với hồ sơ đăng ký này để phục vụ tra cứu khi cần.</div>
+            </div>
+
+            <form id="frm_create_draft_from_dangky" method="post" action="/Manages/XetDuyetDangKy/TaoHoSoSoanThao">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="HoSoDangKyId" />
+                <input type="hidden" asp-for="DanhMucVanBanId" />
+                <input type="hidden" asp-for="TenHoSoDangKy" />
+                <input type="hidden" asp-for="TenLoaiVanBan" />
+
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="form-group">
+                            <label>Workflow hồ sơ soạn thảo <span class="text-danger">*</span></label>
+                            @if (workflowOptions.Any())
+                            {
+                                <select asp-for="QuyTrinhSoanThaoId" class="form-control">
+                                    @foreach (var item in workflowOptions)
+                                    {
+                                        <option value="@item.Id" selected="@(Model.QuyTrinhSoanThaoId == item.Id ? "selected" : null)">@item.TenQuyTrinh</option>
+                                    }
+                                </select>
+                            }
+                            else
+                            {
+                                <input type="text" class="form-control" value="Chưa cấu hình workflow hồ sơ soạn thảo" disabled />
+                            }
+                        </div>
+                    </div>
+                    <div class="col-xl-6">
+                        <div class="form-group">
+                            <label>Đơn vị soạn thảo <span class="text-danger">*</span></label>
+                            @if (isSSA)
+                            {
+                                <select asp-for="DonViSoanThaoId" class="form-control">
+                                    <option value="">-- Chọn đơn vị soạn thảo --</option>
+                                    @foreach (var item in donViOptions)
+                                    {
+                                        <option value="@item.Id" selected="@(Model.DonViSoanThaoId.HasValue && Model.DonViSoanThaoId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
+                                    }
+                                </select>
+                            }
+                            else
+                            {
+                                <select class="form-control" disabled>
+                                    @foreach (var item in donViOptions)
+                                    {
+                                        <option value="@item.Id" selected="@(Model.DonViSoanThaoId.HasValue && Model.DonViSoanThaoId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
+                                    }
+                                </select>
+                                <input type="hidden" asp-for="DonViSoanThaoId" />
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="form-group">
+                            <label>Từ ngày soạn thảo <span class="text-danger">*</span></label>
+                            <input asp-for="TuNgaySoanThao" type="date" class="form-control" value="@Model.TuNgaySoanThao.ToString("yyyy-MM-dd")" />
+                        </div>
+                    </div>
+                    <div class="col-xl-6">
+                        <div class="form-group">
+                            <label>Thời hạn hoàn thành <span class="text-danger">*</span></label>
+                            <input asp-for="DenNgaySoanThao" type="date" class="form-control" value="@(Model.DenNgaySoanThao?.ToString("yyyy-MM-dd"))" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="form-group">
+                            <label>Ghi chú</label>
+                            <textarea asp-for="GhiChu" class="form-control" rows="3" placeholder="Ghi chú bổ sung nếu cần"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="separator separator-dashed my-6"></div>
+
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <h5 class="mb-0">Thời hạn từng bước</h5>
+                        <div class="text-muted font-size-sm">Workflow hồ sơ soạn thảo riêng sẽ hiển thị danh sách các bước và thời hạn để bạn điều chỉnh.</div>
+                    </div>
+                </div>
+
+                <div class="table-responsive border rounded mb-4">
+                    <table class="table table-bordered table-sm m-0">
+                        <thead class="thead-light">
+                            <tr class="text-center">
+                                <th style="min-width:60px;">Thứ tự</th>
+                                <th style="min-width:140px;">Mã bước</th>
+                                <th style="min-width:220px;">Tên bước</th>
+                                <th style="min-width:140px;">Số ngày xử lý</th>
+                                <th style="min-width:160px;">Cảnh báo sắp hạn</th>
+                                <th style="min-width:180px;">Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workflow-step-deadlines-body">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">Chọn workflow để nạp thời hạn từng bước.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row mb-6">
+                    <div class="col-xl-12">
+                        <div class="alert alert-light border mb-0" id="workflow-deadline-summary">
+                            <div class="font-weight-bold mb-2">Kiểm tra thời gian soạn thảo</div>
+                            <div class="mb-1">Tổng số ngày xử lý đã nhập: <span id="tong-so-ngay-xu-ly">0</span> ngày</div>
+                            <div class="mb-1">Khoảng thời gian soạn thảo: <span id="tong-so-ngay-soan-thao">0</span> ngày</div>
+                            <div id="ket-qua-kiem-tra-thoi-gian" class="font-weight-bold text-muted">Chọn từ ngày và thời hạn hoàn thành để hệ thống kiểm tra.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-8">
+                    <a href="/Manages/XetDuyetDangKy" class="btn btn-light-danger font-weight-bold mr-3">Đóng</a>
+                    <button type="button" class="btn btn-primary font-weight-bold" onclick="submitCreateDraftFromDangKy()">Đồng ý tạo hồ sơ soạn thảo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

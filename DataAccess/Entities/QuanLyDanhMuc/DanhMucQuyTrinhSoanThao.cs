@@ -10,6 +10,9 @@ namespace DataAccess.Entities.QuanLyDanhMuc
         [Required(ErrorMessage = "Ten quy trinh khong duoc de trong")]
         public string TenQuyTrinh { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Loai quy trinh khong duoc de trong")]
+        public string LoaiQuyTrinh { get; set; } = "XayDung";
+
         public Guid? DanhMucVanBanId { get; set; }
 
         public string? DanhMucVanBanIds { get; set; }
