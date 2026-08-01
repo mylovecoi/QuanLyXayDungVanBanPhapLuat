@@ -7,6 +7,7 @@
     var danhMucVanBans = ViewData["DanhMucVanBans"] as List<DanhMucVanBan> ?? new List<DanhMucVanBan>();
     var quyTrinhSoanThaos = ViewData["QuyTrinhSoanThaos"] as List<DanhMucQuyTrinhSoanThao> ?? new List<DanhMucQuyTrinhSoanThao>();
     var donViOptions = ViewData["CreateDonViOptions"] as List<DonViOptionModel> ?? new List<DonViOptionModel>();
+    var hoSoDangKyOptions = ViewData["HoSoDangKyOptions"] as List<HoSoDangKyOptionModel> ?? new List<HoSoDangKyOptionModel>();
     var createIsSSA = ViewData["CreateIsSSA"] is bool flag && flag;
     var workflowStepUrl = ViewData["WorkflowStepUrl"]?.ToString() ?? "/Manages/HoSoVanBan/LoadWorkflowSteps";
     var isSingleWorkflow = quyTrinhSoanThaos.Count == 1;
@@ -30,6 +31,31 @@
 <input asp-for="Id" type="hidden" />
 <input asp-for="AttachedFileGroupId" type="hidden" />
 <input asp-for="HanXuLy" type="hidden" id="HanXuLy" value="@(Model.DenNgaySoanThao?.ToString("yyyy-MM-dd") ?? Model.HanXuLy?.ToString("yyyy-MM-dd"))" />
+
+@if (hoSoDangKyOptions.Any())
+{
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="form-group">
+                <label>Văn bản đã đăng ký</label>
+                <select asp-for="HoSoDangKyId" class="form-control" id="HoSoDangKyId">
+                    <option value="">-- Không liên kết hồ sơ đăng ký --</option>
+                    @foreach (var item in hoSoDangKyOptions)
+                    {
+                        <option value="@item.Id"
+                                data-vanbanid="@item.DanhMucVanBanId"
+                                data-tenhoso="@item.TenHoSo"
+                                data-donviid="@item.DonViSoanThaoId"
+                                selected="@(Model.HoSoDangKyId.HasValue && Model.HoSoDangKyId.Value == item.Id ? "selected" : null)">
+                            @item.NhanHienThi
+                        </option>
+                    }
+                </select>
+                <div class="text-muted font-size-sm mt-1">Nếu chọn, hệ thống sẽ liên kết hồ sơ soạn thảo với hồ sơ đăng ký nguồn.</div>
+            </div>
+        </div>
+    </div>
+}
 
 <div class="row">
     <div class="col-xl-6">
@@ -99,7 +125,12 @@
                     <option value="">-- Chọn quy trình --</option>
                     @foreach (var item in quyTrinhSoanThaos)
                     {
-                        <option value="@item.Id" data-vanbanid="@item.DanhMucVanBanId" selected="@(Model.QuyTrinhSoanThaoId == item.Id ? "selected" : null)">@item.TenQuyTrinh (@item.CapApDung)</option>
+                        <option value="@item.Id"
+                                data-vanbanid="@item.DanhMucVanBanId"
+                                data-vanbanids="@item.DanhMucVanBanIds"
+                                selected="@(Model.QuyTrinhSoanThaoId == item.Id ? "selected" : null)">
+                            @item.TenQuyTrinh (@item.CapApDung)
+                        </option>
                     }
                 </select>
             }
@@ -183,11 +214,14 @@
 <script>
     (function () {
         const danhMucVanBan = document.getElementById('DanhMucVanBanId');
+        const hoSoDangKy = document.getElementById('HoSoDangKyId');
         const quyTrinh = document.getElementById('QuyTrinhSoanThaoId');
         const deadlineBody = document.getElementById('workflow-step-deadlines-body');
         const tuNgaySoanThao = document.getElementById('TuNgaySoanThao');
         const denNgaySoanThao = document.getElementById('DenNgaySoanThao');
         const hanXuLy = document.getElementById('HanXuLy');
+        const tenHoSo = document.getElementById('TenHoSo');
+        const donViDeNghi = document.getElementById('DonViDeNghiId');
         const tongSoNgayXuLy = document.getElementById('tong-so-ngay-xu-ly');
         const tongSoNgaySoanThao = document.getElementById('tong-so-ngay-soan-thao');
         const ketQuaKiemTraThoiGian = document.getElementById('ket-qua-kiem-tra-thoi-gian');
@@ -196,6 +230,40 @@
 
         if (!danhMucVanBan || !quyTrinh || !deadlineBody) {
             return;
+        }
+
+        function syncFromHoSoDangKy() {
+            if (!hoSoDangKy) {
+                return;
+            }
+
+            const selectedOption = hoSoDangKy.options[hoSoDangKy.selectedIndex];
+            if (!selectedOption || !selectedOption.value) {
+                if (danhMucVanBan) {
+                    danhMucVanBan.disabled = false;
+                }
+                return;
+            }
+
+            const vanBanId = selectedOption.getAttribute('data-vanbanid') || '';
+            const tenHoSoValue = selectedOption.getAttribute('data-tenhoso') || '';
+            const donViId = selectedOption.getAttribute('data-donviid') || '';
+
+            if (vanBanId) {
+                danhMucVanBan.value = vanBanId;
+                danhMucVanBan.disabled = true;
+            }
+
+            if (tenHoSo && (!tenHoSo.value || !tenHoSo.value.trim())) {
+                tenHoSo.value = tenHoSoValue;
+            }
+
+            if (donViDeNghi && donViId && !donViDeNghi.disabled) {
+                donViDeNghi.value = donViId;
+            }
+
+            initialStepRows = [];
+            filterQuyTrinh();
         }
 
         function normalizeDate(dateValue) {
@@ -285,7 +353,15 @@
                 }
 
                 const vanBanId = option.getAttribute('data-vanbanid');
-                const visible = !selectedVanBanId || !vanBanId || vanBanId === selectedVanBanId;
+                const vanBanIdsRaw = option.getAttribute('data-vanbanids') || '';
+                const vanBanIds = vanBanIdsRaw
+                    .split(',')
+                    .map(function (value) { return value.trim(); })
+                    .filter(function (value) { return value.length > 0; });
+                const visible = !selectedVanBanId
+                    || (!vanBanId && vanBanIds.length === 0)
+                    || vanBanId === selectedVanBanId
+                    || vanBanIds.includes(selectedVanBanId);
                 option.hidden = !visible;
                 if (!visible && option.selected) {
                     quyTrinh.value = '';
@@ -376,6 +452,7 @@
             initialStepRows = [];
             filterQuyTrinh();
         });
+        hoSoDangKy?.addEventListener('change', syncFromHoSoDangKy);
         quyTrinh.addEventListener('change', function () {
             if (quyTrinh.value !== initialWorkflowId) {
                 initialStepRows = [];
@@ -383,6 +460,7 @@
             loadWorkflowSteps();
         });
 
+        syncFromHoSoDangKy();
         filterQuyTrinh();
         loadWorkflowSteps();
         capNhatTongNgayXuLy();

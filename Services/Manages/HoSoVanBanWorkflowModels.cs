@@ -49,6 +49,7 @@ namespace Services.Manages
     public class HoSoVanBanCreateModel
     {
         public Guid Id { get; set; }
+        public Guid? HoSoDangKyId { get; set; }
         public Guid? DonViDeNghiId { get; set; }
         public string TenHoSo { get; set; } = string.Empty;
         public Guid DanhMucVanBanId { get; set; }
@@ -111,6 +112,17 @@ namespace Services.Manages
         public string TenDonVi { get; set; } = string.Empty;
     }
 
+    public class HoSoDangKyOptionModel
+    {
+        public Guid Id { get; set; }
+        public string TenHoSo { get; set; } = string.Empty;
+        public Guid DanhMucVanBanId { get; set; }
+        public string? TenLoaiVanBan { get; set; }
+        public Guid? DonViSoanThaoId { get; set; }
+        public string? TenDonViSoanThao { get; set; }
+        public string NhanHienThi { get; set; } = string.Empty;
+    }
+
     public class HoSoVanBanLayYKienStepModel
     {
         public Guid HoSoVanBanId { get; set; }
@@ -154,6 +166,8 @@ namespace Services.Manages
         public Guid Id { get; set; }
         public string MaHoSo { get; set; } = string.Empty;
         public string TenHoSo { get; set; } = string.Empty;
+        public Guid? HoSoDangKyNguonId { get; set; }
+        public string? TenHoSoDangKyNguon { get; set; }
         public string? TenLoaiVanBan { get; set; }
         public string? TenQuyTrinh { get; set; }
         public string? TenBuocHienTai { get; set; }

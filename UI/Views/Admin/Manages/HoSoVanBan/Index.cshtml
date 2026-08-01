@@ -17,7 +17,8 @@
     var receiveModeMessage = ViewData["ReceiveModeMessage"]?.ToString();
     var routePrefix = ViewData["RoutePrefix"]?.ToString() ?? "/Manages/HoSoVanBan";
     var allowCreate = string.Equals(routePrefix, "/Manages/DangKyVanBan", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(routePrefix, "/Manages/DuThaoVanBan", StringComparison.OrdinalIgnoreCase);
+        || string.Equals(routePrefix, "/Manages/DuThaoVanBan", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(routePrefix, "/Manages/HoSoVanBan", StringComparison.OrdinalIgnoreCase);
     var isXetDuyetDangKy = string.Equals(routePrefix, "/Manages/XetDuyetDangKy", StringComparison.OrdinalIgnoreCase);
     var isDangKyVanBan = string.Equals(routePrefix, "/Manages/DangKyVanBan", StringComparison.OrdinalIgnoreCase);
     var isSoanThaoVanBan = string.Equals(routePrefix, "/Manages/HoSoVanBan", StringComparison.OrdinalIgnoreCase);

@@ -85,6 +85,10 @@
                 return;
             }
 
+            const danhMucVanBan = form.querySelector('#DanhMucVanBanId');
+            if (danhMucVanBan && danhMucVanBan.disabled) {
+                danhMucVanBan.disabled = false;
+            }
             form.submit();
         }
 
@@ -133,7 +137,7 @@
 
                 <div class="mb-4">
                     <div class="section-title">Tài liệu đính kèm</div>
-                    <div class="section-subtitle">Upload file trực tiếp cho hồ sơ theo Id hồ sơ trước khi bấm lưu.</div>
+                    <div class="section-subtitle">Upload file trực tiếp cho hồ sơ theo ID hồ sơ trước khi bấm lưu.</div>
                 </div>
 
                 <input type="hidden" id="Id" value="@Model.Id" />

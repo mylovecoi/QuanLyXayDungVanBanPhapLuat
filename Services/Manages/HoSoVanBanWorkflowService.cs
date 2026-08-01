@@ -1,4 +1,4 @@
-﻿using DataAccess;
+using DataAccess;
 using DataAccess.Entities.Manages;
 using DataAccess.Entities.QuanLyDanhMuc;
 using DocumentFormat.OpenXml.Packaging;
@@ -17,6 +17,7 @@ namespace Services.Manages
         Task<CommonResponse> GetDanhSachTheoBuocAsync(string search, string maBuoc, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1, bool chiLayDonViDangNhap = true, IEnumerable<string>? trangThaiNghiepVuFilters = null, string? loaiQuyTrinh = null);
         Task<CommonResponse> GetDanhSachLayYKienAsync(string search, Guid? donViId = null, int pageSize = 5, int pageCurrent = 1);
         Task<List<DonViOptionModel>> GetDonViOptionsAsync();
+        Task<List<HoSoDangKyOptionModel>> GetHoSoDangKyOptionsAsync(Guid? donViId = null, bool isSSA = false);
         Task<List<DataAccess.Entities.QuanLyDanhMuc.DanhMucVanBan>> GetDanhMucVanBanOptionsAsync();
         Task<List<DataAccess.Entities.QuanLyDanhMuc.DanhMucQuyTrinhSoanThao>> GetQuyTrinhOptionsAsync(Guid? danhMucVanBanId = null, string? loaiQuyTrinh = null);
         Task<List<DataAccess.Entities.QuanLyDanhMuc.DanhMucQuyTrinhSoanThao>> GetDraftQuyTrinhOptionsAsync(Guid danhMucVanBanId);
@@ -215,7 +216,7 @@ namespace Services.Manages
                     }
                 }
 
-                return new CommonResponse("success", "ThÃ nh cÃ´ng", data, totalRecord);
+                return new CommonResponse("success", "Thành công", data, totalRecord);
             }
             catch
             {
@@ -303,7 +304,7 @@ namespace Services.Manages
                         MaBuocHienTai = buoc != null ? buoc.MaBuoc : null,
                         TenLoaiVanBan = vanBan.TenLoaiVanBan,
                         TenQuyTrinh = quyTrinh.TenQuyTrinh,
-                        TenBuocHienTai = buoc != null ? buoc.TenBuoc : "ÄÃ£ hoÃ n thÃ nh",
+                        TenBuocHienTai = buoc != null ? buoc.TenBuoc : "Đã hoàn thành",
                         MaTrangThai = trangThai != null ? trangThai.MaTrangThai : null,
                         TenTrangThai = trangThai != null ? trangThai.TenTrangThai : null,
                         MaMauTrangThai = trangThai != null ? trangThai.MaMauHex : null,
@@ -409,7 +410,7 @@ namespace Services.Manages
                         {
                             item.CanNhanHoSo = false;
                             item.CanXuLyBuocHienTai = false;
-                            item.TenBuocHienTai = "Đang lấy ý kiến góp ý";
+                            item.TenBuocHienTai = "�ang l?y � ki?n g�p �";
                         }
 
                         if (normalizedLoaiQuyTrinh == NormalizeWorkflowType("XayDung") &&
@@ -425,16 +426,16 @@ namespace Services.Manages
                         if (item.Id == Guid.Empty && item.Id != Guid.Empty)
                         {
                             item.CanNhanHoSo = false;
-                            item.TenBuocHienTai = "Äang soáº¡n tháº£o";
+                            item.TenBuocHienTai = "Đang soạn thảo";
                         }
 
                         if (item.NgayHoanThanh.HasValue ||
                             (item.TongSoBuoc > 0 && item.SoBuocHoanThanh >= item.TongSoBuoc))
                         {
                             item.MaTrangThai = "HOAN_THANH";
-                            item.TenTrangThai = "ÄÃ£ hoÃ n thÃ nh";
+                            item.TenTrangThai = "Đã hoàn thành";
                             item.MaMauTrangThai = "#28A745";
-                            item.TenBuocHienTai = "ÄÃ£ hoÃ n thÃ nh";
+                            item.TenBuocHienTai = "Đã hoàn thành";
                             item.CanXuLyBuocHienTai = false;
                         }
                     }
@@ -445,9 +446,9 @@ namespace Services.Manages
                     {
                         var hoanThanhQuaHan = item.SoBuocQuaHan > 0;
                         item.MaTrangThai = hoanThanhQuaHan ? "HOAN_THANH_QUA_HAN" : "HOAN_THANH_DUNG_HAN";
-                        item.TenTrangThai = hoanThanhQuaHan ? "HoÃ n thÃ nh quÃ¡ háº¡n" : "HoÃ n thÃ nh Ä‘Ãºng háº¡n";
+                        item.TenTrangThai = hoanThanhQuaHan ? "Hoàn thành quá hạn" : "Hoàn thành đúng hạn";
                         item.MaMauTrangThai = hoanThanhQuaHan ? "#DC3545" : "#28A745";
-                        item.TenBuocHienTai = "ÄÃ£ hoÃ n thÃ nh";
+                        item.TenBuocHienTai = "Đã hoàn thành";
                         item.CanXuLyBuocHienTai = false;
                     }
                 }
@@ -458,12 +459,12 @@ namespace Services.Manages
                 {
                     var hoanThanhQuaHan = item.SoBuocQuaHan > 0;
                     item.TrangThaiTienDo = hoanThanhQuaHan ? "HOAN_THANH_QUA_HAN" : "HOAN_THANH_DUNG_HAN";
-                    item.TenTrangThaiTienDo = hoanThanhQuaHan ? "HoÃ n thÃ nh quÃ¡ háº¡n" : "HoÃ n thÃ nh Ä‘Ãºng háº¡n";
+                    item.TenTrangThaiTienDo = hoanThanhQuaHan ? "Hoàn thành quá hạn" : "Hoàn thành đúng hạn";
                     item.MaMauTienDo = hoanThanhQuaHan ? "#DC3545" : "#28A745";
                     item.DangOQuaHan = hoanThanhQuaHan;
                 }
 
-                return new CommonResponse("success", "ThÃ nh cÃ´ng", data, totalRecord);
+                return new CommonResponse("success", "Thành công", data, totalRecord);
             }
             catch
             {
@@ -497,6 +498,51 @@ namespace Services.Manages
                 .ToListAsync();
         }
 
+        public async Task<List<HoSoDangKyOptionModel>> GetHoSoDangKyOptionsAsync(Guid? donViId = null, bool isSSA = false)
+        {
+            var query = _dbContext.HoSoVanBans
+                .AsNoTracking()
+                .Where(x => _dbContext.DanhMucQuyTrinhSoanThaos.Any(q => q.Id == x.QuyTrinhSoanThaoId && q.LoaiQuyTrinh == NormalizeWorkflowType("DangKy")))
+                .Select(x => new
+                {
+                    x.Id,
+                    x.TenHoSo,
+                    x.DanhMucVanBanId,
+                    x.DonViSoanThaoId,
+                    TenLoaiVanBan = _dbContext.DanhMucVanBans
+                        .Where(v => v.Id == x.DanhMucVanBanId)
+                        .Select(v => v.TenLoaiVanBan)
+                        .FirstOrDefault(),
+                    TenDonViSoanThao = _dbContext.DanhMucDonVis
+                        .Where(d => d.Id == x.DonViSoanThaoId)
+                        .Select(d => d.TenDonVi)
+                        .FirstOrDefault(),
+                    x.NgayTaoHoSo
+                });
+
+            if (!isSSA && donViId.HasValue && donViId.Value != Guid.Empty)
+            {
+                query = query.Where(x => x.DonViSoanThaoId == donViId.Value);
+            }
+
+            return await query
+                .OrderByDescending(x => x.NgayTaoHoSo)
+                .ThenBy(x => x.TenHoSo)
+                .Select(x => new HoSoDangKyOptionModel
+                {
+                    Id = x.Id,
+                    TenHoSo = x.TenHoSo,
+                    DanhMucVanBanId = x.DanhMucVanBanId,
+                    TenLoaiVanBan = x.TenLoaiVanBan,
+                    DonViSoanThaoId = x.DonViSoanThaoId,
+                    TenDonViSoanThao = x.TenDonViSoanThao,
+                    NhanHienThi = string.IsNullOrWhiteSpace(x.TenLoaiVanBan)
+                        ? x.TenHoSo
+                        : $"{x.TenHoSo} ({x.TenLoaiVanBan})"
+                })
+                .ToListAsync();
+        }
+
         public async Task<List<DataAccess.Entities.QuanLyDanhMuc.DanhMucQuyTrinhSoanThao>> GetQuyTrinhOptionsAsync(Guid? danhMucVanBanId = null, string? loaiQuyTrinh = null)
         {
             var query = _dbContext.DanhMucQuyTrinhSoanThaos
@@ -511,15 +557,11 @@ namespace Services.Manages
 
             if (danhMucVanBanId.HasValue && danhMucVanBanId.Value != Guid.Empty)
             {
-                query = query.Where(x => x.DanhMucVanBanId == danhMucVanBanId.Value);
-            }
-
-            if (string.Equals(loaiQuyTrinh, "XayDung", StringComparison.OrdinalIgnoreCase))
-            {
-                query = query.Where(x => _dbContext.DanhMucBuocQuyTrinhs
-                    .AsNoTracking()
-                    .Any(b => b.QuyTrinhSoanThaoId == x.Id &&
-                              string.Equals(b.LoaiBuoc, "SoanThao")));
+                var vanBanIdToken = danhMucVanBanId.Value.ToString();
+                query = query.Where(x =>
+                    x.DanhMucVanBanId == danhMucVanBanId.Value ||
+                    (!string.IsNullOrWhiteSpace(x.DanhMucVanBanIds) && x.DanhMucVanBanIds.Contains(vanBanIdToken)) ||
+                    (!x.DanhMucVanBanId.HasValue && string.IsNullOrWhiteSpace(x.DanhMucVanBanIds)));
             }
 
             return await query.OrderBy(x => x.TenQuyTrinh).ToListAsync();
@@ -568,17 +610,17 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             if (!request.TuNgaySoanThao.HasValue || !request.DenNgaySoanThao.HasValue)
             {
-                return new CommonResponse("error", "Thá»i gian soáº¡n tháº£o báº¯t buá»™c pháº£i nháº­p.");
+                return new CommonResponse("error", "Thời gian soạn thảo bắt buộc phải nhập.");
             }
 
             if (request.DenNgaySoanThao.Value.Date < request.TuNgaySoanThao.Value.Date)
             {
-                return new CommonResponse("error", "Äáº¿n ngÃ y soáº¡n tháº£o pháº£i lá»›n hÆ¡n hoáº·c báº±ng tá»« ngÃ y soáº¡n tháº£o.");
+                return new CommonResponse("error", "Đến ngày soạn thảo phải lớn hơn hoặc bằng từ ngày soạn thảo.");
             }
 
             if (request.Id == Guid.Empty)
@@ -596,7 +638,7 @@ namespace Services.Manages
 
             if (await _dbContext.HoSoVanBans.AnyAsync(x => x.Id == request.Id))
             {
-                return new CommonResponse("error", "MÃ£ há»“ sÆ¡ Ä‘Ã£ tá»“n táº¡i!");
+                return new CommonResponse("error", "Mã hồ sơ đã tồn tại!");
             }
 
             request.BuocThoiHans = request.BuocThoiHans
@@ -610,19 +652,33 @@ namespace Services.Manages
 
             if (quyTrinh == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y quy trÃ¬nh soáº¡n tháº£o Ä‘ang kÃ­ch hoáº¡t!");
+                return new CommonResponse("error", "Không tìm thấy quy trình soạn thảo đang kích hoạt!");
             }
 
-            var firstStep = await _dbContext.DanhMucBuocQuyTrinhs
-                .AsNoTracking()
-                .Where(x => x.QuyTrinhSoanThaoId == request.QuyTrinhSoanThaoId)
-                .OrderBy(x => x.ThuTuSapXep)
-                .ThenBy(x => x.MaBuoc)
-                .FirstOrDefaultAsync();
+            DanhMucBuocQuyTrinh? firstStep;
+            if (quyTrinh.LoaiQuyTrinh == NormalizeWorkflowType("XayDung"))
+            {
+                firstStep = await ResolveDraftStartStepAsync(request.QuyTrinhSoanThaoId)
+                    ?? await _dbContext.DanhMucBuocQuyTrinhs
+                        .AsNoTracking()
+                        .Where(x => x.QuyTrinhSoanThaoId == request.QuyTrinhSoanThaoId)
+                        .OrderBy(x => x.ThuTuSapXep)
+                        .ThenBy(x => x.MaBuoc)
+                        .FirstOrDefaultAsync();
+            }
+            else
+            {
+                firstStep = await _dbContext.DanhMucBuocQuyTrinhs
+                    .AsNoTracking()
+                    .Where(x => x.QuyTrinhSoanThaoId == request.QuyTrinhSoanThaoId)
+                    .OrderBy(x => x.ThuTuSapXep)
+                    .ThenBy(x => x.MaBuoc)
+                    .FirstOrDefaultAsync();
+            }
 
             if (firstStep == null)
             {
-                return new CommonResponse("error", "Quy trÃ¬nh chÆ°a cÃ³ bÆ°á»›c nÃ o Ä‘á»ƒ khá»Ÿi táº¡o há»“ sÆ¡!");
+                return new CommonResponse("error", "Quy trình chưa có bước nào để khởi tạo hồ sơ!");
             }
 
             var stepDeadlinePlans = await BuildRequestedStepDeadlinePlansAsync(request.QuyTrinhSoanThaoId, request.BuocThoiHans);
@@ -696,7 +752,7 @@ namespace Services.Manages
                     DanhMucTrangThaiId = dangXuLyStatusId,
                     IsCurrent = true,
                     KetQuaXuLy = null,
-                    NoiDungXuLy = "Khá»Ÿi táº¡o há»“ sÆ¡ vÃ o quy trÃ¬nh.",
+                    NoiDungXuLy = "Khởi tạo hồ sơ vào quy trình.",
                     GhiChu = request.GhiChu
                 };
 
@@ -710,9 +766,9 @@ namespace Services.Manages
                     firstStep,
                     currentUser.DanhMucDonViId,
                     xuLyDauTien.DonViXuLyId,
-                    $"Há»“ sÆ¡ '{hoSo.TenHoSo}' Ä‘Ã£ Ä‘Æ°á»£c khá»Ÿi táº¡o vÃ  Ä‘ang á»Ÿ bÆ°á»›c '{firstStep.TenBuoc}'.");
+                    $"Hồ sơ '{hoSo.TenHoSo}' đã được khởi tạo và đang ở bước '{firstStep.TenBuoc}'.");
 
-                return new CommonResponse("success", "ThÃ nh cÃ´ng", hoSo.Id);
+                return new CommonResponse("success", "Thành công", hoSo.Id);
             }
             catch
             {
@@ -726,7 +782,7 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             var hoSo = await _dbContext.HoSoVanBans
@@ -735,7 +791,7 @@ namespace Services.Manages
 
             if (hoSo == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
+                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -745,7 +801,7 @@ namespace Services.Manages
 
             if (!CanEditDangKyHoSo(currentUser, hoSo, currentStep, currentProcessing))
             {
-                return new CommonResponse("error", "Há»“ sÆ¡ nÃ y Ä‘Ã£ Ä‘Æ°á»£c gá»­i Ä‘i hoáº·c báº¡n khÃ´ng cÃ³ quyá»n cáº­p nháº­t.");
+                return new CommonResponse("error", "Hồ sơ này đã được gửi đi hoặc bạn không có quyền cập nhật.");
             }
 
             var buocThoiHans = await _dbContext.HoSoVanBanBuocThoiHans
@@ -802,7 +858,7 @@ namespace Services.Manages
                 BuocThoiHans = buocThoiHans
             };
 
-            return new CommonResponse("success", "ThÃ nh cÃ´ng", model);
+            return new CommonResponse("success", "Thành công", model);
         }
 
         public async Task<CommonResponse> GetChuyenHoSoModelAsync(Guid hoSoVanBanId)
@@ -938,19 +994,19 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "Kh�ng x�c d?nh du?c t�i kho?n dang thao t�c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ cần chuyển xét duyệt.");
+                return new CommonResponse("error", "Kh�ng t�m th?y h? so c?n chuy?n x�t duy?t.");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
             if (currentStep == null)
             {
-                return new CommonResponse("error", "Không xác định được bước hiện tại của hồ sơ.");
+                return new CommonResponse("error", "Kh�ng x�c d?nh du?c bu?c hi?n t?i c?a h? so.");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -961,7 +1017,7 @@ namespace Services.Manages
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "Hồ sơ này không thuộc đơn vị đang đăng nhập để chuyển xét duyệt.");
+                return new CommonResponse("error", "H? so n�y kh�ng thu?c don v? dang dang nh?p d? chuy?n x�t duy?t.");
             }
 
             var nextTransition = await ResolveTransitionByResultsAsync(
@@ -982,20 +1038,20 @@ namespace Services.Manages
 
             if (nextStep == null)
             {
-                return new CommonResponse("error", "Workflow chưa cấu hình bước kế tiếp cho nghiệp vụ chuyển xét duyệt.");
+                return new CommonResponse("error", "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n x�t duy?t.");
             }
 
             var nextStepDeadline = await ResolveNextStepDeadlineAsync(hoSo.Id, nextStep);
 
-            return new CommonResponse("success", "Thành công", new HoSoVanBanXuLyStepModel
+            return new CommonResponse("success", "Th�nh c�ng", new HoSoVanBanXuLyStepModel
             {
                 HoSoVanBanId = hoSo.Id,
                 TenHoSo = hoSo.TenHoSo,
                 KetQuaXuLy = nextTransition?.DieuKienKetQua ?? "GUI_THAM_DINH",
                 NgayXuLy = DateTime.Now,
                 HanXuLy = nextStepDeadline,
-                NoiDungXuLy = $"Chuyển hồ sơ {hoSo.TenHoSo} sang bước xét duyệt.",
-                GhiChu = $"Chuyển hồ sơ {hoSo.TenHoSo} sang bước xử lý kế tiếp."
+                NoiDungXuLy = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c x�t duy?t.",
+                GhiChu = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c x? l� k? ti?p."
             });
         }
 
@@ -1004,13 +1060,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "Kh�ng x�c d?nh du?c t�i kho?n dang thao t�c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ cần chuyển phê duyệt.");
+                return new CommonResponse("error", "Kh�ng t�m th?y h? so c?n chuy?n ph� duy?t.");
             }
 
             var daCoBanGhiDanhGia = await _dbContext.HoSoVanBanDanhGias
@@ -1019,13 +1075,13 @@ namespace Services.Manages
 
             if (!daCoBanGhiDanhGia)
             {
-                return new CommonResponse("error", "Hồ sơ chưa có bản ghi xét duyệt nên chưa thể chuyển sang phê duyệt.");
+                return new CommonResponse("error", "H? so chua c� b?n ghi x�t duy?t n�n chua th? chuy?n sang ph� duy?t.");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
             if (currentStep == null)
             {
-                return new CommonResponse("error", "Không xác định được bước hiện tại của hồ sơ.");
+                return new CommonResponse("error", "Kh�ng x�c d?nh du?c bu?c hi?n t?i c?a h? so.");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1036,7 +1092,7 @@ namespace Services.Manages
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "Hồ sơ này không thuộc đơn vị đang đăng nhập để chuyển phê duyệt.");
+                return new CommonResponse("error", "H? so n�y kh�ng thu?c don v? dang dang nh?p d? chuy?n ph� duy?t.");
             }
 
             var nextTransition = await ResolveTransitionByResultsAsync(
@@ -1057,20 +1113,20 @@ namespace Services.Manages
 
             if (nextStep == null)
             {
-                return new CommonResponse("error", "Workflow chưa cấu hình bước kế tiếp cho nghiệp vụ chuyển phê duyệt.");
+                return new CommonResponse("error", "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n ph� duy?t.");
             }
 
             var nextStepDeadline = await ResolveNextStepDeadlineAsync(hoSo.Id, nextStep);
 
-            return new CommonResponse("success", "Thành công", new HoSoVanBanXuLyStepModel
+            return new CommonResponse("success", "Th�nh c�ng", new HoSoVanBanXuLyStepModel
             {
                 HoSoVanBanId = hoSo.Id,
                 TenHoSo = hoSo.TenHoSo,
                 KetQuaXuLy = nextTransition?.DieuKienKetQua ?? "THAM_DINH_XONG",
                 NgayXuLy = DateTime.Now,
                 HanXuLy = nextStepDeadline,
-                NoiDungXuLy = $"Chuyển hồ sơ {hoSo.TenHoSo} sang bước phê duyệt văn bản.",
-                GhiChu = $"Chuyển hồ sơ {hoSo.TenHoSo} sang bước phê duyệt."
+                NoiDungXuLy = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c ph� duy?t van b?n.",
+                GhiChu = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c ph� duy?t."
             });
         }
 
@@ -1079,19 +1135,19 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "Kh�ng x�c d?nh du?c t�i kho?n dang thao t�c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ cần chuyển ban hành.");
+                return new CommonResponse("error", "Kh�ng t�m th?y h? so c?n chuy?n ban h�nh.");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
             if (currentStep == null)
             {
-                return new CommonResponse("error", "Không xác định được bước hiện tại của hồ sơ.");
+                return new CommonResponse("error", "Kh�ng x�c d?nh du?c bu?c hi?n t?i c?a h? so.");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1102,7 +1158,7 @@ namespace Services.Manages
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "Hồ sơ này không thuộc đơn vị đang đăng nhập để chuyển ban hành.");
+                return new CommonResponse("error", "H? so n�y kh�ng thu?c don v? dang dang nh?p d? chuy?n ban h�nh.");
             }
 
             var nextTransition = await ResolveTransitionByResultsAsync(
@@ -1123,20 +1179,20 @@ namespace Services.Manages
 
             if (nextStep == null)
             {
-                return new CommonResponse("error", "Workflow chưa cấu hình bước kế tiếp cho nghiệp vụ chuyển ban hành.");
+                return new CommonResponse("error", "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n ban h�nh.");
             }
 
             var nextStepDeadline = await ResolveNextStepDeadlineAsync(hoSo.Id, nextStep);
 
-            return new CommonResponse("success", "Thành công", new HoSoVanBanXuLyStepModel
+            return new CommonResponse("success", "Th�nh c�ng", new HoSoVanBanXuLyStepModel
             {
                 HoSoVanBanId = hoSo.Id,
                 TenHoSo = hoSo.TenHoSo,
                 KetQuaXuLy = nextTransition?.DieuKienKetQua ?? "TRINH_THANH_CONG",
                 NgayXuLy = DateTime.Now,
                 HanXuLy = nextStepDeadline,
-                NoiDungXuLy = $"Chuyển hồ sơ {hoSo.TenHoSo} sang bước ban hành văn bản.",
-                GhiChu = $"Chuyển hồ sơ {hoSo.TenHoSo} sang bước ban hành."
+                NoiDungXuLy = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c ban h�nh van b?n.",
+                GhiChu = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c ban h�nh."
             });
         }
 
@@ -1214,33 +1270,33 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             if (!request.TuNgaySoanThao.HasValue || !request.DenNgaySoanThao.HasValue)
             {
-                return new CommonResponse("error", "Thá»i gian soáº¡n tháº£o báº¯t buá»™c pháº£i nháº­p.");
+                return new CommonResponse("error", "Thời gian soạn thảo bắt buộc phải nhập.");
             }
 
             if (request.DenNgaySoanThao.Value.Date < request.TuNgaySoanThao.Value.Date)
             {
-                return new CommonResponse("error", "Äáº¿n ngÃ y soáº¡n tháº£o pháº£i lá»›n hÆ¡n hoáº·c báº±ng tá»« ngÃ y soáº¡n tháº£o.");
+                return new CommonResponse("error", "Đến ngày soạn thảo phải lớn hơn hoặc bằng từ ngày soạn thảo.");
             }
 
             if (request.Id == Guid.Empty)
             {
-                return new CommonResponse("error", "Thiáº¿u thÃ´ng tin há»“ sÆ¡ cáº§n cáº­p nháº­t!");
+                return new CommonResponse("error", "Thiếu thông tin hồ sơ cần cập nhật!");
             }
 
             if (string.IsNullOrWhiteSpace(request.TenHoSo))
             {
-                return new CommonResponse("error", "TÃªn há»“ sÆ¡ khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng!");
+                return new CommonResponse("error", "Tên hồ sơ không được để trống!");
             }
 
             var hoSo = await _dbContext.HoSoVanBans.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
+                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -1249,7 +1305,7 @@ namespace Services.Manages
 
             if (!CanEditDangKyHoSo(currentUser, hoSo, currentStep, currentProcessing))
             {
-                return new CommonResponse("error", "Há»“ sÆ¡ nÃ y Ä‘Ã£ Ä‘Æ°á»£c gá»­i Ä‘i hoáº·c báº¡n khÃ´ng cÃ³ quyá»n cáº­p nháº­t.");
+                return new CommonResponse("error", "Hồ sơ này đã được gửi đi hoặc bạn không có quyền cập nhật.");
             }
 
             request.BuocThoiHans = request.BuocThoiHans
@@ -1263,7 +1319,7 @@ namespace Services.Manages
 
             if (quyTrinh == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y quy trÃ¬nh soáº¡n tháº£o Ä‘ang kÃ­ch hoáº¡t!");
+                return new CommonResponse("error", "Không tìm thấy quy trình soạn thảo đang kích hoạt!");
             }
 
             var firstStep = await _dbContext.DanhMucBuocQuyTrinhs
@@ -1275,7 +1331,7 @@ namespace Services.Manages
 
             if (firstStep == null)
             {
-                return new CommonResponse("error", "Quy trÃ¬nh chÆ°a cÃ³ bÆ°á»›c nÃ o Ä‘á»ƒ cáº­p nháº­t há»“ sÆ¡!");
+                return new CommonResponse("error", "Quy trình chưa có bước nào để cập nhật hồ sơ!");
             }
 
             var stepDeadlinePlans = await BuildRequestedStepDeadlinePlansAsync(request.QuyTrinhSoanThaoId, request.BuocThoiHans);
@@ -1308,7 +1364,7 @@ namespace Services.Manages
                         : null;
                     currentProcessing.HanXuLy = hanXuLyBuocDau;
                     currentProcessing.GhiChu = request.GhiChu?.Trim();
-                    currentProcessing.NoiDungXuLy = "Cáº­p nháº­t há»“ sÆ¡ Ä‘Äƒng kÃ½ trÆ°á»›c khi chuyá»ƒn bÆ°á»›c tiáº¿p theo.";
+                    currentProcessing.NoiDungXuLy = "Cập nhật hồ sơ đăng ký trước khi chuyển bước tiếp theo.";
                 }
 
                 var oldStepPlans = await _dbContext.HoSoVanBanBuocThoiHans
@@ -1337,7 +1393,7 @@ namespace Services.Manages
 
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
-                return new CommonResponse("success", "Cáº­p nháº­t há»“ sÆ¡ thÃ nh cÃ´ng", hoSo.Id);
+                return new CommonResponse("success", "Cập nhật hồ sơ thành công", hoSo.Id);
             }
             catch
             {
@@ -1351,13 +1407,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(request.HoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
+                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -1368,7 +1424,7 @@ namespace Services.Manages
 
             if (currentStep.LoaiBuoc == "LayYKien" || currentStep.LoaiBuoc == "DanhGia")
             {
-                return new CommonResponse("error", "BÆ°á»›c hiá»‡n táº¡i lÃ  bÆ°á»›c Ä‘áº·c thÃ¹. HÃ£y dÃ¹ng nghiá»‡p vá»¥ Láº¥y Ã½ kiáº¿n hoáº·c ÄÃ¡nh giÃ¡.");
+                return new CommonResponse("error", "Bước hiện tại là bước đặc thù. Hãy dùng nghiệp vụ Lấy ý kiến hoặc Đánh giá.");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -1387,7 +1443,7 @@ namespace Services.Manages
                 var isSoanThaoStep = string.Equals(currentStep.LoaiBuoc, "SoanThao", StringComparison.OrdinalIgnoreCase);
                 if (currentProcessing != null && !currentUser.SSA && !currentProcessing.NguoiXuLyId.HasValue && !isSoanThaoStep)
                 {
-                    return new CommonResponse("error", "Há»“ sÆ¡ chÆ°a Ä‘Æ°á»£c nháº­n. Vui lÃ²ng báº¥m 'Nháº­n há»“ sÆ¡' trÆ°á»›c khi xá»­ lÃ½.");
+                    return new CommonResponse("error", "Hồ sơ chưa được nhận. Vui lòng bấm 'Nhận hồ sơ' trước khi xử lý.");
                 }
 
                 if (currentProcessing != null)
@@ -1441,7 +1497,7 @@ namespace Services.Manages
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return new CommonResponse("success", "ThÃ nh cÃ´ng", hoSo.Id);
+                return new CommonResponse("success", "Thành công", hoSo.Id);
             }
             catch
             {
@@ -1455,13 +1511,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
+                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1469,24 +1525,24 @@ namespace Services.Manages
 
             if (currentProcessing == null)
             {
-                return new CommonResponse("error", "Há»“ sÆ¡ chÆ°a phÃ¡t sinh bÆ°á»›c xá»­ lÃ½ hiá»‡n táº¡i.");
+                return new CommonResponse("error", "Hồ sơ chưa phát sinh bước xử lý hiện tại.");
             }
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "Há»“ sÆ¡ nÃ y khÃ´ng thuá»™c Ä‘Æ¡n vá»‹ Ä‘ang Ä‘Äƒng nháº­p Ä‘á»ƒ nháº­n.");
+                return new CommonResponse("error", "Hồ sơ này không thuộc đơn vị đang đăng nhập để nhận.");
             }
 
             if (currentProcessing.NguoiXuLyId.HasValue && !currentUser.SSA)
             {
-                return new CommonResponse("success", "Há»“ sÆ¡ Ä‘Ã£ Ä‘Æ°á»£c nháº­n trÆ°á»›c Ä‘Ã³.");
+                return new CommonResponse("success", "Hồ sơ đã được nhận trước đó.");
             }
 
             currentProcessing.NguoiXuLyId = currentUser.Id;
             currentProcessing.NgayNhan = DateTime.Now;
             await _dbContext.SaveChangesAsync();
 
-            return new CommonResponse("success", "ÄÃ£ nháº­n há»“ sÆ¡ thÃ nh cÃ´ng.");
+            return new CommonResponse("success", "Đã nhận hồ sơ thành công.");
         }
 
         public async Task<CommonResponse> NhanHoSoAsync(Guid hoSoVanBanId, string actionType = "NHAN_HO_SO", string? noiDungXuLy = null, string? ghiChu = null, DateTime? ngayXuLy = null, DateTime? hanXuLy = null)
@@ -1494,13 +1550,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
+                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1508,18 +1564,18 @@ namespace Services.Manages
 
             if (currentProcessing == null)
             {
-                return new CommonResponse("error", "Há»“ sÆ¡ chÆ°a phÃ¡t sinh bÆ°á»›c xá»­ lÃ½ hiá»‡n táº¡i.");
+                return new CommonResponse("error", "Hồ sơ chưa phát sinh bước xử lý hiện tại.");
             }
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "Há»“ sÆ¡ nÃ y khÃ´ng thuá»™c Ä‘Æ¡n vá»‹ Ä‘ang Ä‘Äƒng nháº­p Ä‘á»ƒ nháº­n.");
+                return new CommonResponse("error", "Hồ sơ này không thuộc đơn vị đang đăng nhập để nhận.");
             }
 
             var actionCode = NormalizeTiepNhanNghiepVuCode(actionType);
             if (string.IsNullOrWhiteSpace(actionCode))
             {
-                return new CommonResponse("error", "Thao tÃ¡c nháº­n há»“ sÆ¡ khÃ´ng há»£p lá»‡.");
+                return new CommonResponse("error", "Thao tác nhận hồ sơ không hợp lệ.");
             }
 
             var laThaoTacNhanBanDau = actionCode is "NHAN_HO_SO" or "NHAN_VA_CHUYEN_PHE_DUYET" or "PHE_DUYET_HO_SO";
@@ -1530,7 +1586,7 @@ namespace Services.Manages
             }
             else if (laThaoTacNhanBanDau && !currentUser.SSA)
             {
-                return new CommonResponse("success", "Há»“ sÆ¡ Ä‘Ã£ Ä‘Æ°á»£c nháº­n trÆ°á»›c Ä‘Ã³.");
+                return new CommonResponse("success", "Hồ sơ đã được nhận trước đó.");
             }
 
             currentProcessing.KetQuaXuLy = actionCode;
@@ -1545,7 +1601,7 @@ namespace Services.Manages
                 var currentStep = await GetCurrentStepAsync(hoSo);
                 if (currentStep == null)
                 {
-                    return new CommonResponse("error", "Không xác định được bước hiện tại của hồ sơ.");
+                    return new CommonResponse("error", "Kh�ng x�c d?nh du?c bu?c hi?n t?i c?a h? so.");
                 }
 
                 var ketQuaChuyenBuoc = actionCode switch
@@ -1563,7 +1619,7 @@ namespace Services.Manages
 
                     if (!daCoBanGhiDanhGia)
                     {
-                        return new CommonResponse("error", "Hồ sơ chưa có bản ghi xét duyệt nên chưa thể chuyển sang phê duyệt.");
+                        return new CommonResponse("error", "H? so chua c� b?n ghi x�t duy?t n�n chua th? chuy?n sang ph� duy?t.");
                     }
                 }
 
@@ -1596,9 +1652,9 @@ namespace Services.Manages
                 {
                     return new CommonResponse("error", actionCode switch
                     {
-                        "CHUYEN_PHE_DUYET" => "Workflow chưa cấu hình bước kế tiếp cho nghiệp vụ chuyển phê duyệt.",
-                        "CHUYEN_BAN_HANH" => "Workflow chưa cấu hình bước kế tiếp cho nghiệp vụ chuyển ban hành.",
-                        _ => "Workflow chưa cấu hình bước kế tiếp cho nghiệp vụ chuyển xét duyệt."
+                        "CHUYEN_PHE_DUYET" => "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n ph� duy?t.",
+                        "CHUYEN_BAN_HANH" => "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n ban h�nh.",
+                        _ => "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n x�t duy?t."
                     });
                 }
 
@@ -1627,18 +1683,18 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "Kh�ng x�c d?nh du?c t�i kho?n dang thao t�c!");
             }
 
             if (string.IsNullOrWhiteSpace(lyDoTraLai))
             {
-                return new CommonResponse("error", "Bạn cần nhập lý do trả lại hồ sơ.");
+                return new CommonResponse("error", "B?n c?n nh?p l� do tr? l?i h? so.");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "Kh�ng t�m th?y h? so van b?n!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -1647,7 +1703,7 @@ namespace Services.Manages
                                  string.Equals(currentStep.MaBuoc, "BUOC_03_THAM_DINH_VAN_BAN", StringComparison.OrdinalIgnoreCase));
             if (!laBuocDanhGia)
             {
-                return new CommonResponse("error", "Hồ sơ hiện không ở bước thẩm định văn bản.");
+                return new CommonResponse("error", "H? so hi?n kh�ng ? bu?c th?m d?nh van b?n.");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1657,19 +1713,19 @@ namespace Services.Manages
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "Hồ sơ này không thuộc đơn vị đang đăng nhập để trả lại.");
+                return new CommonResponse("error", "H? so n�y kh�ng thu?c don v? dang dang nh?p d? tr? l?i.");
             }
 
             var soLanTraLaiToiDa = currentStep.SoLanTraLaiToiDa > 0 ? currentStep.SoLanTraLaiToiDa : 3;
             if (hoSo.SoLanTraLaiHienTai >= soLanTraLaiToiDa)
             {
-                return new CommonResponse("error", $"Đã vượt quá số lần trả lại tối đa ({soLanTraLaiToiDa}) của bước này.");
+                return new CommonResponse("error", $"�� vu?t qu� s? l?n tr? l?i t?i da ({soLanTraLaiToiDa}) c?a bu?c n�y.");
             }
 
             var maBuocTraLai = await ResolveDraftReturnStepCodeAsync(hoSo.QuyTrinhSoanThaoId);
             if (string.IsNullOrWhiteSpace(maBuocTraLai))
             {
-                return new CommonResponse("error", "Không xác định được bước trả lại cho hồ sơ này.");
+                return new CommonResponse("error", "Kh�ng x�c d?nh du?c bu?c tr? l?i cho h? so n�y.");
             }
 
             var nextStep = await _dbContext.DanhMucBuocQuyTrinhs
@@ -1678,7 +1734,7 @@ namespace Services.Manages
 
             if (nextStep == null)
             {
-                return new CommonResponse("error", "Không tìm thấy bước soạn thảo để trả lại hồ sơ.");
+                return new CommonResponse("error", "Kh�ng t�m th?y bu?c so?n th?o d? tr? l?i h? so.");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -1705,13 +1761,13 @@ namespace Services.Manages
                     currentUser.DanhMucDonViId,
                     currentUser.Id,
                     "TRA_LAI_HO_SO_DANH_GIA",
-                    $"Trả lại hồ sơ từ bước đánh giá lần {hoSo.SoLanTraLaiHienTai}");
+                    $"Tr? l?i h? so t? bu?c d�nh gi� l?n {hoSo.SoLanTraLaiHienTai}");
 
                 await AdvanceWorkflowAsync(hoSo, currentUser, nextStep, null, "TRA_LAI_HO_SO", lyDoTraLai.Trim());
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return new CommonResponse("success", "Đã trả lại hồ sơ về bước soạn thảo.");
+                return new CommonResponse("success", "�� tr? l?i h? so v? bu?c so?n th?o.");
             }
             catch
             {
@@ -1725,19 +1781,19 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(request.HoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
+                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
             if (currentStep == null || !string.Equals(currentStep.LoaiBuoc, "SoanThao", StringComparison.OrdinalIgnoreCase))
             {
-                return new CommonResponse("error", "Há»“ sÆ¡ hiá»‡n khÃ´ng á»Ÿ bÆ°á»›c soáº¡n tháº£o Ä‘á»ƒ chuyá»ƒn láº¥y gÃ³p Ã½.");
+                return new CommonResponse("error", "Hồ sơ hiện không ở bước soạn thảo để chuyển lấy góp ý.");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1747,13 +1803,13 @@ namespace Services.Manages
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "Há»“ sÆ¡ nÃ y Ä‘Ã£ Ä‘Æ°á»£c chuyá»ƒn sang Ä‘Æ¡n vá»‹ khÃ¡c. Báº¡n khÃ´ng thá»ƒ cáº­p nháº­t ná»¯a!");
+                return new CommonResponse("error", "Hồ sơ này đã được chuyển sang đơn vị khác. Bạn không thể cập nhật nữa!");
             }
 
             var actionMode = NormalizeLayYKienActionMode(request.ActionMode);
             if (actionMode == "GUI_DON_VI_GOP_Y" && request.DonViDuocLayYKienIds.Count == 0)
             {
-                return new CommonResponse("error", "Báº¡n pháº£i chá»n Ã­t nháº¥t 1 Ä‘Æ¡n vá»‹ Ä‘á»ƒ gá»­i gÃ³p Ã½.");
+                return new CommonResponse("error", "Bạn phải chọn ít nhất 1 đơn vị để gửi góp ý.");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -1796,7 +1852,7 @@ namespace Services.Manages
                             NgayGui = now,
                             HanPhanHoi = request.HanPhanHoi,
                             TrangThaiPhanHoi = "CHO_GOP_Y",
-                            GhiChu = "ÄÆ¡n vá»‹ soáº¡n tháº£o gá»­i Ä‘á» nghá»‹ gÃ³p Ã½."
+                            GhiChu = "Đơn vị soạn thảo gửi đề nghị góp ý."
                         });
 
                         await TaoThongBaoAsync(
@@ -1804,7 +1860,7 @@ namespace Services.Manages
                             currentStep,
                             currentUser.DanhMucDonViId,
                             donViId,
-                            $"Há»“ sÆ¡ '{hoSo.TenHoSo}' Ä‘ang láº¥y gÃ³p Ã½ tá»« Ä‘Æ¡n vá»‹ cá»§a báº¡n.");
+                            $"Hồ sơ '{hoSo.TenHoSo}' đang lấy góp ý từ đơn vị của bạn.");
                     }
                 }
                 else
@@ -1817,18 +1873,18 @@ namespace Services.Manages
                         NgayGui = now,
                         HanPhanHoi = request.HanPhanHoi,
                         TrangThaiPhanHoi = "CHO_CAP_NHAT_KET_QUA",
-                        GhiChu = "ÄÆ¡n vá»‹ soáº¡n tháº£o tá»± cáº­p nháº­t káº¿t quáº£ gÃ³p Ã½."
+                        GhiChu = "Đơn vị soạn thảo tự cập nhật kết quả góp ý."
                     });
                 }
 
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
-                return new CommonResponse("success", "ÄÃ£ chuyá»ƒn há»“ sÆ¡ sang bÆ°á»›c láº¥y gÃ³p Ã½.");
+                return new CommonResponse("success", "Đã chuyển hồ sơ sang bước lấy góp ý.");
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return new CommonResponse("error", $"KhÃ´ng thá»ƒ khá»Ÿi táº¡o bÆ°á»›c láº¥y gÃ³p Ã½: {ex.Message}");
+                return new CommonResponse("error", $"Không thể khởi tạo bước lấy góp ý: {ex.Message}");
             }
         }
 
@@ -1837,24 +1893,24 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             if (string.IsNullOrWhiteSpace(lyDoTraLai))
             {
-                return new CommonResponse("error", "Báº¡n pháº£i nháº­p lÃ½ do tráº£ láº¡i há»“ sÆ¡.");
+                return new CommonResponse("error", "Bạn phải nhập lý do trả lại hồ sơ.");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
+                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
             if (currentStep == null || currentStep.MaBuoc != "BUOC_02_THONG_NHAT")
             {
-                return new CommonResponse("error", "Há»“ sÆ¡ hiá»‡n khÃ´ng á»Ÿ bÆ°á»›c xÃ©t duyá»‡t Ä‘Äƒng kÃ½ Ä‘á»ƒ tráº£ láº¡i.");
+                return new CommonResponse("error", "Hồ sơ hiện không ở bước xét duyệt đăng ký để trả lại.");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -1867,12 +1923,12 @@ namespace Services.Manages
 
                 if (!CanCurrentUserXuLy(currentUser, currentProcessing))
                 {
-                    return new CommonResponse("error", "Há»“ sÆ¡ nÃ y khÃ´ng thuá»™c Ä‘Æ¡n vá»‹ Ä‘ang Ä‘Äƒng nháº­p Ä‘á»ƒ xá»­ lÃ½.");
+                    return new CommonResponse("error", "Hồ sơ này không thuộc đơn vị đang đăng nhập để xử lý.");
                 }
 
                 if (currentProcessing != null && !currentUser.SSA && !currentProcessing.NguoiXuLyId.HasValue)
                 {
-                    return new CommonResponse("error", "Há»“ sÆ¡ chÆ°a Ä‘Æ°á»£c nháº­n. Vui lÃ²ng nháº­n há»“ sÆ¡ trÆ°á»›c khi tráº£ láº¡i.");
+                    return new CommonResponse("error", "Hồ sơ chưa được nhận. Vui lòng nhận hồ sơ trước khi trả lại.");
                 }
 
                 if (currentProcessing != null)
@@ -1887,7 +1943,7 @@ namespace Services.Manages
                 var nextStep = await ResolveFallbackStepAsync(hoSo.QuyTrinhSoanThaoId, currentStep.MaBuoc, "KHONG_DONG_Y");
                 if (nextStep == null)
                 {
-                    return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c bÆ°á»›c quay láº¡i khi tráº£ há»“ sÆ¡.");
+                    return new CommonResponse("error", "Không xác định được bước quay lại khi trả hồ sơ.");
                 }
 
                 hoSo.SoLanTraLaiHienTai += 1;
@@ -1906,7 +1962,7 @@ namespace Services.Manages
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return new CommonResponse("success", "ÄÃ£ tráº£ láº¡i há»“ sÆ¡ vá» bÆ°á»›c Ä‘Äƒng kÃ½.");
+                return new CommonResponse("success", "Đã trả lại hồ sơ về bước đăng ký.");
             }
             catch
             {
@@ -2205,13 +2261,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(request.HoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
+                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -2224,12 +2280,12 @@ namespace Services.Manages
             var dangLayGopY = string.Equals(currentProcessing?.KetQuaXuLy, "DANG_LAY_GOP_Y", StringComparison.OrdinalIgnoreCase);
             if (currentStep == null || (currentStep.LoaiBuoc != "LayYKien" && !dangLayGopY))
             {
-                return new CommonResponse("error", "Há»“ sÆ¡ hiá»‡n khÃ´ng á»Ÿ nghiá»‡p vá»¥ láº¥y Ã½ kiáº¿n!");
+                return new CommonResponse("error", "Hồ sơ hiện không ở nghiệp vụ lấy ý kiến!");
             }
 
             if (currentStep.YeuCauFileDinhKem && !request.AttachedFileGroupId.HasValue)
             {
-                return new CommonResponse("error", "BÆ°á»›c nÃ y yÃªu cáº§u cÃ³ file Ä‘Ã­nh kÃ¨m káº¿t quáº£ láº¥y Ã½ kiáº¿n!");
+                return new CommonResponse("error", "Bước này yêu cầu có file đính kèm kết quả lấy ý kiến!");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -2256,7 +2312,7 @@ namespace Services.Manages
                 {
                     if (!request.DonViDuocLayYKienId.HasValue || request.DonViDuocLayYKienId == Guid.Empty)
                     {
-                        return new CommonResponse("error", "Thiáº¿u thÃ´ng tin Ä‘Æ¡n vá»‹ pháº£n há»“i gÃ³p Ã½.");
+                        return new CommonResponse("error", "Thiếu thông tin đơn vị phản hồi góp ý.");
                     }
 
                     layYKien = existingRows
@@ -2266,7 +2322,7 @@ namespace Services.Manages
 
                     if (layYKien == null)
                     {
-                        return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y yÃªu cáº§u gÃ³p Ã½ cá»§a Ä‘Æ¡n vá»‹ Ä‘Æ°á»£c chá»n.");
+                        return new CommonResponse("error", "Không tìm thấy yêu cầu góp ý của đơn vị được chọn.");
                     }
 
                     layYKien.NoiDungPhanHoi = request.NoiDungPhanHoi?.Trim();
@@ -2277,7 +2333,7 @@ namespace Services.Manages
 
                     await _dbContext.SaveChangesAsync();
                     await transaction.CommitAsync();
-                    return new CommonResponse("success", "ÄÃ£ cáº­p nháº­t Ã½ kiáº¿n cá»§a Ä‘Æ¡n vá»‹ gÃ³p Ã½.", layYKien.Id);
+                    return new CommonResponse("success", "Đã cập nhật ý kiến của đơn vị góp ý.", layYKien.Id);
                 }
 
                 if (actionMode == "TONG_HOP_Y_KIEN")
@@ -2288,7 +2344,7 @@ namespace Services.Manages
                         x.DonViDuocLayYKienId == null || x.DonViDuocLayYKienId == Guid.Empty);
                     if (invalidUnitRow != null)
                     {
-                        return new CommonResponse("error", "Vui lÃ²ng chá»n Ä‘Æ¡n vá»‹ gÃ³p Ã½ cho táº¥t cáº£ cÃ¡c dÃ²ng trÆ°á»›c khi lÆ°u.");
+                        return new CommonResponse("error", "Vui lòng chọn đơn vị góp ý cho tất cả các dòng trước khi lưu.");
                     }
 
                     var updateRows = request.CacLayYKien
@@ -2437,7 +2493,7 @@ namespace Services.Manages
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return new CommonResponse("success", "ThÃ nh cÃ´ng", layYKien.Id);
+                return new CommonResponse("success", "Thành công", layYKien.Id);
             }
             catch
             {
@@ -2451,13 +2507,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(request.HoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
+                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -2466,7 +2522,7 @@ namespace Services.Manages
                                  string.Equals(currentStep.MaBuoc, "BUOC_03_THAM_DINH_VAN_BAN", StringComparison.OrdinalIgnoreCase));
             if (!laBuocDanhGia)
             {
-                return new CommonResponse("error", "Hồ sơ hiện không ở bước thẩm định văn bản.");
+                return new CommonResponse("error", "H? so hi?n kh�ng ? bu?c th?m d?nh van b?n.");
             }
 
             var ketQua = request.KetQuaDanhGia.Trim().ToUpperInvariant();
@@ -2474,12 +2530,12 @@ namespace Services.Manages
             var laTraLaiThamDinh = ketQua == "KHONG_DAT" || ketQua.StartsWith("KHONG_DAT_LAN_", StringComparison.OrdinalIgnoreCase);
             if (!ketQuaDuocChapNhan.Contains(ketQua) && !laTraLaiThamDinh)
             {
-                return new CommonResponse("error", "Kết quả xét duyệt chỉ chấp nhận DAT, THAM_DINH_XONG hoặc các trạng thái KHONG_DAT_LAN_1..3!");
+                return new CommonResponse("error", "K?t qu? x�t duy?t ch? ch?p nh?n DAT, THAM_DINH_XONG ho?c c�c tr?ng th�i KHONG_DAT_LAN_1..3!");
             }
 
             if (currentStep.YeuCauFileDinhKem && !request.AttachedFileGroupId.HasValue)
             {
-                return new CommonResponse("error", "BÆ°á»›c Ä‘Ã¡nh giÃ¡ hiá»‡n táº¡i yÃªu cáº§u file Ä‘Ã­nh kÃ¨m!");
+                return new CommonResponse("error", "Bước đánh giá hiện tại yêu cầu file đính kèm!");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -2538,7 +2594,7 @@ namespace Services.Manages
 
                     if (nextStep == null)
                     {
-                        return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y bÆ°á»›c tráº£ láº¡i theo mÃ£ bÆ°á»›c Ä‘Ã£ nháº­p!");
+                        return new CommonResponse("error", "Không tìm thấy bước trả lại theo mã bước đã nhập!");
                     }
 
                     traLaiBuocId = nextStep.Id;
@@ -2598,7 +2654,7 @@ namespace Services.Manages
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return new CommonResponse("success", "ThÃ nh cÃ´ng", danhGia.Id);
+                return new CommonResponse("success", "Thành công", danhGia.Id);
             }
             catch (Exception ex)
             {
@@ -2612,13 +2668,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "KhÃ´ng xÃ¡c Ä‘á»‹nh Ä‘Æ°á»£c tÃ i khoáº£n Ä‘ang thao tÃ¡c!");
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
             }
 
             var hoSo = await _dbContext.HoSoVanBans.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.HoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
+                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
             }
 
             var danhGia = await _dbContext.HoSoVanBanDanhGias
@@ -2627,7 +2683,7 @@ namespace Services.Manages
 
             if (danhGia == null)
             {
-                return new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y láº§n Ä‘Ã¡nh giÃ¡ cáº§n pháº£n há»“i!");
+                return new CommonResponse("error", "Không tìm thấy lần đánh giá cần phản hồi!");
             }
 
             try
@@ -2647,7 +2703,7 @@ namespace Services.Manages
 
                 _dbContext.HoSoVanBanPhanHoiDanhGias.Add(phanHoi);
                 await _dbContext.SaveChangesAsync();
-                return new CommonResponse("success", "ThÃ nh cÃ´ng", phanHoi.Id);
+                return new CommonResponse("success", "Thành công", phanHoi.Id);
             }
             catch
             {
@@ -2714,14 +2770,14 @@ namespace Services.Manages
 
                     if (string.Equals(model.LoaiBuocHienTai, "SoanThao", StringComparison.OrdinalIgnoreCase))
                     {
-                        model.TenBuocHienTai = "Äang soáº¡n tháº£o";
+                        model.TenBuocHienTai = "Đang soạn thảo";
                     }
 
                     if (string.Equals(model.TrangThaiNghiepVuTiepNhan, "DANG_LAY_GOP_Y", StringComparison.OrdinalIgnoreCase))
                     {
                         model.CanNhanHoSo = false;
                         model.CanXuLyBuocHienTai = false;
-                        model.TenBuocHienTai = "Đang lấy ý kiến góp ý";
+                        model.TenBuocHienTai = "�ang l?y � ki?n g�p �";
                     }
 
                     var trackingMap = await BuildTrackingMapAsync(new[] { hoSoVanBanId });
@@ -2734,9 +2790,9 @@ namespace Services.Manages
                     if (model.NgayHoanThanh.HasValue ||
                         (model.TienDoSummary.TongSoBuoc > 0 && model.TienDoSummary.SoBuocHoanThanh >= model.TienDoSummary.TongSoBuoc))
                     {
-                        model.TenTrangThai = "ÄÃ£ hoÃ n thÃ nh";
+                        model.TenTrangThai = "Đã hoàn thành";
                         model.MaMauTrangThai = "#28A745";
-                        model.TenBuocHienTai = "ÄÃ£ hoÃ n thÃ nh";
+                        model.TenBuocHienTai = "Đã hoàn thành";
                         model.CanXuLyBuocHienTai = false;
                     }
 
@@ -2744,9 +2800,9 @@ namespace Services.Manages
                         (model.TienDoSummary.TongSoBuoc > 0 && model.TienDoSummary.SoBuocHoanThanh >= model.TienDoSummary.TongSoBuoc))
                     {
                         var hoanThanhQuaHan = model.TienDoSummary.SoBuocQuaHan > 0;
-                        model.TenTrangThai = hoanThanhQuaHan ? "HoÃ n thÃ nh quÃ¡ háº¡n" : "HoÃ n thÃ nh Ä‘Ãºng háº¡n";
+                        model.TenTrangThai = hoanThanhQuaHan ? "Hoàn thành quá hạn" : "Hoàn thành đúng hạn";
                         model.MaMauTrangThai = hoanThanhQuaHan ? "#DC3545" : "#28A745";
-                        model.TenBuocHienTai = "ÄÃ£ hoÃ n thÃ nh";
+                        model.TenBuocHienTai = "Đã hoàn thành";
                         model.CanXuLyBuocHienTai = false;
                     }
 
@@ -2829,8 +2885,8 @@ namespace Services.Manages
                 }
 
                 return model == null
-                    ? new CommonResponse("error", "KhÃ´ng tÃ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!")
-                    : new CommonResponse("success", "ThÃ nh cÃ´ng", model);
+                    ? new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!")
+                    : new CommonResponse("success", "Thành công", model);
             }
             catch
             {
@@ -2858,10 +2914,10 @@ namespace Services.Manages
                         FileId = x.Id,
                         GroupId = x.GroupId,
                         TableName = x.TableName ?? "HoSoVanBanDuThao",
-                        FileName = x.FileName ?? "Tệp đính kèm",
+                        FileName = x.FileName ?? "T?p d�nh k�m",
                         MoTa = x.MoTa,
-                        NguonHienThi = "Dự thảo hiện tại",
-                        NhanHienThi = "Dự thảo hiện tại | " + (x.FileName ?? "Tệp đính kèm"),
+                        NguonHienThi = "D? th?o hi?n t?i",
+                        NhanHienThi = "D? th?o hi?n t?i | " + (x.FileName ?? "T?p d�nh k�m"),
                         NgayTao = x.CreatedDate,
                         FileExtension = x.FileName != null ? Path.GetExtension(x.FileName).ToLowerInvariant() : null,
                         LaDocx = x.FileName != null && string.Equals(Path.GetExtension(x.FileName), ".docx", StringComparison.OrdinalIgnoreCase)
@@ -2880,10 +2936,10 @@ namespace Services.Manages
                         FileId = file.Id,
                         GroupId = file.GroupId,
                         TableName = file.TableName ?? "HoSoVanBanDuThaoVersion",
-                        FileName = file.FileName ?? "Tệp đính kèm",
+                        FileName = file.FileName ?? "T?p d�nh k�m",
                         MoTa = file.MoTa,
                         NguonHienThi = NormalizeDraftCompareSourceLabel(version.TenVersion),
-                        NhanHienThi = NormalizeDraftCompareSourceLabel(version.TenVersion) + " | " + (file.FileName ?? "Tệp đính kèm"),
+                        NhanHienThi = NormalizeDraftCompareSourceLabel(version.TenVersion) + " | " + (file.FileName ?? "T?p d�nh k�m"),
                         NgayTao = version.NgayTaoVersion,
                         FileExtension = file.FileName != null ? Path.GetExtension(file.FileName).ToLowerInvariant() : null,
                         LaDocx = file.FileName != null && string.Equals(Path.GetExtension(file.FileName), ".docx", StringComparison.OrdinalIgnoreCase)
@@ -2894,7 +2950,7 @@ namespace Services.Manages
                     .Concat(versionFiles)
                     .Where(x => !string.IsNullOrWhiteSpace(x.FileExtension) && DraftFileExtensions.Contains(x.FileExtension!, StringComparer.OrdinalIgnoreCase))
                     .Where(x => !string.IsNullOrWhiteSpace(x.NguonHienThi) &&
-                                x.NguonHienThi.StartsWith("Dự thảo lần ", StringComparison.OrdinalIgnoreCase))
+                                x.NguonHienThi.StartsWith("D? th?o l?n ", StringComparison.OrdinalIgnoreCase))
                     .OrderByDescending(x => x.NgayTao ?? DateTime.MinValue)
                     .ThenBy(x => x.NhanHienThi)
                     .ToList();
@@ -2910,8 +2966,8 @@ namespace Services.Manages
 
                 if (fileOptions.Count < 2)
                 {
-                    model.CanhBao = "Cần ít nhất 2 file dự thảo .doc hoặc .docx để thực hiện so sánh.";
-                    return new CommonResponse("success", "Thành công", model);
+                    model.CanhBao = "C?n �t nh?t 2 file d? th?o .doc ho?c .docx d? th?c hi?n so s�nh.";
+                    return new CommonResponse("success", "Th�nh c�ng", model);
                 }
 
                 model.SourceFileId = sourceFileId ?? fileOptions[0].FileId;
@@ -2921,14 +2977,14 @@ namespace Services.Manages
 
                 if (model.SourceFile == null || model.TargetFile == null)
                 {
-                    model.CanhBao = "Không xác định được đủ 2 file để so sánh.";
-                    return new CommonResponse("success", "Thành công", model);
+                    model.CanhBao = "Kh�ng x�c d?nh du?c d? 2 file d? so s�nh.";
+                    return new CommonResponse("success", "Th�nh c�ng", model);
                 }
 
                 if (!model.SourceFile.LaDocx || !model.TargetFile.LaDocx)
                 {
-                    model.CanhBao = "Chức năng so sánh nội dung hiện hỗ trợ trực tiếp cho file .docx. Với file .doc, bạn vẫn có thể mở/tải file để đối chiếu thủ công.";
-                    return new CommonResponse("success", "Thành công", model);
+                    model.CanhBao = "Ch?c nang so s�nh n?i dung hi?n h? tr? tr?c ti?p cho file .docx. V?i file .doc, b?n v?n c� th? m?/t?i file d? d?i chi?u th? c�ng.";
+                    return new CommonResponse("success", "Th�nh c�ng", model);
                 }
 
                 var sourceEntity = await _dbContext.AttachedFiles
@@ -2943,8 +2999,8 @@ namespace Services.Manages
                     .FirstOrDefaultAsync();
                 if (sourceEntity?.FileContent == null || targetEntity?.FileContent == null)
                 {
-                    model.CanhBao = "Không đọc được nội dung 1 trong 2 file đã chọn.";
-                    return new CommonResponse("success", "Thành công", model);
+                    model.CanhBao = "Kh�ng d?c du?c n?i dung 1 trong 2 file d� ch?n.";
+                    return new CommonResponse("success", "Th�nh c�ng", model);
                 }
 
                 var leftLines = ExtractDocxLines(sourceEntity.FileContent);
@@ -2957,11 +3013,11 @@ namespace Services.Manages
                 model.SoDongXoa = model.DiffRows.Count(x => x.Status == "removed");
                 model.SoDongSua = model.DiffRows.Count(x => x.Status == "changed");
 
-                return new CommonResponse("success", "Thành công", model);
+                return new CommonResponse("success", "Th�nh c�ng", model);
             }
             catch (Exception ex)
             {
-                return new CommonResponse("error", $"Không thể so sánh dự thảo: {ex.Message}");
+                return new CommonResponse("error", $"Kh�ng th? so s�nh d? th?o: {ex.Message}");
             }
         }
 
@@ -2969,13 +3025,13 @@ namespace Services.Manages
         {
             if (string.IsNullOrWhiteSpace(sourceLabel))
             {
-                return "Dự thảo";
+                return "D? th?o";
             }
 
             var normalized = sourceLabel.Trim();
-            if (normalized.StartsWith("Phiên bản dự thảo lần ", StringComparison.OrdinalIgnoreCase))
+            if (normalized.StartsWith("Phi�n b?n d? th?o l?n ", StringComparison.OrdinalIgnoreCase))
             {
-                return "Dự thảo lần " + normalized["Phiên bản dự thảo lần ".Length..];
+                return "D? th?o l?n " + normalized["Phi�n b?n d? th?o l?n ".Length..];
             }
 
             return normalized;
@@ -3023,7 +3079,7 @@ namespace Services.Manages
 
                     if (row == null)
                     {
-                        return new CommonResponse("error", "ÄÆ¡n vá»‹ hiá»‡n táº¡i khÃ´ng cÃ³ yÃªu cáº§u gÃ³p Ã½ cho há»“ sÆ¡ nÃ y.");
+                        return new CommonResponse("error", "Đơn vị hiện tại không có yêu cầu góp ý cho hồ sơ này.");
                     }
 
                     form.DonViDuocLayYKienId = row.DonViDuocLayYKienId;
@@ -3040,11 +3096,11 @@ namespace Services.Manages
                     form.TrangThaiPhanHoi = "DA_GAN_KET_QUA_Y_KIEN";
                 }
 
-                return new CommonResponse("success", "ThÃ nh cÃ´ng", form);
+                return new CommonResponse("success", "Thành công", form);
             }
             catch (Exception ex)
             {
-                return new CommonResponse("error", $"KhÃ´ng thá»ƒ táº£i form láº¥y gÃ³p Ã½: {ex.Message}");
+                return new CommonResponse("error", $"Không thể tải form lấy góp ý: {ex.Message}");
             }
         }
 
@@ -3180,7 +3236,7 @@ namespace Services.Manages
                 DanhMucTrangThaiId = dangXuLyStatusId,
                 IsCurrent = true,
                 KetQuaXuLy = null,
-                NoiDungXuLy = $"Chuyá»ƒn tá»« bÆ°á»›c trÆ°á»›c vá»›i káº¿t quáº£ '{ketQua}'. {(string.IsNullOrWhiteSpace(noiDung) ? string.Empty : noiDung)}".Trim(),
+                NoiDungXuLy = $"Chuyển từ bước trước với kết quả '{ketQua}'. {(string.IsNullOrWhiteSpace(noiDung) ? string.Empty : noiDung)}".Trim(),
                 GhiChu = null
             };
 
@@ -3191,7 +3247,7 @@ namespace Services.Manages
                 nextStep,
                 currentUser.DanhMucDonViId,
                 donViXuLyId,
-                $"Há»“ sÆ¡ '{hoSo.TenHoSo}' Ä‘Ã£ chuyá»ƒn sang bÆ°á»›c '{nextStep.TenBuoc}'.");
+                $"Hồ sơ '{hoSo.TenHoSo}' đã chuyển sang bước '{nextStep.TenBuoc}'.");
         }
 
         private async Task<Guid> ResolveAssignedDonViXuLyIdAsync(
@@ -3273,7 +3329,7 @@ namespace Services.Manages
 
         private static string ResolveDraftVersionLabel(int draftVersionNumber)
         {
-            return $"Dự thảo lần {draftVersionNumber}";
+            return $"D? th?o l?n {draftVersionNumber}";
         }
 
         private static List<string> ExtractDocxLines(byte[] fileContent)
@@ -3346,7 +3402,7 @@ namespace Services.Manages
 
             if (string.IsNullOrEmpty(current))
             {
-                return "<span class=\"compare-inline-empty\">(trống)</span>";
+                return "<span class=\"compare-inline-empty\">(tr?ng)</span>";
             }
 
             if (status == "added")
@@ -3373,7 +3429,7 @@ namespace Services.Manages
             var otherTokens = TokenizeCompareText(other);
             if (currentTokens.Count == 0)
             {
-                return "<span class=\"compare-inline-empty\">(trống)</span>";
+                return "<span class=\"compare-inline-empty\">(tr?ng)</span>";
             }
 
             var matrix = BuildLcsMatrix(currentTokens, otherTokens);
@@ -3544,7 +3600,7 @@ namespace Services.Manages
 
             if (draftFiles.Count == 0)
             {
-                return new CommonResponse("error", "Phải đính kèm ít nhất 1 file dự thảo trước khi chuyển thẩm định.");
+                return new CommonResponse("error", "Ph?i d�nh k�m �t nh?t 1 file d? th?o tru?c khi chuy?n th?m d?nh.");
             }
 
             var requiredDraftVersionLabel = ResolveDraftVersionLabel(requiredDraftVersionNumber);
@@ -3557,7 +3613,7 @@ namespace Services.Manages
 
             if (requiredDraftFiles.Count == 0)
             {
-                return new CommonResponse("error", $"Phải có ít nhất 1 file \"{requiredDraftVersionLabel}\" trước khi chuyển xét duyệt dự thảo.");
+                return new CommonResponse("error", $"Ph?i c� �t nh?t 1 file \"{requiredDraftVersionLabel}\" tru?c khi chuy?n x�t duy?t d? th?o.");
             }
 
             var hasWordFile = requiredDraftFiles.Any(file =>
@@ -3565,8 +3621,8 @@ namespace Services.Manages
                 DraftFileExtensions.Contains(Path.GetExtension(file.FileName).ToLowerInvariant()));
 
             return hasWordFile
-                ? new CommonResponse("success", "Thành công")
-                : new CommonResponse("error", $"Phải có ít nhất 1 file \"{requiredDraftVersionLabel}\" định dạng .doc hoặc .docx trước khi chuyển xét duyệt dự thảo.");
+                ? new CommonResponse("success", "Th�nh c�ng")
+                : new CommonResponse("error", $"Ph?i c� �t nh?t 1 file \"{requiredDraftVersionLabel}\" d?nh d?ng .doc ho?c .docx tru?c khi chuy?n x�t duy?t d? th?o.");
         }
 
         private async Task<string?> ResolveDraftReturnStepCodeAsync(Guid quyTrinhSoanThaoId)
@@ -3606,7 +3662,7 @@ namespace Services.Manages
                 HoSoVanBanId = hoSo.Id,
                 LanVersion = nextVersion + 1,
                 SoLanTraLai = hoSo.SoLanTraLaiHienTai,
-                TenVersion = $"Phiên bản dự thảo lần {nextVersion + 1}",
+                TenVersion = $"Phi�n b?n d? th?o l?n {nextVersion + 1}",
                 AttachedFileGroupId = Guid.NewGuid(),
                 DonViTaoId = donViTaoId,
                 NguoiTaoId = nguoiTaoId,
@@ -3809,12 +3865,12 @@ namespace Services.Manages
                 new()
                 {
                     Value = "CAP_NHAT_KET_QUA",
-                    Text = "Đơn vị soạn thảo tự cập nhật kết quả góp ý"
+                    Text = "�on v? so?n th?o t? c?p nh?t k?t qu? g�p �"
                 },
                 new()
                 {
                     Value = "GUI_DON_VI_GOP_Y",
-                    Text = "Gửi lấy góp ý đến từng đơn vị rồi tổng hợp lại"
+                    Text = "G?i l?y g�p � d?n t?ng don v? r?i t?ng h?p l?i"
                 }
             };
         }
@@ -3837,10 +3893,10 @@ namespace Services.Manages
         {
             return maBuocHienTai switch
             {
-                "BUOC_01_DANG_KY" => "Chuyá»ƒn vÄƒn báº£n Ä‘áº¿n Ä‘Æ¡n vá»‹ tiáº¿p nháº­n",
-                "BUOC_02_THONG_NHAT" => "Pháº£n há»“i VP UBND vá» Ä‘Äƒng kÃ½ xÃ¢y dá»±ng",
-                "BUOC_06_TRINH_THAM_QUYEN" => "Pháº£n há»“i káº¿t quáº£ trÃ¬nh cÆ¡ quan cÃ³ tháº©m quyá»n",
-                _ => $"Cáº­p nháº­t bÆ°á»›c {(string.IsNullOrWhiteSpace(tenBuocHienTai) ? "hiá»‡n táº¡i" : tenBuocHienTai)}"
+                "BUOC_01_DANG_KY" => "Chuyển văn bản đến đơn vị tiếp nhận",
+                "BUOC_02_THONG_NHAT" => "Phản hồi VP UBND về đăng ký xây dựng",
+                "BUOC_06_TRINH_THAM_QUYEN" => "Phản hồi kết quả trình cơ quan có thẩm quyền",
+                _ => $"Cập nhật bước {(string.IsNullOrWhiteSpace(tenBuocHienTai) ? "hiện tại" : tenBuocHienTai)}"
             };
         }
 
@@ -3848,10 +3904,10 @@ namespace Services.Manages
         {
             return maBuocHienTai switch
             {
-                "BUOC_01_DANG_KY" => "Chuyá»ƒn Ä‘áº¿n bÆ°á»›c 2",
-                "BUOC_02_THONG_NHAT" => "Gá»­i káº¿t quáº£ phÃª duyá»‡t Ä‘Äƒng kÃ½",
-                "BUOC_06_TRINH_THAM_QUYEN" => "Gá»­i káº¿t quáº£ phÃª duyá»‡t vÄƒn báº£n",
-                _ => $"HoÃ n thÃ nh {(string.IsNullOrWhiteSpace(tenBuocHienTai) ? "bÆ°á»›c hiá»‡n táº¡i" : tenBuocHienTai)}"
+                "BUOC_01_DANG_KY" => "Chuyển đến bước 2",
+                "BUOC_02_THONG_NHAT" => "Gửi kết quả phê duyệt đăng ký",
+                "BUOC_06_TRINH_THAM_QUYEN" => "Gửi kết quả phê duyệt văn bản",
+                _ => $"Hoàn thành {(string.IsNullOrWhiteSpace(tenBuocHienTai) ? "bước hiện tại" : tenBuocHienTai)}"
             };
         }
 
@@ -3863,7 +3919,7 @@ namespace Services.Manages
                 return string.IsNullOrWhiteSpace(normalizedNote) ? null : normalizedNote;
             }
 
-            var attachedFileNote = $"TÃ i liá»‡u Ä‘Ã­nh kÃ¨m group: {attachedFileGroupId.Value}";
+            var attachedFileNote = $"Tài liệu đính kèm group: {attachedFileGroupId.Value}";
             if (string.IsNullOrWhiteSpace(normalizedNote))
             {
                 return attachedFileNote;
@@ -4001,14 +4057,14 @@ namespace Services.Manages
         {
             return NormalizeTiepNhanNghiepVuCode(actionType) switch
             {
-                "NHAN_HO_SO" => "ÄÃ£ nháº­n há»“ sÆ¡",
-                "NHAN_VA_CHUYEN_PHE_DUYET" => "ÄÃ£ nháº­n vÃ  chuyá»ƒn phÃª duyá»‡t",
-                "PHE_DUYET_HO_SO" => "ÄÃ£ phÃª duyá»‡t há»“ sÆ¡",
-                "TRA_LAI_HO_SO" => "ÄÃ£ tráº£ láº¡i há»“ sÆ¡",
-                "CHUYEN_PHE_DUYET" => "ÄÃ£ chuyá»ƒn phÃª duyá»‡t",
-                "CHUYEN_BAN_HANH" => "ÄÃ£ chuyá»ƒn ban hÃ nh",
-                "CHUYEN_XET_DUYET_DANH_GIA" => "ÄÃ£ chuyá»ƒn xá»­ lÃ½ Ä‘Ã¡nh giÃ¡",
-                "DANG_LAY_GOP_Y" => "Äang láº¥y gÃ³p Ã½",
+                "NHAN_HO_SO" => "Đã nhận hồ sơ",
+                "NHAN_VA_CHUYEN_PHE_DUYET" => "Đã nhận và chuyển phê duyệt",
+                "PHE_DUYET_HO_SO" => "Đã phê duyệt hồ sơ",
+                "TRA_LAI_HO_SO" => "Đã trả lại hồ sơ",
+                "CHUYEN_PHE_DUYET" => "Đã chuyển phê duyệt",
+                "CHUYEN_BAN_HANH" => "Đã chuyển ban hành",
+                "CHUYEN_XET_DUYET_DANH_GIA" => "Đã chuyển xử lý đánh giá",
+                "DANG_LAY_GOP_Y" => "Đang lấy góp ý",
                 _ => string.Empty
             };
         }
@@ -4022,15 +4078,15 @@ namespace Services.Manages
         {
             return NormalizeTiepNhanNghiepVuCode(actionType) switch
             {
-                "NHAN_HO_SO" => "ÄÃ£ nháº­n há»“ sÆ¡ thÃ nh cÃ´ng.",
-                "NHAN_VA_CHUYEN_PHE_DUYET" => "ÄÃ£ nháº­n há»“ sÆ¡ vÃ  ghi nháº­n chuyá»ƒn phÃª duyá»‡t.",
-                "PHE_DUYET_HO_SO" => "ÄÃ£ ghi nháº­n phÃª duyá»‡t há»“ sÆ¡.",
-                "TRA_LAI_HO_SO" => "ÄÃ£ ghi nháº­n tráº£ láº¡i há»“ sÆ¡.",
-                "CHUYEN_PHE_DUYET" => "ÄÃ£ ghi nháº­n chuyá»ƒn phÃª duyá»‡t.",
-                "CHUYEN_BAN_HANH" => "ÄÃ£ ghi nháº­n chuyá»ƒn ban hÃ nh.",
-                "CHUYEN_XET_DUYET_DANH_GIA" => "ÄÃ£ chuyá»ƒn há»“ sÆ¡ sang mÃ n hÃ¬nh xá»­ lÃ½ Ä‘Ã¡nh giÃ¡.",
-                "DANG_LAY_GOP_Y" => "ÄÃ£ chuyá»ƒn sang tráng thÃ¡i láº¥y gÃ³p Ã½.",
-                _ => "Cáº­p nháº­t tráº¡ng thÃ¡i nghiá»‡p vá»¥ thÃ nh cÃ´ng."
+                "NHAN_HO_SO" => "Đã nhận hồ sơ thành công.",
+                "NHAN_VA_CHUYEN_PHE_DUYET" => "Đã nhận hồ sơ và ghi nhận chuyển phê duyệt.",
+                "PHE_DUYET_HO_SO" => "Đã ghi nhận phê duyệt hồ sơ.",
+                "TRA_LAI_HO_SO" => "Đã ghi nhận trả lại hồ sơ.",
+                "CHUYEN_PHE_DUYET" => "Đã ghi nhận chuyển phê duyệt.",
+                "CHUYEN_BAN_HANH" => "Đã ghi nhận chuyển ban hành.",
+                "CHUYEN_XET_DUYET_DANH_GIA" => "Đã chuyển hồ sơ sang màn hình xử lý đánh giá.",
+                "DANG_LAY_GOP_Y" => "Đã chuyển sang tr�ng thái lấy góp ý.",
+                _ => "Cập nhật trạng thái nghiệp vụ thành công."
             };
         }
 
@@ -4174,9 +4230,9 @@ namespace Services.Manages
             if (processing == null)
             {
                 model.MaTrangThaiTheoDoi = "CHUA_THUC_HIEN";
-                model.TenTrangThaiTheoDoi = "ChÆ°a thá»±c hiá»‡n";
+                model.TenTrangThaiTheoDoi = "Chưa thực hiện";
                 model.MaMauTrangThaiTheoDoi = "#CED4DA";
-                model.GhiChuTheoDoi = "BÆ°á»›c nÃ y chÆ°a phÃ¡t sinh xá»­ lÃ½.";
+                model.GhiChuTheoDoi = "Bước này chưa phát sinh xử lý.";
                 return model;
             }
 
@@ -4197,10 +4253,10 @@ namespace Services.Manages
                 if (processing.HanXuLy.HasValue && now > processing.HanXuLy.Value)
                 {
                     model.MaTrangThaiTheoDoi = "QUA_HAN";
-                    model.TenTrangThaiTheoDoi = "Äang xá»­ lÃ½ quÃ¡ háº¡n";
+                    model.TenTrangThaiTheoDoi = "Đang xử lý quá hạn";
                     model.MaMauTrangThaiTheoDoi = mauQuaHan;
                     model.SoNgayTre = (int)Math.Ceiling((now - processing.HanXuLy.Value).TotalDays);
-                    model.GhiChuTheoDoi = $"BÆ°á»›c Ä‘ang xá»­ lÃ½ vÃ  Ä‘Ã£ quÃ¡ háº¡n {Math.Max(model.SoNgayTre ?? 0, 0)} ngÃ y.";
+                    model.GhiChuTheoDoi = $"Bước đang xử lý và đã quá hạn {Math.Max(model.SoNgayTre ?? 0, 0)} ngày.";
                     return model;
                 }
 
@@ -4210,16 +4266,16 @@ namespace Services.Manages
                     now >= processing.HanXuLy.Value.AddDays(-soNgayCanhBao))
                 {
                     model.MaTrangThaiTheoDoi = "SAP_DEN_HAN";
-                    model.TenTrangThaiTheoDoi = "Sáº¯p Ä‘áº¿n háº¡n";
+                    model.TenTrangThaiTheoDoi = "Sắp đến hạn";
                     model.MaMauTrangThaiTheoDoi = mauSapHan;
-                    model.GhiChuTheoDoi = "BÆ°á»›c Ä‘ang xá»­ lÃ½ vÃ  Ä‘Ã£ Ä‘áº¿n ngÆ°á»¡ng cáº£nh bÃ¡o sáº¯p háº¡n.";
+                    model.GhiChuTheoDoi = "Bước đang xử lý và đã đến ngưỡng cảnh báo sắp hạn.";
                     return model;
                 }
 
                 model.MaTrangThaiTheoDoi = "DANG_XU_LY";
-                model.TenTrangThaiTheoDoi = "Äang xá»­ lÃ½";
+                model.TenTrangThaiTheoDoi = "Đang xử lý";
                 model.MaMauTrangThaiTheoDoi = mauDangXuLy;
-                model.GhiChuTheoDoi = "BÆ°á»›c Ä‘ang Ä‘Æ°á»£c thá»±c hiá»‡n.";
+                model.GhiChuTheoDoi = "Bước đang được thực hiện.";
                 return model;
             }
 
@@ -4228,24 +4284,24 @@ namespace Services.Manages
                 if (processing.HanXuLy.HasValue && processing.NgayXuLy.Value > processing.HanXuLy.Value)
                 {
                     model.MaTrangThaiTheoDoi = "HOAN_THANH_QUA_HAN";
-                    model.TenTrangThaiTheoDoi = "HoÃ n thÃ nh quÃ¡ háº¡n";
+                    model.TenTrangThaiTheoDoi = "Hoàn thành quá hạn";
                     model.MaMauTrangThaiTheoDoi = mauQuaHan;
                     model.SoNgayTre = (int)Math.Ceiling((processing.NgayXuLy.Value - processing.HanXuLy.Value).TotalDays);
-                    model.GhiChuTheoDoi = $"BÆ°á»›c Ä‘Ã£ hoÃ n thÃ nh nhÆ°ng trá»… {Math.Max(model.SoNgayTre ?? 0, 0)} ngÃ y.";
+                    model.GhiChuTheoDoi = $"Bước đã hoàn thành nhưng trễ {Math.Max(model.SoNgayTre ?? 0, 0)} ngày.";
                     return model;
                 }
 
                 model.MaTrangThaiTheoDoi = "HOAN_THANH_DUNG_HAN";
-                model.TenTrangThaiTheoDoi = "HoÃ n thÃ nh Ä‘Ãºng háº¡n";
+                model.TenTrangThaiTheoDoi = "Hoàn thành đúng hạn";
                 model.MaMauTrangThaiTheoDoi = mauDangXuLy;
-                model.GhiChuTheoDoi = "BÆ°á»›c Ä‘Ã£ hoÃ n thÃ nh trong háº¡n.";
+                model.GhiChuTheoDoi = "Bước đã hoàn thành trong hạn.";
                 return model;
             }
 
             model.MaTrangThaiTheoDoi = "CHUA_THUC_HIEN";
-            model.TenTrangThaiTheoDoi = "ChÆ°a thá»±c hiá»‡n";
+            model.TenTrangThaiTheoDoi = "Chưa thực hiện";
             model.MaMauTrangThaiTheoDoi = "#CED4DA";
-            model.GhiChuTheoDoi = "BÆ°á»›c chÆ°a cÃ³ káº¿t quáº£ xá»­ lÃ½.";
+            model.GhiChuTheoDoi = "Bước chưa có kết quả xử lý.";
             return model;
         }
 

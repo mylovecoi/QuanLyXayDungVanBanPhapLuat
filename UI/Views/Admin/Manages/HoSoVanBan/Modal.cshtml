@@ -92,6 +92,30 @@
     </div>
 </div>
 
+<div class="modal fade" id="LayGopY_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Chuyển lấy góp ý
+                    <span class="d-block text-muted pt-2 font-size-sm">Cập nhật thông tin trước khi chuyển hồ sơ sang bước lấy góp ý</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form id="frm_laygopy_wrapper">
+                <div class="modal-body" id="frm_laygopy_body">
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary font-weight-bold" onclick="SubmitChuyenLayGopY()">Chuyển lấy góp ý</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if (isXetDuyetDangKy)
 {
     <div class="modal fade" id="NhanHoSo_Modal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -167,6 +191,10 @@
     function Create() {
         if ('@routePrefix' === '/Manages/DangKyVanBan') {
             window.location.href = '/Manages/DangKyVanBan/CreatePage';
+            return;
+        }
+        if ('@routePrefix' === '/Manages/HoSoVanBan') {
+            window.location.href = '/Manages/HoSoVanBan/CreatePage';
             return;
         }
 
@@ -410,6 +438,93 @@
             },
             error: function () {
                 toastr.error('Không thể tải form chuyển hồ sơ!', 'Lỗi!');
+            }
+        });
+    }
+
+    function OpenChuyenLayGopY(id) {
+        const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+        $.ajax({
+            url: '@routePrefix/LayGopYAction',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': csrfToken
+            },
+            data: { id: id },
+            success: function (data) {
+                $('#frm_laygopy_body').html(data);
+                $('#LayGopY_Modal').modal('show');
+                InitializeLayGopYForm();
+            },
+            error: function () {
+                toastr.error('Không thể tải form chuyển lấy góp ý!', 'Lỗi!');
+            }
+        });
+    }
+
+    function InitializeLayGopYForm() {
+        if ($.fn.select2 && $('#layGopYDonViIds').length) {
+            $('#layGopYDonViIds').select2({
+                width: '100%',
+                placeholder: 'Chọn đơn vị cần góp ý'
+            });
+        }
+
+        ToggleLayGopYMode();
+    }
+
+    function ToggleLayGopYMode() {
+        const mode = ($('#layGopYActionMode').val() || '').toUpperCase();
+        const showDonVi = mode === 'GUI_DON_VI_GOP_Y';
+        $('#layGopYDonViWrapper').toggleClass('d-none', !showDonVi);
+        if (!showDonVi && $('#layGopYDonViIds').length) {
+            $('#layGopYDonViIds').val(null).trigger('change');
+        }
+    }
+
+    function SubmitChuyenLayGopY() {
+        const form = document.getElementById('frm_laygopy');
+        if (!form) {
+            toastr.error('Không tìm thấy dữ liệu chuyển lấy góp ý.', 'Lỗi!');
+            return;
+        }
+
+        const mode = (form.querySelector('#layGopYActionMode')?.value || '').toUpperCase();
+        const hanPhanHoi = form.querySelector('[name="HanPhanHoi"]')?.value;
+        if (!hanPhanHoi) {
+            toastr.error('Bạn phải nhập thời hạn xử lý bước góp ý.');
+            return;
+        }
+
+        if (mode === 'GUI_DON_VI_GOP_Y') {
+            const selectedUnits = $('#layGopYDonViIds').val() || [];
+            if (!selectedUnits.length) {
+                toastr.error('Bạn phải chọn ít nhất 1 đơn vị để gửi góp ý.');
+                return;
+            }
+        }
+
+        const token = form.querySelector('input[name="__RequestVerificationToken"]')?.value
+            || $('input[name="__RequestVerificationToken"]').val();
+
+        $.ajax({
+            url: '@routePrefix/KhoiTaoLayYKien',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': token
+            },
+            data: $(form).serialize(),
+            success: function (res) {
+                if (res.status === 'success') {
+                    toastr.success(res.message || 'Đã chuyển hồ sơ sang bước lấy góp ý.');
+                    $('#LayGopY_Modal').modal('hide');
+                    window.location.reload();
+                } else {
+                    toastr.error(res.message || 'Có lỗi xảy ra');
+                }
+            },
+            error: function () {
+                toastr.error('Không thể chuyển hồ sơ sang bước lấy góp ý!', 'Lỗi!');
             }
         });
     }

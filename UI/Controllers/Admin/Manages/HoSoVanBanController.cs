@@ -51,8 +51,43 @@ namespace UI.Controllers.Admin.Manages
             return View("Views/Admin/Manages/HoSoVanBan/Index.cshtml", model.Data);
         }
 
+        [HttpGet("Manages/HoSoVanBan/CreatePage")]
+        [AuthorizeAction("Create", "HoSoVanBan", "Index")]
+        public async Task<IActionResult> CreatePage()
+        {
+            ViewData["Title"] = "Soạn thảo văn bản";
+            ViewData["PageTitle"] = "Thêm mới hồ sơ soạn thảo";
+            ViewData["PageSubtitle"] = "Khởi tạo hồ sơ soạn thảo và có thể liên kết tới văn bản đã đăng ký.";
+            ViewData["FormAction"] = "/Manages/HoSoVanBan/Store";
+            ViewData["SubmitLabel"] = "Thêm mới";
+            ViewData["BackUrl"] = "/Manages/HoSoVanBan";
+            ViewData["DonViLabel"] = "Đơn vị soạn thảo";
+            ViewData["DanhMucVanBans"] = await _hoSoVanBanWorkflowService.GetDanhMucVanBanOptionsAsync();
+            ViewData["QuyTrinhSoanThaos"] = await _hoSoVanBanWorkflowService.GetQuyTrinhOptionsAsync(loaiQuyTrinh: "XayDung");
+            ViewData["WorkflowStepUrl"] = "/Manages/HoSoVanBan/LoadWorkflowSteps";
+            ViewData["AttachedFileTableName"] = "HoSoVanBan";
+            await PopulateCreateViewDataAsync();
+
+            var currentUser = _authService.GetUserInfo();
+            var isSSA = currentUser?.SSA ?? false;
+            var sessionDonViId = currentUser?.DanhMucDonViId != Guid.Empty ? currentUser?.DanhMucDonViId : null;
+            ViewData["HoSoDangKyOptions"] = await _hoSoVanBanWorkflowService.GetHoSoDangKyOptionsAsync(sessionDonViId, isSSA);
+
+            var model = new HoSoVanBanCreateModel
+            {
+                Id = Guid.NewGuid(),
+                DonViDeNghiId = sessionDonViId,
+                HanXuLy = DateTime.Today.AddDays(7),
+                TuNgaySoanThao = DateTime.Today,
+                DenNgaySoanThao = DateTime.Today.AddDays(7)
+            };
+            model.QuyTrinhSoanThaoId = (ViewData["QuyTrinhSoanThaos"] as List<DataAccess.Entities.QuanLyDanhMuc.DanhMucQuyTrinhSoanThao>)?.FirstOrDefault()?.Id ?? Guid.Empty;
+
+            return View("Views/Admin/Manages/HoSoVanBan/Create.cshtml", model);
+        }
+
         [HttpGet("Manages/HoSoVanBan/Create")]
-        [AuthorizeAction("Create")]
+        [AuthorizeAction("Create", "HoSoVanBan", "Index")]
         public async Task<IActionResult> Create()
         {
             ViewData["DanhMucVanBans"] = await _hoSoVanBanWorkflowService.GetDanhMucVanBanOptionsAsync();
@@ -66,7 +101,7 @@ namespace UI.Controllers.Admin.Manages
         }
 
         [HttpGet("Manages/HoSoVanBan/LoadWorkflowSteps")]
-        [AuthorizeAction("Create")]
+        [AuthorizeAction("Create", "HoSoVanBan", "Index")]
         public async Task<JsonResult> LoadWorkflowSteps(Guid quyTrinhSoanThaoId)
         {
             var data = await _hoSoVanBanWorkflowService.GetBuocThoiHanOptionsAsync(quyTrinhSoanThaoId);
@@ -75,7 +110,7 @@ namespace UI.Controllers.Admin.Manages
 
         [HttpPost("Manages/HoSoVanBan/Store")]
         [ValidateAntiForgeryToken]
-        [AuthorizeAction("Store")]
+        [AuthorizeAction("Store", "HoSoVanBan", "Index")]
         public async Task<IActionResult> Store(HoSoVanBanCreateModel request)
         {
             var model = await _hoSoVanBanWorkflowService.CreateHoSoAsync(request);
@@ -185,6 +220,22 @@ namespace UI.Controllers.Admin.Manages
         {
             var model = await _hoSoVanBanWorkflowService.HoanThanhDanhGiaAsync(request);
             return Json(new { status = model.Status, message = model.Message });
+        }
+
+        private async Task PopulateCreateViewDataAsync()
+        {
+            var currentUser = _authService.GetUserInfo();
+            var isSSA = currentUser?.SSA ?? false;
+            var sessionDonViId = currentUser?.DanhMucDonViId ?? Guid.Empty;
+            var donViOptions = await _hoSoVanBanWorkflowService.GetDonViOptionsAsync();
+            if (!isSSA)
+            {
+                donViOptions = donViOptions.Where(x => x.Id == sessionDonViId).ToList();
+            }
+
+            ViewData["CreateDonViOptions"] = donViOptions;
+            ViewData["CreateIsSSA"] = isSSA;
+            ViewData["CreateSessionDonViId"] = sessionDonViId;
         }
 
         private async Task<Guid?> ApplyDonViFilterViewDataAsync(Guid? donViId)

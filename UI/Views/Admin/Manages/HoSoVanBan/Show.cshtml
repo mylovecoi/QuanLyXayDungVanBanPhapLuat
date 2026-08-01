@@ -232,6 +232,13 @@
                     <div class="hoso-info-label">Quy trình</div>
                     <div class="hoso-info-value">@Model.TenQuyTrinh</div>
                 </div>
+                @if (Model.HoSoDangKyNguonId.HasValue)
+                {
+                    <div class="hoso-info-item">
+                        <div class="hoso-info-label">Hồ sơ đăng ký nguồn</div>
+                        <div class="hoso-info-value">@(!string.IsNullOrWhiteSpace(Model.TenHoSoDangKyNguon) ? Model.TenHoSoDangKyNguon : Model.HoSoDangKyNguonId.ToString())</div>
+                    </div>
+                }
                 <div class="hoso-info-item">
                     <div class="hoso-info-label">Ngày tạo hồ sơ</div>
                     <div class="hoso-info-value">@FuntionGlobal.ConvertDateTimeToStr(Model.NgayTaoHoSo)</div>
