@@ -1,0 +1,508 @@
+@using Services.Manages
+@using UI.ViewModels
+@model IEnumerable<HoSoVanBanListItemModel>
+
+@{
+    var pageInfo = ViewData["PageInfo"] as VMPageInfo;
+    var pageSize = pageInfo?.PageSize ?? 5;
+    var timKiem = pageInfo?.Search ?? string.Empty;
+    var donViOptions = ViewData["DonViOptions"] as List<DonViOptionModel> ?? new();
+    var maBuocOptions = ViewData["MaBuocOptions"] as List<SelectOptionModel> ?? new();
+    var mucCanhBaoOptions = ViewData["MucCanhBaoOptions"] as List<SelectOptionModel> ?? new();
+    Guid? selectedDonViId = ViewData["SelectedDonViId"] is Guid selected ? selected : ViewData["SelectedDonViId"] as Guid?;
+    var selectedMaBuoc = ViewData["SelectedMaBuoc"]?.ToString() ?? string.Empty;
+    var selectedMucCanhBao = ViewData["SelectedMucCanhBao"]?.ToString() ?? string.Empty;
+    var hideDonViFilter = ViewData["HideDonViFilter"] is bool hide && hide;
+    var recordId = pageInfo?.RecordStart ?? 1;
+    var tongHoSo = Model.Count();
+    var soBinhThuong = Model.Count(x => x.MucCanhBao == "BINH_THUONG");
+    var soSapDenHan = Model.Count(x => x.MucCanhBao == "SAP_DEN_HAN");
+    var soQuaHan = Model.Count(x => x.MucCanhBao == "QUA_HAN");
+    var soTraLaiNhieu = Model.Count(x => x.MucCanhBao == "TRA_LAI_NHIEU");
+}
+
+@section custom_script {
+    <script>
+        $(document).ready(function () {
+            $('#PageSize_Search, #DonViId_Search, #MaBuoc_Search, #MucCanhBao_Search').change(ReloadFrm);
+            $('#checkAllHoSo').change(function () {
+                $('.check-ho-so-dondoc').prop('checked', $(this).is(':checked'));
+            });
+            $('#txt_Search').keypress(function (e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    ReloadFrm();
+                }
+            });
+        });
+
+        function ClearTxtSearch() {
+            $('#txt_Search').val('');
+            ReloadFrm();
+        }
+
+        function SubmitTxtSearch() { ReloadFrm(); }
+
+        function ReloadFrm() {
+            var currentPathUrl = window.location.pathname + '?';
+            var timKiem = '&TimKiem=' + ($('#txt_Search').val() || '');
+            var pageSize = '&PageSize=' + ($('#PageSize_Search').val() || '5');
+            var donViId = $('#DonViId_Search').length ? '&DonViId=' + ($('#DonViId_Search').val() || '') : '';
+            var maBuoc = '&MaBuoc=' + ($('#MaBuoc_Search').val() || '');
+            var mucCanhBao = '&MucCanhBao=' + ($('#MucCanhBao_Search').val() || '');
+            window.location.href = currentPathUrl + timKiem + pageSize + donViId + maBuoc + mucCanhBao;
+        }
+
+        function ClickPage(pageSelect) {
+            var currentPathUrl = window.location.pathname + '?';
+            var timKiem = '&TimKiem=' + ($('#txt_Search').val() || '');
+            var pageSize = '&PageSize=' + ($('#PageSize_Search').val() || '5');
+            var donViId = $('#DonViId_Search').length ? '&DonViId=' + ($('#DonViId_Search').val() || '') : '';
+            var maBuoc = '&MaBuoc=' + ($('#MaBuoc_Search').val() || '');
+            var mucCanhBao = '&MucCanhBao=' + ($('#MucCanhBao_Search').val() || '');
+            var pageCurrent = '&PageCurrent=' + pageSelect;
+            window.location.href = currentPathUrl + timKiem + pageSize + donViId + maBuoc + mucCanhBao + pageCurrent;
+        }
+
+        function OpenDonDoc(id) {
+            $.ajax({
+                url: '/Manages/TheoDoiTienDoXayDung/DonDoc',
+                type: 'GET',
+                data: { id: id },
+                success: function (data) {
+                    $('#frm_dondoc_body').html(data);
+                    $('#DonDoc_Modal').modal('show');
+                },
+                error: function () {
+                    toastr.error('Không thể tải thông tin đôn đốc!');
+                }
+            });
+        }
+
+        function SubmitDonDoc() {
+            var form = document.getElementById('frm_dondoc');
+            if (!form) return;
+
+            var noiDung = ($('#NoiDungDonDoc').val() || '').trim();
+            if (!noiDung) {
+                toastr.error('Bạn phải nhập nội dung đôn đốc.');
+                $('#NoiDungDonDoc').focus();
+                return;
+            }
+
+            var token = form.querySelector('input[name="__RequestVerificationToken"]')?.value
+                || $('input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: '/Manages/TheoDoiTienDoXayDung/DonDoc',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                data: $(form).serialize(),
+                success: function (res) {
+                    if (res.status === 'success') {
+                        toastr.success(res.message || 'Đã gửi đôn đốc.');
+                        $('#DonDoc_Modal').modal('hide');
+                    } else {
+                        toastr.error(res.message || 'Có lỗi xảy ra.');
+                    }
+                },
+                error: function () {
+                    toastr.error('Không thể gửi đôn đốc!');
+                }
+            });
+        }
+
+        function OpenDonDocHangLoat() {
+            var selectedIds = $('.check-ho-so-dondoc:checked').map(function () {
+                return $(this).val();
+            }).get();
+
+            if (!selectedIds.length) {
+                toastr.error('Bạn chưa chọn hồ sơ để đôn đốc.');
+                return;
+            }
+
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            $.ajax({
+                url: '/Manages/TheoDoiTienDoXayDung/DonDocHangLoat',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                traditional: true,
+                data: { hoSoVanBanIds: selectedIds },
+                success: function (res) {
+                    if (typeof res === 'object' && res.status === 'error') {
+                        toastr.error(res.message || 'Không thể tải dữ liệu đôn đốc hàng loạt.');
+                        return;
+                    }
+
+                    $('#frm_dondoc_hangloat_body').html(res);
+                    $('#DonDocHangLoat_Modal').modal('show');
+                },
+                error: function () {
+                    toastr.error('Không thể tải dữ liệu đôn đốc hàng loạt!');
+                }
+            });
+        }
+
+        function SubmitDonDocHangLoat() {
+            var form = document.getElementById('frm_dondoc_hangloat');
+            if (!form) return;
+
+            var noiDung = ($('#NoiDungDonDocHangLoat').val() || '').trim();
+            if (!noiDung) {
+                toastr.error('Bạn phải nhập nội dung đôn đốc.');
+                $('#NoiDungDonDocHangLoat').focus();
+                return;
+            }
+
+            var token = form.querySelector('input[name="__RequestVerificationToken"]')?.value
+                || $('input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: '/Manages/TheoDoiTienDoXayDung/GuiDonDocHangLoat',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                data: $(form).serialize(),
+                success: function (res) {
+                    if (res.status === 'success') {
+                        toastr.success(res.message || 'Đã gửi đôn đốc hàng loạt.');
+                        $('#DonDocHangLoat_Modal').modal('hide');
+                        $('.check-ho-so-dondoc').prop('checked', false);
+                        $('#checkAllHoSo').prop('checked', false);
+                    } else {
+                        toastr.error(res.message || 'Có lỗi xảy ra.');
+                    }
+                },
+                error: function () {
+                    toastr.error('Không thể gửi đôn đốc hàng loạt!');
+                }
+            });
+        }
+    </script>
+}
+
+<div class="card card-custom">
+    <div class="card-header flex-wrap border-0 pt-6 pb-0">
+        <div class="card-title">
+            <h3 class="card-label">
+                <b>@ViewData["Title"]?.ToString()?.ToUpper()</b>
+                <span class="d-block text-muted pt-2 font-size-sm">Theo dõi toàn bộ hồ sơ xây dựng văn bản chưa hoàn thành</span>
+            </h3>
+        </div>
+    </div>
+
+    @Html.AntiForgeryToken()
+
+    <div class="card-body pt-0">
+        <hr />
+
+        <div class="alert alert-light-info d-flex align-items-center mb-6">
+            <i class="la la-bell icon-xl mr-3 text-info"></i>
+            <div>
+                Sở Tư pháp có thể lọc theo bước hiện tại, mức cảnh báo và mở chi tiết timeline để theo dõi, đôn đốc hồ sơ chậm tiến độ.
+            </div>
+        </div>
+
+        <div class="row mb-6">
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="card card-custom gutter-b shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="font-size-sm text-muted text-uppercase mb-2">Tổng hồ sơ</div>
+                        <div class="font-size-h2 font-weight-bolder text-dark">@tongHoSo</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="card card-custom gutter-b shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="font-size-sm text-muted text-uppercase mb-2">Bình thường</div>
+                        <div class="font-size-h2 font-weight-bolder" style="color:#28A745;">@soBinhThuong</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="card card-custom gutter-b shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="font-size-sm text-muted text-uppercase mb-2">Sắp hạn</div>
+                        <div class="font-size-h2 font-weight-bolder" style="color:#FFC107;">@soSapDenHan</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="card card-custom gutter-b shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="font-size-sm text-muted text-uppercase mb-2">Quá hạn</div>
+                        <div class="font-size-h2 font-weight-bolder" style="color:#DC3545;">@soQuaHan</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-2 col-md-4 col-sm-6">
+                <div class="card card-custom gutter-b shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="font-size-sm text-muted text-uppercase mb-2">Trả lại nhiều</div>
+                        <div class="font-size-h2 font-weight-bolder" style="color:#6F42C1;">@soTraLaiNhieu</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-2">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Hiển thị</label>
+                    <select class="form-control" id="PageSize_Search">
+                        <option value="5" selected="@(pageSize == 5 ? "selected" : null)">5</option>
+                        <option value="10" selected="@(pageSize == 10 ? "selected" : null)">10</option>
+                        <option value="20" selected="@(pageSize == 20 ? "selected" : null)">20</option>
+                        <option value="50" selected="@(pageSize == 50 ? "selected" : null)">50</option>
+                        <option value="100" selected="@(pageSize == 100 ? "selected" : null)">100</option>
+                    </select>
+                </div>
+            </div>
+            @if (!hideDonViFilter)
+            {
+                <div class="col-xl-3">
+                    <div class="form-group">
+                        <label class="text-blue font-weight-bold">Đơn vị</label>
+                        <select class="form-control" id="DonViId_Search">
+                            <option value="">-- Tất cả đơn vị --</option>
+                            @foreach (var item in donViOptions)
+                            {
+                                <option value="@item.Id" selected="@(selectedDonViId.HasValue && selectedDonViId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            }
+            <div class="col-xl-@(hideDonViFilter ? "4" : "3")">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Bước hiện tại</label>
+                    <select class="form-control" id="MaBuoc_Search">
+                        <option value="">-- Tất cả bước --</option>
+                        @foreach (var item in maBuocOptions)
+                        {
+                            <option value="@item.Value" selected="@(string.Equals(selectedMaBuoc, item.Value, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@item.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-xl-2">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Cảnh báo</label>
+                    <select class="form-control" id="MucCanhBao_Search">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var item in mucCanhBaoOptions)
+                        {
+                            <option value="@item.Value" selected="@(string.Equals(selectedMucCanhBao, item.Value, StringComparison.OrdinalIgnoreCase) ? "selected" : null)">@item.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-xl-2">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Tìm kiếm</label>
+                    <div class="input-group">
+                        <input class="form-control" id="txt_Search" placeholder="Tìm kiếm..." value="@timKiem" />
+                        <div class="input-group-prepend">
+                            <button class="btn btn-danger" type="button" onclick="ClearTxtSearch()"><i class="las la-times-circle"></i></button>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" onclick="SubmitTxtSearch()"><i class="las la-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-1 d-flex align-items-end">
+                <div class="form-group w-100">
+                    <button type="button" class="btn btn-warning font-weight-bold w-100" onclick="OpenDonDocHangLoat()">
+                        <i class="la la-bullhorn"></i> Đôn đốc
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive border rounded-lg mb-8">
+            <table class="table table-striped table-hover table-responsive-lg rounded-lg m-0">
+                <thead>
+                    <tr class="table-active text-center">
+                        <th width="3%">
+                            <input type="checkbox" id="checkAllHoSo" />
+                        </th>
+                        <th width="4%">#</th>
+                        <th width="21%">Hồ sơ</th>
+                        <th width="14%">Bước hiện tại</th>
+                        <th width="12%">Đơn vị</th>
+                        <th width="11%">Thời hạn</th>
+                        <th width="11%">Cảnh báo</th>
+                        <th width="12%">Tiến độ</th>
+                        <th width="12%">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr class="@FuntionGlobal.GetClassTable(recordId)">
+                                <td class="text-center align-middle">
+                                    @if (item.MucCanhBao != "BINH_THUONG")
+                                    {
+                                        <input type="checkbox" class="check-ho-so-dondoc" value="@item.Id" />
+                                    }
+                                </td>
+                                <td class="text-center align-middle">@recordId</td>
+                                <td class="align-middle">
+                                    <div class="font-weight-bold text-primary">@item.TenHoSo</div>
+                                    <div>Mã hồ sơ: @item.MaHoSo</div>
+                                    <div>Loại văn bản: @(item.TenLoaiVanBan ?? "-")</div>
+                                    <div>Tạo ngày: @FuntionGlobal.ConvertDateTimeToStr(item.NgayTaoHoSo)</div>
+                                </td>
+                                <td class="align-middle">
+                                    <div class="font-weight-bold">@(item.TenBuocHienTai ?? "-")</div>
+                                    @if (!string.IsNullOrWhiteSpace(item.TenTrangThai))
+                                    {
+                                        <div class="mt-2">
+                                            <span class="badge" style="background-color:@(string.IsNullOrWhiteSpace(item.MaMauTrangThai) ? "#6c757d" : item.MaMauTrangThai);color:#212529;padding:8px 12px;">
+                                                @item.TenTrangThai
+                                            </span>
+                                        </div>
+                                    }
+                                </td>
+                                <td class="align-middle">
+                                    <div><span class="font-weight-bold">Chủ trì:</span> @(item.TenDonViSoanThao ?? "-")</div>
+                                    <div><span class="font-weight-bold">Đang xử lý:</span> @(item.TenDonViXuLyHienTai ?? "-")</div>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <div>Nhận: @(item.NgayNhanHienTai.HasValue ? item.NgayNhanHienTai.Value.ToString("dd/MM/yyyy") : "-")</div>
+                                    <div>Hạn: @(item.HanXuLy.HasValue ? item.HanXuLy.Value.ToString("dd/MM/yyyy") : "-")</div>
+                                    <div class="mt-2 small text-muted">
+                                        @if (item.SoNgayQuaHanHienTai.HasValue)
+                                        {
+                                            <span>Quá hạn @item.SoNgayQuaHanHienTai ngày</span>
+                                        }
+                                        else if (item.SoNgayConLai.HasValue)
+                                        {
+                                            <span>Còn @item.SoNgayConLai ngày</span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="align-middle text-center">
+                                    <div>
+                                        <span class="badge" style="background-color:@item.MaMauCanhBao;color:#212529;padding:8px 12px;">
+                                            @item.TenMucCanhBao
+                                        </span>
+                                    </div>
+                                    <div class="mt-2 small">
+                                        Trả lại: @item.SoLanTraLaiHienTai
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(item.GhiChuCanhBao))
+                                    {
+                                        <div class="mt-2 small text-muted">@item.GhiChuCanhBao</div>
+                                    }
+                                </td>
+                                <td class="align-middle text-center">
+                                    <div class="mb-2">
+                                        <span class="badge" style="background-color:@item.MaMauTienDo;color:#212529;padding:8px 12px;">
+                                            @item.TenTrangThaiTienDo
+                                        </span>
+                                    </div>
+                                    <div class="font-weight-bold">@item.SoBuocHoanThanh/@item.TongSoBuoc bước</div>
+                                    <div class="progress mt-2" style="height:8px;">
+                                        <div class="progress-bar" role="progressbar" style="width:@item.TyLeHoanThanh%;background-color:@(item.SoBuocQuaHan > 0 ? "#DC3545" : "#28A745");"></div>
+                                    </div>
+                                    <div class="mt-2 small">
+                                        <div>Quá hạn: @item.SoBuocQuaHan</div>
+                                        <div>Chưa làm: @item.SoBuocChuaThucHien</div>
+                                    </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                    <button type="button" onclick="Show('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Xem chi tiết">
+                                        <i class="icon-lg la la-eye text-primary"></i>
+                                    </button>
+                                    <button type="button" onclick="ShowTimeline('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Xem timeline">
+                                        <i class="icon-lg la la-stream text-info"></i>
+                                    </button>
+                                    @if (item.MucCanhBao != "BINH_THUONG")
+                                    {
+                                        <button type="button" onclick="OpenDonDoc('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Đôn đốc">
+                                            <i class="icon-lg la la-bullhorn text-warning"></i>
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                            recordId++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="text-center" colspan="9">Không tìm thấy thông tin.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @await Html.PartialAsync("~/Views/Shared/Pagination.cshtml")
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/Admin/Manages/HoSoVanBan/Modal.cshtml")
+
+<div class="modal fade" id="DonDoc_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Đôn đốc tiến độ
+                    <span class="d-block text-muted pt-2 font-size-sm">Gửi thông báo đôn đốc đến đơn vị đang xử lý hồ sơ</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form id="frm_dondoc">
+                <div class="modal-body" id="frm_dondoc_body">
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-warning font-weight-bold" onclick="SubmitDonDoc()">Gửi đôn đốc</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="DonDocHangLoat_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Đôn đốc hàng loạt
+                    <span class="d-block text-muted pt-2 font-size-sm">Gửi một nội dung đôn đốc cho nhiều hồ sơ đã chọn</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <form id="frm_dondoc_hangloat">
+                <div class="modal-body" id="frm_dondoc_hangloat_body">
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-danger font-weight-bold" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-warning font-weight-bold" onclick="SubmitDonDocHangLoat()">Gửi đôn đốc</button>
+            </div>
+        </div>
+    </div>
+</div>

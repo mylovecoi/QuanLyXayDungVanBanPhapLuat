@@ -302,7 +302,7 @@ BEGIN
     (
         '20000000-0000-0000-0000-000000000032', @SystemUser, @Now, @SystemUser, @Now,
         1, 'Detail', 1, 'ThiHanhPhapLuat.DanhSachKeHoach', '20000000-0000-0000-0000-000000000031',
-        N'Danh sach ke hoach', 'DangPhatTrien', 'DanhSachKeHoach', NULL, 'DangPhatTrien',
+        N'Danh sach ke hoach', 'DanhSachKeHoachThiHanhPhapLuat', 'Index', NULL, 'ThiHanhPhapLuatKeHoach',
         N'Kich hoat', NULL, NULL
     );
 END;
@@ -320,7 +320,7 @@ BEGIN
     (
         '20000000-0000-0000-0000-000000000033', @SystemUser, @Now, @SystemUser, @Now,
         2, 'Detail', 1, 'ThiHanhPhapLuat.QuaTrinhToChucThucHien', '20000000-0000-0000-0000-000000000031',
-        N'Danh sach qua trinh to chuc thuc hien', 'DangPhatTrien', 'QuaTrinhToChucThucHien', NULL, 'DangPhatTrien',
+        N'Danh sach qua trinh to chuc thuc hien', 'QuaTrinhToChucThucHien', 'Index', NULL, 'ThiHanhPhapLuatKeHoach',
         N'Kich hoat', NULL, NULL
     );
 END;
@@ -338,7 +338,7 @@ BEGIN
     (
         '20000000-0000-0000-0000-000000000034', @SystemUser, @Now, @SystemUser, @Now,
         3, 'Detail', 1, 'ThiHanhPhapLuat.DanhGiaKetQua', '20000000-0000-0000-0000-000000000031',
-        N'Danh gia ket qua', 'DangPhatTrien', 'DanhGiaKetQua', NULL, 'DangPhatTrien',
+        N'Danh gia ket qua', 'DanhGiaKetQuaThiHanhPhapLuat', 'Index', NULL, 'ThiHanhPhapLuatKeHoach',
         N'Kich hoat', NULL, NULL
     );
 END;

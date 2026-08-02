@@ -39,6 +39,12 @@ namespace DataAccess.Entities.Manages
         [StringLength(50)]
         public string? PhanLoaiDuThao { get; set; }
 
+        [StringLength(50)]
+        public string? LoaiTaiLieu { get; set; }
+
+        [StringLength(30)]
+        public string PhamViCongKhai { get; set; } = "NOI_BO";
+
         public string? Status { get; set; } = "CXD";
 
         public bool Public { get; set; } = false;

@@ -100,6 +100,7 @@ builder.Services.AddScoped<IDanhMucPhongBanService, DanhMucPhongBanService>();
 builder.Services.AddScoped<IDanhMucCanBoService, DanhMucCanBoService>();
 builder.Services.AddScoped<IDanhMucDiaDanhService, DanhMucDiaDanhService>();
 builder.Services.AddScoped<IDanhMucTrangThaiService, DanhMucTrangThaiService>();
+builder.Services.AddScoped<IDanhMucTieuChiDiemService, DanhMucTieuChiDiemService>();
 builder.Services.AddScoped<IDanhMucVanBanService, DanhMucVanBanService>();
 builder.Services.AddScoped<IQuyTrinhSoanThaoService, QuyTrinhSoanThaoService>();
 
@@ -111,6 +112,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVanBanPhapLuatService, VanBanPhapLuatService>();
 builder.Services.AddScoped<IHoSoVanBanWorkflowService, HoSoVanBanWorkflowService>();
 builder.Services.AddScoped<IHoSoVanBanDuThaoService, HoSoVanBanDuThaoService>();
+builder.Services.AddScoped<IThiHanhPhapLuatService, ThiHanhPhapLuatService>();
 builder.Services.AddScoped<IAttachedFileService, AttachedFileService>();
 builder.Services.AddScoped<IThuTucHanhChinhService, ThuTucHanhChinhService>();
 

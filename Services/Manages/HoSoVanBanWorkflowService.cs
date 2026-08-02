@@ -1,4 +1,4 @@
-using DataAccess;
+﻿using DataAccess;
 using DataAccess.Entities.Manages;
 using DataAccess.Entities.QuanLyDanhMuc;
 using DocumentFormat.OpenXml.Packaging;
@@ -13,10 +13,42 @@ namespace Services.Manages
     public interface IHoSoVanBanWorkflowService
     {
         Task<CommonResponse> GetDanhSachAsync(string search, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1);
-        Task<CommonResponse> GetDanhSachDangKyAsync(string search, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1);
+        Task<CommonResponse> GetDanhSachDangKyAsync(
+            string search,
+            Guid? donViSoanThaoId = null,
+            int pageSize = 5,
+            int pageCurrent = 1,
+            Guid? danhMucVanBanId = null,
+            Guid? nguoiXuLyId = null,
+            string? maTrangThai = null,
+            string? maBuoc = null,
+            DateTime? tuNgayTao = null,
+            DateTime? denNgayTao = null,
+            DateTime? tuHanXuLy = null,
+            DateTime? denHanXuLy = null,
+            DateTime? tuNgayHoanThanh = null,
+            DateTime? denNgayHoanThanh = null);
         Task<CommonResponse> GetDanhSachTheoBuocAsync(string search, string maBuoc, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1, bool chiLayDonViDangNhap = true, IEnumerable<string>? trangThaiNghiepVuFilters = null, string? loaiQuyTrinh = null);
+        Task<CommonResponse> GetDanhSachBanHanhAsync(string search, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1);
+        Task<CommonResponse> GetDanhSachChamDiemXayDungAsync(string search, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1);
+        Task<CommonResponse> GetDanhSachTheoDoiTienDoXayDungAsync(string search, Guid? donViSoanThaoId = null, string? maBuoc = null, string? mucCanhBao = null, int pageSize = 5, int pageCurrent = 1);
+        Task<CommonResponse> GetDanhSachGiaHanXayDungAsync(string search, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1);
         Task<CommonResponse> GetDanhSachLayYKienAsync(string search, Guid? donViId = null, int pageSize = 5, int pageCurrent = 1);
+        Task<CommonResponse> GetDonDocTienDoFormAsync(Guid hoSoVanBanId);
+        Task<CommonResponse> GuiDonDocTienDoAsync(HoSoVanBanDonDocFormModel request);
+        Task<CommonResponse> GetDonDocTienDoHangLoatFormAsync(List<Guid> hoSoVanBanIds);
+        Task<CommonResponse> GuiDonDocTienDoHangLoatAsync(HoSoVanBanDonDocHangLoatFormModel request);
+        Task<CommonResponse> GetKetQuaLayYKienFormAsync(Guid hoSoVanBanId, string coQuan = "UBND");
+        Task<CommonResponse> SaveKetQuaLayYKienAsync(HoSoVanBanKetQuaLayYKienFormModel request);
+        Task<CommonResponse> GetBanHanhFormAsync(Guid hoSoVanBanId);
+        Task<CommonResponse> SaveBanHanhAsync(HoSoVanBanBanHanhFormModel request, bool xacNhanBanHanh);
+        Task<CommonResponse> GetGiaHanXayDungFormAsync(Guid hoSoVanBanId);
+        Task<CommonResponse> SaveGiaHanXayDungAsync(HoSoVanBanGiaHanFormModel request);
+        Task<CommonResponse> GetChamDiemXayDungFormAsync(Guid hoSoVanBanId);
+        Task<CommonResponse> SaveChamDiemXayDungAsync(HoSoVanBanChamDiemFormModel request);
         Task<List<DonViOptionModel>> GetDonViOptionsAsync();
+        Task<List<SelectOptionModel>> GetBuocTheoDoiTienDoOptionsAsync();
+        Task<List<SelectOptionModel>> GetNguoiXuLyOptionsAsync(Guid? donViId = null);
         Task<List<HoSoDangKyOptionModel>> GetHoSoDangKyOptionsAsync(Guid? donViId = null, bool isSSA = false);
         Task<List<DataAccess.Entities.QuanLyDanhMuc.DanhMucVanBan>> GetDanhMucVanBanOptionsAsync();
         Task<List<DataAccess.Entities.QuanLyDanhMuc.DanhMucQuyTrinhSoanThao>> GetQuyTrinhOptionsAsync(Guid? danhMucVanBanId = null, string? loaiQuyTrinh = null);
@@ -63,14 +95,418 @@ namespace Services.Manages
             return await GetDanhSachInternalAsync(search, pageSize, pageCurrent, false, null, false, donViSoanThaoId);
         }
 
-        public async Task<CommonResponse> GetDanhSachDangKyAsync(string search, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1)
+        public async Task<CommonResponse> GetDanhSachDangKyAsync(
+            string search,
+            Guid? donViSoanThaoId = null,
+            int pageSize = 5,
+            int pageCurrent = 1,
+            Guid? danhMucVanBanId = null,
+            Guid? nguoiXuLyId = null,
+            string? maTrangThai = null,
+            string? maBuoc = null,
+            DateTime? tuNgayTao = null,
+            DateTime? denNgayTao = null,
+            DateTime? tuHanXuLy = null,
+            DateTime? denHanXuLy = null,
+            DateTime? tuNgayHoanThanh = null,
+            DateTime? denNgayHoanThanh = null)
         {
-            return await GetDanhSachInternalAsync(search, pageSize, pageCurrent, false, null, false, donViSoanThaoId, false, null, "DangKy");
+            return await GetDanhSachInternalAsync(
+                search,
+                pageSize,
+                pageCurrent,
+                false,
+                null,
+                false,
+                donViSoanThaoId,
+                false,
+                null,
+                "DangKy",
+                danhMucVanBanId,
+                nguoiXuLyId,
+                maTrangThai,
+                maBuoc,
+                tuNgayTao,
+                denNgayTao,
+                tuHanXuLy,
+                denHanXuLy,
+                tuNgayHoanThanh,
+                denNgayHoanThanh);
         }
 
         public async Task<CommonResponse> GetDanhSachTheoBuocAsync(string search, string maBuoc, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1, bool chiLayDonViDangNhap = true, IEnumerable<string>? trangThaiNghiepVuFilters = null, string? loaiQuyTrinh = null)
         {
             return await GetDanhSachInternalAsync(search, pageSize, pageCurrent, false, maBuoc, chiLayDonViDangNhap, donViSoanThaoId, true, trangThaiNghiepVuFilters, loaiQuyTrinh);
+        }
+
+        public async Task<CommonResponse> GetDanhSachBanHanhAsync(string search, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1)
+        {
+            try
+            {
+                var currentUser = _authService.GetUserInfo();
+                var donViDangNhapId = currentUser?.DanhMucDonViId ?? Guid.Empty;
+                var isSSA = currentUser?.SSA ?? false;
+
+                var query =
+                    from hoSo in _dbContext.HoSoVanBans.AsNoTracking()
+                    join vanBan in _dbContext.DanhMucVanBans.AsNoTracking() on hoSo.DanhMucVanBanId equals vanBan.Id
+                    join quyTrinh in _dbContext.DanhMucQuyTrinhSoanThaos.AsNoTracking() on hoSo.QuyTrinhSoanThaoId equals quyTrinh.Id
+                    join donVi in _dbContext.DanhMucDonVis.AsNoTracking() on hoSo.DonViSoanThaoId equals donVi.Id
+                    join buoc in _dbContext.DanhMucBuocQuyTrinhs.AsNoTracking() on hoSo.BuocHienTaiId equals buoc.Id
+                    join xuLyCurrent in _dbContext.HoSoVanBanXuLys.AsNoTracking().Where(x => x.IsCurrent) on hoSo.Id equals xuLyCurrent.HoSoVanBanId into xuLyCurrentJoin
+                    from xuLyCurrent in xuLyCurrentJoin.DefaultIfEmpty()
+                    join donViXuLy in _dbContext.DanhMucDonVis.AsNoTracking() on xuLyCurrent.DonViXuLyId equals donViXuLy.Id into donViXuLyJoin
+                    from donViXuLy in donViXuLyJoin.DefaultIfEmpty()
+                    join trangThai in _dbContext.DanhMucTrangThais.AsNoTracking() on hoSo.DanhMucTrangThaiId equals trangThai.Id into trangThaiJoin
+                    from trangThai in trangThaiJoin.DefaultIfEmpty()
+                    where quyTrinh.LoaiQuyTrinh == NormalizeWorkflowType("XayDung")
+                          && (buoc.MaBuoc == "BUOC_06_THONG_QUA_BAN_HANH" || buoc.MaBuoc == "BUOC_07_THONG_QUA_BAN_HANH")
+                          && (isSSA || donViDangNhapId == Guid.Empty || (xuLyCurrent != null && xuLyCurrent.DonViXuLyId == donViDangNhapId))
+                          && (!donViSoanThaoId.HasValue || donViSoanThaoId.Value == Guid.Empty || hoSo.DonViSoanThaoId == donViSoanThaoId.Value)
+                    select new HoSoVanBanListItemModel
+                    {
+                        Id = hoSo.Id,
+                        MaHoSo = hoSo.MaHoSo,
+                        TenHoSo = hoSo.TenHoSo,
+                        MaBuocHienTai = buoc.MaBuoc,
+                        TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                        ChuTheBanHanh = vanBan.ChuTheBanHanh,
+                        TenQuyTrinh = quyTrinh.TenQuyTrinh,
+                        TenBuocHienTai = buoc.TenBuoc,
+                        MaTrangThai = trangThai != null ? trangThai.MaTrangThai : null,
+                        TenTrangThai = trangThai != null ? trangThai.TenTrangThai : null,
+                        MaMauTrangThai = trangThai != null ? trangThai.MaMauHex : null,
+                        TenDonViSoanThao = donVi.TenDonVi,
+                        DonViXuLyHienTaiId = xuLyCurrent != null ? xuLyCurrent.DonViXuLyId : null,
+                        TenDonViXuLyHienTai = donViXuLy != null ? donViXuLy.TenDonVi : null,
+                        NguoiXuLyHienTaiId = xuLyCurrent != null ? xuLyCurrent.NguoiXuLyId : null,
+                        NgayNhanHienTai = xuLyCurrent != null ? xuLyCurrent.NgayNhan : null,
+                        TrangThaiNghiepVuTiepNhan = xuLyCurrent != null ? xuLyCurrent.KetQuaXuLy : null,
+                        TenTrangThaiNghiepVuTiepNhan = xuLyCurrent != null ? xuLyCurrent.KetQuaXuLy : null,
+                        NoiDungXuLyHienTai = xuLyCurrent != null ? xuLyCurrent.NoiDungXuLy : null,
+                        NgayTaoHoSo = hoSo.NgayTaoHoSo,
+                        HanXuLy = hoSo.HanXuLy,
+                        NgayHoanThanh = hoSo.NgayHoanThanh,
+                        SoLanTraLaiHienTai = hoSo.SoLanTraLaiHienTai,
+                        CanXuLyBuocHienTai = false,
+                        CanNhanHoSo = false,
+                        DaNhanHoSo = false,
+                        DaCoDuThao = false
+                    };
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var keyword = search.Trim().ToLower();
+                    query = query.Where(x =>
+                        x.MaHoSo.ToLower().Contains(keyword) ||
+                        x.TenHoSo.ToLower().Contains(keyword) ||
+                        (x.TenLoaiVanBan != null && x.TenLoaiVanBan.ToLower().Contains(keyword)) ||
+                        (x.TenDonViSoanThao != null && x.TenDonViSoanThao.ToLower().Contains(keyword)));
+                }
+
+                var totalRecord = await query.CountAsync();
+                var data = await query
+                    .OrderByDescending(x => x.NgayNhanHienTai ?? x.NgayTaoHoSo)
+                    .Skip((pageCurrent - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var trackingMap = await BuildTrackingMapAsync(data.Select(x => x.Id));
+                foreach (var item in data)
+                {
+                    item.CanXuLyBuocHienTai = isSSA ||
+                                              donViDangNhapId == Guid.Empty ||
+                                              (item.DonViXuLyHienTaiId.HasValue && item.DonViXuLyHienTaiId.Value == donViDangNhapId);
+                    item.DaNhanHoSo = item.NguoiXuLyHienTaiId.HasValue;
+                    item.CanNhanHoSo = item.CanXuLyBuocHienTai && !item.DaNhanHoSo;
+                    if (trackingMap.TryGetValue(item.Id, out var tracking))
+                    {
+                        item.TongSoBuoc = tracking.Summary.TongSoBuoc;
+                        item.SoBuocHoanThanh = tracking.Summary.SoBuocHoanThanh;
+                        item.SoBuocDungHan = tracking.Summary.SoBuocDungHan;
+                        item.SoBuocQuaHan = tracking.Summary.SoBuocQuaHan;
+                        item.SoBuocChuaThucHien = tracking.Summary.SoBuocChuaThucHien;
+                        item.TyLeHoanThanh = tracking.Summary.TyLeHoanThanh;
+                    }
+                    item.TenTrangThaiNghiepVuTiepNhan = ResolveTiepNhanNghiepVuLabel(item.TrangThaiNghiepVuTiepNhan);
+                }
+
+                return new CommonResponse("success", "Thành công", data, totalRecord);
+            }
+            catch
+            {
+                return new CommonResponse();
+            }
+        }
+
+        public async Task<CommonResponse> GetDanhSachChamDiemXayDungAsync(string search, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1)
+        {
+            try
+            {
+                var currentUser = _authService.GetUserInfo();
+                var donViDangNhapId = currentUser?.DanhMucDonViId ?? Guid.Empty;
+                var isSSA = currentUser?.SSA ?? false;
+
+                var query =
+                    from hoSo in _dbContext.HoSoVanBans.AsNoTracking()
+                    join vanBan in _dbContext.DanhMucVanBans.AsNoTracking() on hoSo.DanhMucVanBanId equals vanBan.Id
+                    join quyTrinh in _dbContext.DanhMucQuyTrinhSoanThaos.AsNoTracking() on hoSo.QuyTrinhSoanThaoId equals quyTrinh.Id
+                    join donVi in _dbContext.DanhMucDonVis.AsNoTracking() on hoSo.DonViSoanThaoId equals donVi.Id
+                    join chamDiem in _dbContext.HoSoVanBanChamDiems.AsNoTracking() on hoSo.Id equals chamDiem.HoSoVanBanId into chamDiemJoin
+                    from chamDiem in chamDiemJoin.DefaultIfEmpty()
+                    where quyTrinh.LoaiQuyTrinh == NormalizeWorkflowType("XayDung")
+                          && hoSo.TrangThaiBanHanh == "DA_BAN_HANH"
+                          && (isSSA || donViDangNhapId == Guid.Empty || hoSo.DonViSoanThaoId == donViDangNhapId)
+                          && (!donViSoanThaoId.HasValue || donViSoanThaoId.Value == Guid.Empty || hoSo.DonViSoanThaoId == donViSoanThaoId.Value)
+                    select new HoSoVanBanListItemModel
+                    {
+                        Id = hoSo.Id,
+                        MaHoSo = hoSo.MaHoSo,
+                        TenHoSo = hoSo.TenHoSo,
+                        TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                        ChuTheBanHanh = vanBan.ChuTheBanHanh,
+                        TenQuyTrinh = quyTrinh.TenQuyTrinh,
+                        TenDonViSoanThao = donVi.TenDonVi,
+                        NgayTaoHoSo = hoSo.NgayTaoHoSo,
+                        HanXuLy = hoSo.HanXuLy,
+                        NgayHoanThanh = hoSo.NgayBanHanh ?? hoSo.NgayHoanThanh,
+                        SoLanTraLaiHienTai = hoSo.SoLanTraLaiHienTai,
+                        DiemTienDoXayDung = hoSo.DiemTienDoXayDung,
+                        DiemChatLuongVanBan = hoSo.DiemChatLuongVanBan,
+                        TongDiemDanhGia = hoSo.TongDiemDanhGia,
+                        XepLoaiDanhGia = hoSo.XepLoaiDanhGia,
+                        DaCoBanGhiChamDiem = chamDiem != null
+                    };
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var keyword = search.Trim().ToLower();
+                    query = query.Where(x =>
+                        x.MaHoSo.ToLower().Contains(keyword) ||
+                        x.TenHoSo.ToLower().Contains(keyword) ||
+                        (x.TenLoaiVanBan != null && x.TenLoaiVanBan.ToLower().Contains(keyword)) ||
+                        (x.TenDonViSoanThao != null && x.TenDonViSoanThao.ToLower().Contains(keyword)));
+                }
+
+                var totalRecord = await query.CountAsync();
+                var data = await query
+                    .OrderByDescending(x => x.NgayHoanThanh ?? x.NgayTaoHoSo)
+                    .Skip((pageCurrent - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new CommonResponse("success", "Thành công", data, totalRecord);
+            }
+            catch
+            {
+                return new CommonResponse();
+            }
+        }
+
+        public async Task<CommonResponse> GetDanhSachTheoDoiTienDoXayDungAsync(string search, Guid? donViSoanThaoId = null, string? maBuoc = null, string? mucCanhBao = null, int pageSize = 5, int pageCurrent = 1)
+        {
+            try
+            {
+                var currentUser = _authService.GetUserInfo();
+                var donViDangNhapId = currentUser?.DanhMucDonViId ?? Guid.Empty;
+                var isSSA = currentUser?.SSA ?? false;
+                var canViewAll = isSSA || donViDangNhapId == SoTuPhapDonViId;
+                var normalizedMucCanhBao = string.IsNullOrWhiteSpace(mucCanhBao) ? null : mucCanhBao.Trim().ToUpperInvariant();
+                var normalizedMaBuoc = string.IsNullOrWhiteSpace(maBuoc) ? null : maBuoc.Trim();
+
+                var query =
+                    from hoSo in _dbContext.HoSoVanBans.AsNoTracking()
+                    join vanBan in _dbContext.DanhMucVanBans.AsNoTracking() on hoSo.DanhMucVanBanId equals vanBan.Id
+                    join quyTrinh in _dbContext.DanhMucQuyTrinhSoanThaos.AsNoTracking() on hoSo.QuyTrinhSoanThaoId equals quyTrinh.Id
+                    join donVi in _dbContext.DanhMucDonVis.AsNoTracking() on hoSo.DonViSoanThaoId equals donVi.Id
+                    join buoc in _dbContext.DanhMucBuocQuyTrinhs.AsNoTracking() on hoSo.BuocHienTaiId equals buoc.Id into buocJoin
+                    from buoc in buocJoin.DefaultIfEmpty()
+                    join xuLyCurrent in _dbContext.HoSoVanBanXuLys.AsNoTracking().Where(x => x.IsCurrent) on hoSo.Id equals xuLyCurrent.HoSoVanBanId into xuLyCurrentJoin
+                    from xuLyCurrent in xuLyCurrentJoin.DefaultIfEmpty()
+                    join donViXuLy in _dbContext.DanhMucDonVis.AsNoTracking() on xuLyCurrent.DonViXuLyId equals donViXuLy.Id into donViXuLyJoin
+                    from donViXuLy in donViXuLyJoin.DefaultIfEmpty()
+                    join trangThai in _dbContext.DanhMucTrangThais.AsNoTracking() on hoSo.DanhMucTrangThaiId equals trangThai.Id into trangThaiJoin
+                    from trangThai in trangThaiJoin.DefaultIfEmpty()
+                    where quyTrinh.LoaiQuyTrinh == NormalizeWorkflowType("XayDung")
+                          && hoSo.TrangThaiBanHanh != "DA_BAN_HANH"
+                          && !hoSo.NgayBanHanh.HasValue
+                          && !hoSo.NgayHoanThanh.HasValue
+                          && (string.IsNullOrWhiteSpace(normalizedMaBuoc) || (buoc != null && buoc.MaBuoc == normalizedMaBuoc))
+                          && (!donViSoanThaoId.HasValue || donViSoanThaoId.Value == Guid.Empty || hoSo.DonViSoanThaoId == donViSoanThaoId.Value)
+                          && (canViewAll || donViDangNhapId == Guid.Empty || hoSo.DonViSoanThaoId == donViDangNhapId || (xuLyCurrent != null && xuLyCurrent.DonViXuLyId == donViDangNhapId))
+                    select new HoSoVanBanListItemModel
+                    {
+                        Id = hoSo.Id,
+                        MaHoSo = hoSo.MaHoSo,
+                        TenHoSo = hoSo.TenHoSo,
+                        MaBuocHienTai = buoc != null ? buoc.MaBuoc : null,
+                        TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                        ChuTheBanHanh = vanBan.ChuTheBanHanh,
+                        TenQuyTrinh = quyTrinh.TenQuyTrinh,
+                        TenBuocHienTai = buoc != null ? buoc.TenBuoc : null,
+                        MaTrangThai = trangThai != null ? trangThai.MaTrangThai : null,
+                        TenTrangThai = trangThai != null ? trangThai.TenTrangThai : null,
+                        MaMauTrangThai = trangThai != null ? trangThai.MaMauHex : null,
+                        TenDonViSoanThao = donVi.TenDonVi,
+                        DonViXuLyHienTaiId = xuLyCurrent != null ? xuLyCurrent.DonViXuLyId : null,
+                        TenDonViXuLyHienTai = donViXuLy != null ? donViXuLy.TenDonVi : null,
+                        NguoiXuLyHienTaiId = xuLyCurrent != null ? xuLyCurrent.NguoiXuLyId : null,
+                        NgayNhanHienTai = xuLyCurrent != null ? xuLyCurrent.NgayNhan : null,
+                        TrangThaiNghiepVuTiepNhan = xuLyCurrent != null ? xuLyCurrent.KetQuaXuLy : null,
+                        TenTrangThaiNghiepVuTiepNhan = xuLyCurrent != null ? xuLyCurrent.KetQuaXuLy : null,
+                        NoiDungXuLyHienTai = xuLyCurrent != null ? xuLyCurrent.NoiDungXuLy : null,
+                        NgayTaoHoSo = hoSo.NgayTaoHoSo,
+                        HanXuLy = xuLyCurrent != null ? xuLyCurrent.HanXuLy : hoSo.HanXuLy,
+                        SoLanTraLaiHienTai = hoSo.SoLanTraLaiHienTai
+                    };
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var keyword = search.Trim().ToLowerInvariant();
+                    query = query.Where(x =>
+                        x.MaHoSo.ToLower().Contains(keyword) ||
+                        x.TenHoSo.ToLower().Contains(keyword) ||
+                        (x.TenLoaiVanBan != null && x.TenLoaiVanBan.ToLower().Contains(keyword)) ||
+                        (x.TenDonViSoanThao != null && x.TenDonViSoanThao.ToLower().Contains(keyword)) ||
+                        (x.TenBuocHienTai != null && x.TenBuocHienTai.ToLower().Contains(keyword)));
+                }
+
+                var rawData = await query
+                    .OrderByDescending(x => x.NgayNhanHienTai ?? x.NgayTaoHoSo)
+                    .ThenBy(x => x.MaHoSo)
+                    .ToListAsync();
+
+                if (rawData.Count > 0)
+                {
+                    var trackingMap = await BuildTrackingMapAsync(rawData.Select(x => x.Id));
+                    foreach (var item in rawData)
+                    {
+                        item.CanXuLyBuocHienTai = canViewAll ||
+                                                  donViDangNhapId == Guid.Empty ||
+                                                  (item.DonViXuLyHienTaiId.HasValue && item.DonViXuLyHienTaiId.Value == donViDangNhapId);
+                        item.DaNhanHoSo = item.NguoiXuLyHienTaiId.HasValue;
+                        item.CanNhanHoSo = item.CanXuLyBuocHienTai && !item.DaNhanHoSo;
+                        item.TenTrangThaiNghiepVuTiepNhan = ResolveTiepNhanNghiepVuLabel(item.TrangThaiNghiepVuTiepNhan);
+
+                        if (!trackingMap.TryGetValue(item.Id, out var tracking))
+                        {
+                            continue;
+                        }
+
+                        item.TongSoBuoc = tracking.Summary.TongSoBuoc;
+                        item.SoBuocHoanThanh = tracking.Summary.SoBuocHoanThanh;
+                        item.SoBuocDungHan = tracking.Summary.SoBuocDungHan;
+                        item.SoBuocQuaHan = tracking.Summary.SoBuocQuaHan;
+                        item.SoBuocChuaThucHien = tracking.Summary.SoBuocChuaThucHien;
+                        item.TyLeHoanThanh = tracking.Summary.TyLeHoanThanh;
+
+                        var currentStep = tracking.Steps.FirstOrDefault(x => x.IsCurrent)
+                                          ?? tracking.Steps.FirstOrDefault(x => x.MaBuoc == item.MaBuocHienTai)
+                                          ?? tracking.Steps.OrderByDescending(x => x.ThuTuSapXep).FirstOrDefault();
+                        if (currentStep == null)
+                        {
+                            continue;
+                        }
+
+                        item.TrangThaiTienDo = currentStep.MaTrangThaiTheoDoi;
+                        item.TenTrangThaiTienDo = currentStep.TenTrangThaiTheoDoi;
+                        item.MaMauTienDo = currentStep.MaMauTrangThaiTheoDoi;
+                        item.DangOQuaHan = currentStep.MaTrangThaiTheoDoi is "QUA_HAN" or "HOAN_THANH_QUA_HAN";
+
+                        ResolveAlertInfo(item, currentStep);
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(normalizedMucCanhBao))
+                {
+                    rawData = rawData
+                        .Where(x => string.Equals(x.MucCanhBao, normalizedMucCanhBao, StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+                }
+
+                var totalRecord = rawData.Count;
+                var data = rawData
+                    .Skip((pageCurrent - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                return new CommonResponse("success", "Thành công", data, totalRecord);
+            }
+            catch
+            {
+                return new CommonResponse();
+            }
+        }
+
+        public async Task<CommonResponse> GetDanhSachGiaHanXayDungAsync(string search, Guid? donViSoanThaoId = null, int pageSize = 5, int pageCurrent = 1)
+        {
+            try
+            {
+                var currentUser = _authService.GetUserInfo();
+                var donViDangNhapId = currentUser?.DanhMucDonViId ?? Guid.Empty;
+                var isSSA = currentUser?.SSA ?? false;
+                var canViewAll = isSSA || donViDangNhapId == SoTuPhapDonViId;
+
+                var query =
+                    from hoSo in _dbContext.HoSoVanBans.AsNoTracking()
+                    join vanBan in _dbContext.DanhMucVanBans.AsNoTracking() on hoSo.DanhMucVanBanId equals vanBan.Id
+                    join quyTrinh in _dbContext.DanhMucQuyTrinhSoanThaos.AsNoTracking() on hoSo.QuyTrinhSoanThaoId equals quyTrinh.Id
+                    join donVi in _dbContext.DanhMucDonVis.AsNoTracking() on hoSo.DonViSoanThaoId equals donVi.Id
+                    join buoc in _dbContext.DanhMucBuocQuyTrinhs.AsNoTracking() on hoSo.BuocHienTaiId equals buoc.Id into buocJoin
+                    from buoc in buocJoin.DefaultIfEmpty()
+                    join xuLyCurrent in _dbContext.HoSoVanBanXuLys.AsNoTracking().Where(x => x.IsCurrent) on hoSo.Id equals xuLyCurrent.HoSoVanBanId into xuLyCurrentJoin
+                    from xuLyCurrent in xuLyCurrentJoin.DefaultIfEmpty()
+                    join donViXuLy in _dbContext.DanhMucDonVis.AsNoTracking() on xuLyCurrent.DonViXuLyId equals donViXuLy.Id into donViXuLyJoin
+                    from donViXuLy in donViXuLyJoin.DefaultIfEmpty()
+                    where quyTrinh.LoaiQuyTrinh == NormalizeWorkflowType("XayDung")
+                          && hoSo.TrangThaiBanHanh != "DA_BAN_HANH"
+                          && !hoSo.NgayBanHanh.HasValue
+                          && !hoSo.NgayHoanThanh.HasValue
+                          && (!donViSoanThaoId.HasValue || donViSoanThaoId.Value == Guid.Empty || hoSo.DonViSoanThaoId == donViSoanThaoId.Value)
+                          && (canViewAll || donViDangNhapId == Guid.Empty || hoSo.DonViSoanThaoId == donViDangNhapId || (xuLyCurrent != null && xuLyCurrent.DonViXuLyId == donViDangNhapId))
+                    select new HoSoVanBanListItemModel
+                    {
+                        Id = hoSo.Id,
+                        MaHoSo = hoSo.MaHoSo,
+                        TenHoSo = hoSo.TenHoSo,
+                        MaBuocHienTai = buoc != null ? buoc.MaBuoc : null,
+                        TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                        TenBuocHienTai = buoc != null ? buoc.TenBuoc : null,
+                        TenDonViSoanThao = donVi.TenDonVi,
+                        TenDonViXuLyHienTai = donViXuLy != null ? donViXuLy.TenDonVi : null,
+                        DonViXuLyHienTaiId = xuLyCurrent != null ? xuLyCurrent.DonViXuLyId : null,
+                        NgayTaoHoSo = hoSo.NgayTaoHoSo,
+                        HanXuLy = xuLyCurrent != null ? xuLyCurrent.HanXuLy : hoSo.HanXuLy,
+                        SoLanTraLaiHienTai = hoSo.SoLanTraLaiHienTai,
+                        SoLanGiaHan = _dbContext.HoSoVanBanGiaHans.Count(x => x.HoSoVanBanId == hoSo.Id)
+                    };
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var keyword = search.Trim().ToLowerInvariant();
+                    query = query.Where(x =>
+                        x.MaHoSo.ToLower().Contains(keyword) ||
+                        x.TenHoSo.ToLower().Contains(keyword) ||
+                        (x.TenLoaiVanBan != null && x.TenLoaiVanBan.ToLower().Contains(keyword)) ||
+                        (x.TenDonViSoanThao != null && x.TenDonViSoanThao.ToLower().Contains(keyword)) ||
+                        (x.TenBuocHienTai != null && x.TenBuocHienTai.ToLower().Contains(keyword)));
+                }
+
+                var totalRecord = await query.CountAsync();
+                var data = await query
+                    .OrderBy(x => x.HanXuLy ?? DateTime.MaxValue)
+                    .ThenByDescending(x => x.SoLanGiaHan)
+                    .ThenBy(x => x.MaHoSo)
+                    .Skip((pageCurrent - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new CommonResponse("success", "Thành công", data, totalRecord);
+            }
+            catch
+            {
+                return new CommonResponse();
+            }
         }
 
         public async Task<CommonResponse> GetDanhSachLayYKienAsync(string search, Guid? donViId = null, int pageSize = 5, int pageCurrent = 1)
@@ -111,6 +547,7 @@ namespace Services.Manages
                         TenHoSo = hoSo.TenHoSo,
                         MaBuocHienTai = buoc.MaBuoc,
                         TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                        ChuTheBanHanh = vanBan.ChuTheBanHanh,
                         TenQuyTrinh = quyTrinh.TenQuyTrinh,
                         TenBuocHienTai = buoc.TenBuoc,
                         MaTrangThai = trangThai != null ? trangThai.MaTrangThai : null,
@@ -216,12 +653,188 @@ namespace Services.Manages
                     }
                 }
 
-                return new CommonResponse("success", "Thành công", data, totalRecord);
+                return new CommonResponse("success", "ThĂ nh cĂ´ng", data, totalRecord);
             }
             catch
             {
                 return new CommonResponse();
             }
+        }
+
+        public async Task<CommonResponse> GetKetQuaLayYKienFormAsync(Guid hoSoVanBanId, string coQuan = "UBND")
+        {
+            var normalizedCoQuan = (coQuan ?? "UBND").Trim().ToUpperInvariant();
+            var data = await (
+                from hoSo in _dbContext.HoSoVanBans.AsNoTracking()
+                join vanBan in _dbContext.DanhMucVanBans.AsNoTracking() on hoSo.DanhMucVanBanId equals vanBan.Id
+                join donVi in _dbContext.DanhMucDonVis.AsNoTracking() on hoSo.DonViSoanThaoId equals donVi.Id
+                join buoc in _dbContext.DanhMucBuocQuyTrinhs.AsNoTracking() on hoSo.BuocHienTaiId equals buoc.Id
+                where hoSo.Id == hoSoVanBanId
+                select new HoSoVanBanKetQuaLayYKienFormModel
+                {
+                    HoSoVanBanId = hoSo.Id,
+                    TenHoSo = hoSo.TenHoSo,
+                    TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                    TenDonViSoanThao = donVi.TenDonVi,
+                    TenBuocHienTai = buoc.TenBuoc,
+                    CoQuanLayYKien = normalizedCoQuan,
+                    AttachedFileGroupId = Guid.NewGuid(),
+                    NgayGuiLayYKien = DateTime.Today,
+                    HanPhanHoi = hoSo.HanXuLy
+                }).FirstOrDefaultAsync();
+
+            if (data == null)
+            {
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ láº¥y Ă½ kiáº¿n.");
+            }
+
+            var dot = await _dbContext.HoSoVanBanDotLayYKiens.AsNoTracking()
+                .Where(x => x.HoSoVanBanId == hoSoVanBanId && x.CoQuanLayYKien == normalizedCoQuan)
+                .OrderByDescending(x => x.LanLayYKien)
+                .FirstOrDefaultAsync();
+
+            if (dot == null)
+            {
+                data.LanLayYKien = await _dbContext.HoSoVanBanDotLayYKiens
+                    .CountAsync(x => x.HoSoVanBanId == hoSoVanBanId && x.CoQuanLayYKien == normalizedCoQuan) + 1;
+                return new CommonResponse("success", "ThĂ nh cĂ´ng", data);
+            }
+
+            data.Id = dot.Id;
+            data.LanLayYKien = dot.LanLayYKien;
+            data.CheDoNhapYKien = dot.CheDoNhapYKien;
+            data.HinhThucLayYKien = dot.HinhThucLayYKien;
+            data.SoVanBanLayYKien = dot.SoVanBanLayYKien;
+            data.NgayGuiLayYKien = dot.NgayGuiLayYKien;
+            data.HanPhanHoi = dot.HanPhanHoi;
+            data.NgayCoKetQua = dot.NgayCoKetQua;
+            data.NoiDungYeuCau = dot.NoiDungYeuCau;
+            data.TongSoThanhVien = dot.TongSoThanhVien;
+            data.SoDongY = dot.SoDongY;
+            data.SoDongYCoYKien = dot.SoDongYCoYKien;
+            data.SoKhongDongY = dot.SoKhongDongY;
+            data.SoKhongPhanHoi = dot.SoKhongPhanHoi;
+            data.TyLeDongY = dot.TyLeDongY;
+            data.KetQuaChung = dot.KetQuaChung;
+            data.NoiDungTongHop = dot.NoiDungTongHop;
+            data.NoiDungTiepThu = dot.NoiDungTiepThu;
+            data.TrangThai = dot.TrangThai;
+            data.AttachedFileGroupId = dot.AttachedFileGroupId ?? data.AttachedFileGroupId;
+            data.GhiChu = dot.GhiChu;
+            data.ThanhViens = await _dbContext.HoSoVanBanYKienThanhViens.AsNoTracking()
+                .Where(x => x.DotLayYKienId == dot.Id)
+                .OrderBy(x => x.ThuTuHienThi)
+                .Select(x => new HoSoVanBanYKienThanhVienModel
+                {
+                    Id = x.Id, ThanhVienId = x.ThanhVienId, HoTenThanhVien = x.HoTenThanhVien,
+                    ChucVu = x.ChucVu, DonViId = x.DonViId, TenDonVi = x.TenDonVi,
+                    ThuTuHienThi = x.ThuTuHienThi, CoQuyenBieuQuyet = x.CoQuyenBieuQuyet,
+                    KetQuaYKien = x.KetQuaYKien, NoiDungYKien = x.NoiDungYKien,
+                    NoiDungTiepThu = x.NoiDungTiepThu, NgayPhanHoi = x.NgayPhanHoi,
+                    AttachedFileGroupId = x.AttachedFileGroupId, GhiChu = x.GhiChu
+                }).ToListAsync();
+
+            return new CommonResponse("success", "ThĂ nh cĂ´ng", data);
+        }
+
+        public async Task<CommonResponse> SaveKetQuaLayYKienAsync(HoSoVanBanKetQuaLayYKienFormModel request)
+        {
+            var currentUser = _authService.GetUserInfo();
+            if (currentUser == null) return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c.");
+
+            var normalizedCoQuan = string.IsNullOrWhiteSpace(request.CoQuanLayYKien)
+                ? "UBND"
+                : request.CoQuanLayYKien.Trim().ToUpperInvariant();
+            var expectedStepCode = normalizedCoQuan == "HDND"
+                ? "BUOC_06_TRINH_HDND_HOP"
+                : "BUOC_05_LAY_Y_KIEN_THANH_VIEN_UBND";
+            var successTransition = normalizedCoQuan == "HDND"
+                ? "TRINH_HDND_XONG"
+                : "LAY_Y_KIEN_UBND_XONG";
+            var coQuanLabel = normalizedCoQuan == "HDND" ? "HÄND" : "UBND";
+
+            var hoSo = await GetHoSoWithCurrentStepAsync(request.HoSoVanBanId);
+            var currentStep = hoSo == null ? null : await GetCurrentStepAsync(hoSo);
+            if (hoSo == null || currentStep == null || currentStep.MaBuoc != expectedStepCode)
+            {
+                return new CommonResponse("error", $"Há»“ sÆ¡ hiá»‡n khĂ´ng á»Ÿ bÆ°á»›c láº¥y Ă½ kiáº¿n {coQuanLabel}.");
+            }
+
+            var currentProcessing = await _dbContext.HoSoVanBanXuLys
+                .Where(x => x.HoSoVanBanId == hoSo.Id && x.IsCurrent)
+                .OrderByDescending(x => x.NgayNhan).FirstOrDefaultAsync();
+            if (!CanCurrentUserXuLy(currentUser, currentProcessing))
+                return new CommonResponse("error", "Báº¡n khĂ´ng cĂ³ quyá»n cáº­p nháº­t há»“ sÆ¡ nĂ y.");
+
+            var mode = (request.CheDoNhapYKien ?? "TONG_HOP").Trim().ToUpperInvariant();
+            if (mode != "TONG_HOP" && mode != "CHI_TIET")
+                return new CommonResponse("error", "Cháº¿ Ä‘á»™ nháº­p Ă½ kiáº¿n khĂ´ng há»£p lá»‡.");
+
+            var members = request.ThanhViens.Where(x => !string.IsNullOrWhiteSpace(x.HoTenThanhVien)).ToList();
+            if (mode == "CHI_TIET")
+            {
+                if (members.Count == 0) return new CommonResponse("error", $"Pháº£i nháº­p Ă­t nháº¥t má»™t thĂ nh viĂªn {coQuanLabel}.");
+                var voting = members.Where(x => x.CoQuyenBieuQuyet).ToList();
+                request.TongSoThanhVien = voting.Count;
+                request.SoDongY = voting.Count(x => x.KetQuaYKien == "DONG_Y");
+                request.SoDongYCoYKien = voting.Count(x => x.KetQuaYKien == "DONG_Y_CO_Y_KIEN");
+                request.SoKhongDongY = voting.Count(x => x.KetQuaYKien == "KHONG_DONG_Y");
+                request.SoKhongPhanHoi = voting.Count(x => string.IsNullOrWhiteSpace(x.KetQuaYKien) || x.KetQuaYKien == "CHUA_PHAN_HOI" || x.KetQuaYKien == "KHONG_THAM_GIA");
+            }
+
+            var total = request.TongSoThanhVien ?? 0;
+            var sum = (request.SoDongY ?? 0) + (request.SoDongYCoYKien ?? 0) + (request.SoKhongDongY ?? 0) + (request.SoKhongPhanHoi ?? 0);
+            if (total < 0 || sum != total) return new CommonResponse("error", "Tá»•ng sá»‘ káº¿t quáº£ pháº£i báº±ng tá»•ng sá»‘ thĂ nh viĂªn.");
+            if (request.TrangThai == "DA_XAC_NHAN" && (total == 0 || string.IsNullOrWhiteSpace(request.KetQuaChung) || !request.NgayCoKetQua.HasValue))
+                return new CommonResponse("error", "Khi xĂ¡c nháº­n pháº£i cĂ³ thĂ nh viĂªn, ngĂ y cĂ³ káº¿t quáº£ vĂ  káº¿t quáº£ chung.");
+            request.TyLeDongY = total == 0 ? 0 : Math.Round(((request.SoDongY ?? 0) + (request.SoDongYCoYKien ?? 0)) * 100m / total, 2);
+
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var dot = request.Id == Guid.Empty ? null : await _dbContext.HoSoVanBanDotLayYKiens.FirstOrDefaultAsync(x => x.Id == request.Id);
+                dot ??= new HoSoVanBanDotLayYKien { HoSoVanBanId = hoSo.Id, BuocQuyTrinhId = currentStep.Id, LanLayYKien = request.LanLayYKien, CoQuanLayYKien = normalizedCoQuan };
+                if (dot.Id == Guid.Empty) _dbContext.HoSoVanBanDotLayYKiens.Add(dot);
+                dot.BuocQuyTrinhId = currentStep.Id;
+                dot.CoQuanLayYKien = normalizedCoQuan;
+                dot.CheDoNhapYKien = mode; dot.HinhThucLayYKien = request.HinhThucLayYKien; dot.SoVanBanLayYKien = request.SoVanBanLayYKien;
+                dot.NgayGuiLayYKien = request.NgayGuiLayYKien; dot.HanPhanHoi = request.HanPhanHoi; dot.NgayCoKetQua = request.NgayCoKetQua;
+                dot.NoiDungYeuCau = request.NoiDungYeuCau; dot.TongSoThanhVien = request.TongSoThanhVien; dot.SoDongY = request.SoDongY;
+                dot.SoDongYCoYKien = request.SoDongYCoYKien; dot.SoKhongDongY = request.SoKhongDongY; dot.SoKhongPhanHoi = request.SoKhongPhanHoi;
+                dot.TyLeDongY = request.TyLeDongY; dot.KetQuaChung = request.KetQuaChung; dot.NoiDungTongHop = request.NoiDungTongHop;
+                dot.NoiDungTiepThu = request.NoiDungTiepThu; dot.NguoiTongHopId = currentUser.Id; dot.NgayTongHop = DateTime.Now;
+                dot.TrangThai = request.TrangThai == "DA_XAC_NHAN" ? "DA_XAC_NHAN" : "NHAP"; dot.AttachedFileGroupId = request.AttachedFileGroupId; dot.GhiChu = request.GhiChu;
+                await _dbContext.SaveChangesAsync();
+
+                var oldMembers = await _dbContext.HoSoVanBanYKienThanhViens.Where(x => x.DotLayYKienId == dot.Id).ToListAsync();
+                _dbContext.HoSoVanBanYKienThanhViens.RemoveRange(oldMembers);
+                if (mode == "CHI_TIET") _dbContext.HoSoVanBanYKienThanhViens.AddRange(members.Select((x, i) => new HoSoVanBanYKienThanhVien
+                {
+                    DotLayYKienId = dot.Id, ThanhVienId = x.ThanhVienId, HoTenThanhVien = x.HoTenThanhVien.Trim(), ChucVu = x.ChucVu,
+                    DonViId = x.DonViId, TenDonVi = x.TenDonVi, ThuTuHienThi = i + 1, CoQuyenBieuQuyet = x.CoQuyenBieuQuyet,
+                    KetQuaYKien = string.IsNullOrWhiteSpace(x.KetQuaYKien) ? "CHUA_PHAN_HOI" : x.KetQuaYKien,
+                    NoiDungYKien = x.NoiDungYKien, NoiDungTiepThu = x.NoiDungTiepThu, NgayPhanHoi = x.NgayPhanHoi,
+                    TrangThaiPhanHoi = string.IsNullOrWhiteSpace(x.KetQuaYKien) || x.KetQuaYKien == "CHUA_PHAN_HOI" ? "CHUA_PHAN_HOI" : "DA_PHAN_HOI",
+                    AttachedFileGroupId = x.AttachedFileGroupId, GhiChu = x.GhiChu
+                }));
+
+                if (dot.TrangThai == "DA_XAC_NHAN")
+                {
+                    currentProcessing!.IsCurrent = false; currentProcessing.NgayXuLy = DateTime.Now;
+                    currentProcessing.KetQuaXuLy = successTransition; currentProcessing.NoiDungXuLy = request.NoiDungTongHop;
+                    var transition = await GetTransitionAsync(hoSo.QuyTrinhSoanThaoId, currentStep.Id, successTransition);
+                    var nextStep = transition == null ? null : await _dbContext.DanhMucBuocQuyTrinhs.AsNoTracking().FirstOrDefaultAsync(x => x.Id == transition.DenBuocId);
+                    await AdvanceWorkflowAsync(hoSo, currentUser, nextStep, null, successTransition, request.NoiDungTongHop);
+                }
+
+                await _dbContext.SaveChangesAsync(); await transaction.CommitAsync();
+                if (normalizedCoQuan == "HDND")
+                {
+                    return new CommonResponse("success", dot.TrangThai == "DA_XAC_NHAN" ? "ÄĂ£ xĂ¡c nháº­n káº¿t quáº£ láº¥y Ă½ kiáº¿n HÄND." : "ÄĂ£ lÆ°u nhĂ¡p káº¿t quáº£ láº¥y Ă½ kiáº¿n HÄND.", dot.Id);
+                }
+                return new CommonResponse("success", dot.TrangThai == "DA_XAC_NHAN" ? "ÄĂ£ xĂ¡c nháº­n káº¿t quáº£ láº¥y Ă½ kiáº¿n UBND." : "ÄĂ£ lÆ°u nhĂ¡p káº¿t quáº£ láº¥y Ă½ kiáº¿n UBND.", dot.Id);
+            }
+            catch { await transaction.RollbackAsync(); return new CommonResponse("error", "KhĂ´ng thá»ƒ lÆ°u káº¿t quáº£ láº¥y Ă½ kiáº¿n UBND."); }
         }
 
         private async Task<CommonResponse> GetDanhSachInternalAsync(
@@ -234,7 +847,17 @@ namespace Services.Manages
             Guid? donViSoanThaoId = null,
             bool chiLayTheoLichSuNhanXuLy = false,
             IEnumerable<string>? trangThaiNghiepVuFilters = null,
-            string? loaiQuyTrinh = null)
+            string? loaiQuyTrinh = null,
+            Guid? danhMucVanBanId = null,
+            Guid? nguoiXuLyId = null,
+            string? maTrangThai = null,
+            string? maBuocLoc = null,
+            DateTime? tuNgayTao = null,
+            DateTime? denNgayTao = null,
+            DateTime? tuHanXuLy = null,
+            DateTime? denHanXuLy = null,
+            DateTime? tuNgayHoanThanh = null,
+            DateTime? denNgayHoanThanh = null)
         {
             try
             {
@@ -292,6 +915,8 @@ namespace Services.Manages
                                                  ? (string.Equals(bq.LoaiBuoc, "SoanThao") || bq.ThuTuSapXep == 1)
                                                  : bq.MaBuoc == maBuoc))))
                                   : hoSo.DonViSoanThaoId == donViSoanThaoId.Value))
+                          && (!danhMucVanBanId.HasValue || danhMucVanBanId.Value == Guid.Empty || hoSo.DanhMucVanBanId == danhMucVanBanId.Value)
+                          && (!nguoiXuLyId.HasValue || nguoiXuLyId.Value == Guid.Empty || (xuLyCurrent != null && xuLyCurrent.NguoiXuLyId == nguoiXuLyId.Value))
                           && (trangThaiNghiepVuFilterList == null || trangThaiNghiepVuFilterList.Count == 0 ||
                               (xuLyCurrent != null &&
                                !string.IsNullOrWhiteSpace(xuLyCurrent.KetQuaXuLy) &&
@@ -303,8 +928,9 @@ namespace Services.Manages
                         TenHoSo = hoSo.TenHoSo,
                         MaBuocHienTai = buoc != null ? buoc.MaBuoc : null,
                         TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                        ChuTheBanHanh = vanBan.ChuTheBanHanh,
                         TenQuyTrinh = quyTrinh.TenQuyTrinh,
-                        TenBuocHienTai = buoc != null ? buoc.TenBuoc : "Đã hoàn thành",
+                        TenBuocHienTai = buoc != null ? buoc.TenBuoc : "ÄĂ£ hoĂ n thĂ nh",
                         MaTrangThai = trangThai != null ? trangThai.MaTrangThai : null,
                         TenTrangThai = trangThai != null ? trangThai.TenTrangThai : null,
                         MaMauTrangThai = trangThai != null ? trangThai.MaMauHex : null,
@@ -330,6 +956,56 @@ namespace Services.Manages
                         (x.TenLoaiVanBan != null && x.TenLoaiVanBan.Contains(search)) ||
                         (x.TenQuyTrinh != null && x.TenQuyTrinh.Contains(search)) ||
                         (x.TenDonViSoanThao != null && x.TenDonViSoanThao.Contains(search)));
+                }
+
+                if (!string.IsNullOrWhiteSpace(maTrangThai))
+                {
+                    var normalizedMaTrangThai = maTrangThai.Trim().ToUpperInvariant();
+                    query = query.Where(x => x.MaTrangThai != null && x.MaTrangThai.ToUpper() == normalizedMaTrangThai);
+                }
+
+                if (!string.IsNullOrWhiteSpace(maBuocLoc))
+                {
+                    var normalizedMaBuoc = maBuocLoc.Trim().ToUpperInvariant();
+                    query = normalizedMaBuoc == "HOAN_THANH"
+                        ? query.Where(x => x.NgayHoanThanh.HasValue || x.MaBuocHienTai == null)
+                        : query.Where(x => x.MaBuocHienTai != null && x.MaBuocHienTai.ToUpper() == normalizedMaBuoc);
+                }
+
+                if (tuNgayTao.HasValue)
+                {
+                    var fromDate = tuNgayTao.Value.Date;
+                    query = query.Where(x => x.NgayTaoHoSo.Date >= fromDate);
+                }
+
+                if (denNgayTao.HasValue)
+                {
+                    var toDate = denNgayTao.Value.Date;
+                    query = query.Where(x => x.NgayTaoHoSo.Date <= toDate);
+                }
+
+                if (tuHanXuLy.HasValue)
+                {
+                    var fromDeadline = tuHanXuLy.Value.Date;
+                    query = query.Where(x => x.HanXuLy.HasValue && x.HanXuLy.Value.Date >= fromDeadline);
+                }
+
+                if (denHanXuLy.HasValue)
+                {
+                    var toDeadline = denHanXuLy.Value.Date;
+                    query = query.Where(x => x.HanXuLy.HasValue && x.HanXuLy.Value.Date <= toDeadline);
+                }
+
+                if (tuNgayHoanThanh.HasValue)
+                {
+                    var fromCompleted = tuNgayHoanThanh.Value.Date;
+                    query = query.Where(x => x.NgayHoanThanh.HasValue && x.NgayHoanThanh.Value.Date >= fromCompleted);
+                }
+
+                if (denNgayHoanThanh.HasValue)
+                {
+                    var toCompleted = denNgayHoanThanh.Value.Date;
+                    query = query.Where(x => x.NgayHoanThanh.HasValue && x.NgayHoanThanh.Value.Date <= toCompleted);
                 }
 
                 if (chiLayTheoLichSuNhanXuLy && maBuoc == "BUOC_02_THONG_NHAT")
@@ -410,7 +1086,7 @@ namespace Services.Manages
                         {
                             item.CanNhanHoSo = false;
                             item.CanXuLyBuocHienTai = false;
-                            item.TenBuocHienTai = "�ang l?y � ki?n g�p �";
+                            item.TenBuocHienTai = "ï¿½ang l?y ï¿½ ki?n gï¿½p ï¿½";
                         }
 
                         if (normalizedLoaiQuyTrinh == NormalizeWorkflowType("XayDung") &&
@@ -426,16 +1102,16 @@ namespace Services.Manages
                         if (item.Id == Guid.Empty && item.Id != Guid.Empty)
                         {
                             item.CanNhanHoSo = false;
-                            item.TenBuocHienTai = "Đang soạn thảo";
+                            item.TenBuocHienTai = "Äang soáº¡n tháº£o";
                         }
 
                         if (item.NgayHoanThanh.HasValue ||
                             (item.TongSoBuoc > 0 && item.SoBuocHoanThanh >= item.TongSoBuoc))
                         {
                             item.MaTrangThai = "HOAN_THANH";
-                            item.TenTrangThai = "Đã hoàn thành";
+                            item.TenTrangThai = "ÄĂ£ hoĂ n thĂ nh";
                             item.MaMauTrangThai = "#28A745";
-                            item.TenBuocHienTai = "Đã hoàn thành";
+                            item.TenBuocHienTai = "ÄĂ£ hoĂ n thĂ nh";
                             item.CanXuLyBuocHienTai = false;
                         }
                     }
@@ -446,9 +1122,9 @@ namespace Services.Manages
                     {
                         var hoanThanhQuaHan = item.SoBuocQuaHan > 0;
                         item.MaTrangThai = hoanThanhQuaHan ? "HOAN_THANH_QUA_HAN" : "HOAN_THANH_DUNG_HAN";
-                        item.TenTrangThai = hoanThanhQuaHan ? "Hoàn thành quá hạn" : "Hoàn thành đúng hạn";
+                        item.TenTrangThai = hoanThanhQuaHan ? "HoĂ n thĂ nh quĂ¡ háº¡n" : "HoĂ n thĂ nh Ä‘Ăºng háº¡n";
                         item.MaMauTrangThai = hoanThanhQuaHan ? "#DC3545" : "#28A745";
-                        item.TenBuocHienTai = "Đã hoàn thành";
+                        item.TenBuocHienTai = "ÄĂ£ hoĂ n thĂ nh";
                         item.CanXuLyBuocHienTai = false;
                     }
                 }
@@ -459,12 +1135,254 @@ namespace Services.Manages
                 {
                     var hoanThanhQuaHan = item.SoBuocQuaHan > 0;
                     item.TrangThaiTienDo = hoanThanhQuaHan ? "HOAN_THANH_QUA_HAN" : "HOAN_THANH_DUNG_HAN";
-                    item.TenTrangThaiTienDo = hoanThanhQuaHan ? "Hoàn thành quá hạn" : "Hoàn thành đúng hạn";
+                    item.TenTrangThaiTienDo = hoanThanhQuaHan ? "HoĂ n thĂ nh quĂ¡ háº¡n" : "HoĂ n thĂ nh Ä‘Ăºng háº¡n";
                     item.MaMauTienDo = hoanThanhQuaHan ? "#DC3545" : "#28A745";
                     item.DangOQuaHan = hoanThanhQuaHan;
                 }
 
-                return new CommonResponse("success", "Thành công", data, totalRecord);
+                return new CommonResponse("success", "ThĂ nh cĂ´ng", data, totalRecord);
+            }
+            catch
+            {
+                return new CommonResponse();
+            }
+        }
+
+        public async Task<CommonResponse> GetDonDocTienDoFormAsync(Guid hoSoVanBanId)
+        {
+            try
+            {
+                var hoSo = await (
+                    from h in _dbContext.HoSoVanBans.AsNoTracking()
+                    join vanBan in _dbContext.DanhMucVanBans.AsNoTracking() on h.DanhMucVanBanId equals vanBan.Id
+                    join donVi in _dbContext.DanhMucDonVis.AsNoTracking() on h.DonViSoanThaoId equals donVi.Id
+                    join buoc in _dbContext.DanhMucBuocQuyTrinhs.AsNoTracking() on h.BuocHienTaiId equals buoc.Id into buocJoin
+                    from buoc in buocJoin.DefaultIfEmpty()
+                    join xuLyCurrent in _dbContext.HoSoVanBanXuLys.AsNoTracking().Where(x => x.IsCurrent) on h.Id equals xuLyCurrent.HoSoVanBanId into xuLyCurrentJoin
+                    from xuLyCurrent in xuLyCurrentJoin.DefaultIfEmpty()
+                    join donViXuLy in _dbContext.DanhMucDonVis.AsNoTracking() on xuLyCurrent.DonViXuLyId equals donViXuLy.Id into donViXuLyJoin
+                    from donViXuLy in donViXuLyJoin.DefaultIfEmpty()
+                    where h.Id == hoSoVanBanId
+                    select new HoSoVanBanDonDocFormModel
+                    {
+                        HoSoVanBanId = h.Id,
+                        MaHoSo = h.MaHoSo,
+                        TenHoSo = h.TenHoSo,
+                        TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                        TenBuocHienTai = buoc != null ? buoc.TenBuoc : null,
+                        TenDonViSoanThao = donVi.TenDonVi,
+                        TenDonViXuLyHienTai = donViXuLy != null ? donViXuLy.TenDonVi : null,
+                        HanXuLy = xuLyCurrent != null ? xuLyCurrent.HanXuLy : h.HanXuLy
+                    }).FirstOrDefaultAsync();
+
+                if (hoSo == null)
+                {
+                    return new CommonResponse("error", "Không tìm thấy hồ sơ cần đôn đốc.");
+                }
+
+                var trackingMap = await BuildTrackingMapAsync(new[] { hoSoVanBanId });
+                var currentStep = trackingMap.TryGetValue(hoSoVanBanId, out var tracking)
+                    ? tracking.Steps.FirstOrDefault(x => x.IsCurrent) ?? tracking.Steps.OrderByDescending(x => x.ThuTuSapXep).FirstOrDefault()
+                    : null;
+
+                var fakeItem = new HoSoVanBanListItemModel { SoLanTraLaiHienTai = 0 };
+                if (currentStep != null)
+                {
+                    ResolveAlertInfo(fakeItem, currentStep);
+                    hoSo.MucCanhBao = fakeItem.MucCanhBao;
+                    hoSo.GhiChuCanhBao = fakeItem.GhiChuCanhBao;
+                }
+
+                hoSo.NoiDungDonDoc =
+                    $"Đề nghị đơn vị khẩn trương rà soát và xử lý hồ sơ '{hoSo.TenHoSo}'" +
+                    $"{(string.IsNullOrWhiteSpace(hoSo.TenBuocHienTai) ? string.Empty : $" tại bước '{hoSo.TenBuocHienTai}'")}" +
+                    $"{(hoSo.HanXuLy.HasValue ? $", hạn xử lý {hoSo.HanXuLy.Value:dd/MM/yyyy}" : string.Empty)}.";
+
+                return new CommonResponse("success", "Thành công", hoSo);
+            }
+            catch
+            {
+                return new CommonResponse();
+            }
+        }
+
+        public async Task<CommonResponse> GuiDonDocTienDoAsync(HoSoVanBanDonDocFormModel request)
+        {
+            try
+            {
+                var currentUser = _authService.GetUserInfo();
+                if (currentUser == null)
+                {
+                    return new CommonResponse("error", "Không xác định được tài khoản đang thao tác.");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.NoiDungDonDoc))
+                {
+                    return new CommonResponse("error", "Nội dung đôn đốc không được để trống.");
+                }
+
+                var hoSo = await _dbContext.HoSoVanBans.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.HoSoVanBanId);
+                if (hoSo == null)
+                {
+                    return new CommonResponse("error", "Không tìm thấy hồ sơ cần đôn đốc.");
+                }
+
+                var currentProcessing = await _dbContext.HoSoVanBanXuLys
+                    .AsNoTracking()
+                    .Where(x => x.HoSoVanBanId == request.HoSoVanBanId && x.IsCurrent)
+                    .OrderByDescending(x => x.NgayNhan)
+                    .FirstOrDefaultAsync();
+
+                var donViNhan = currentProcessing?.DonViXuLyId != Guid.Empty
+                    ? currentProcessing!.DonViXuLyId
+                    : hoSo.DonViSoanThaoId;
+
+                if (donViNhan == Guid.Empty || donViNhan == currentUser.DanhMucDonViId)
+                {
+                    return new CommonResponse("error", "Không xác định được đơn vị nhận đôn đốc phù hợp.");
+                }
+
+                var currentStep = await GetCurrentStepAsync(hoSo);
+                var config = BuildNotificationNavigation(currentStep?.MaBuoc, hoSo.MaHoSo);
+                var noiDung = request.NoiDungDonDoc.Trim();
+                if (!noiDung.Contains("Đôn đốc", StringComparison.OrdinalIgnoreCase))
+                {
+                    noiDung = $"[Đôn đốc tiến độ] {noiDung}";
+                }
+
+                var thongBao = new Notification
+                {
+                    DonViGui = currentUser.DanhMucDonViId,
+                    DonViTiepNhan = donViNhan,
+                    DonViDongChuyen = string.Empty,
+                    NoiDung = noiDung,
+                    ControllerNameDanhSach = config.ControllerNameDanhSach,
+                    ActionNameDanhSach = config.ActionNameDanhSach,
+                    ParameterDanhSach = config.ParameterDanhSach,
+                    ControllerNameXetDuyet = config.ControllerNameXetDuyet,
+                    ActionNameXetDuyet = config.ActionNameXetDuyet,
+                    ParameterXetDuyet = config.ParameterXetDuyet,
+                    DonViView = new List<Guid>()
+                };
+
+                var result = await _notificationService.StoreAsync(thongBao);
+                return result.Status == "success"
+                    ? new CommonResponse("success", "Đã gửi thông báo đôn đốc thành công.")
+                    : result;
+            }
+            catch
+            {
+                return new CommonResponse();
+            }
+        }
+
+        public async Task<CommonResponse> GetDonDocTienDoHangLoatFormAsync(List<Guid> hoSoVanBanIds)
+        {
+            try
+            {
+                var ids = hoSoVanBanIds.Where(x => x != Guid.Empty).Distinct().ToList();
+                if (ids.Count == 0)
+                {
+                    return new CommonResponse("error", "Bạn chưa chọn hồ sơ để đôn đốc.");
+                }
+
+                var hoSos = await (
+                    from h in _dbContext.HoSoVanBans.AsNoTracking()
+                    join buoc in _dbContext.DanhMucBuocQuyTrinhs.AsNoTracking() on h.BuocHienTaiId equals buoc.Id into buocJoin
+                    from buoc in buocJoin.DefaultIfEmpty()
+                    join xuLyCurrent in _dbContext.HoSoVanBanXuLys.AsNoTracking().Where(x => x.IsCurrent) on h.Id equals xuLyCurrent.HoSoVanBanId into xuLyCurrentJoin
+                    from xuLyCurrent in xuLyCurrentJoin.DefaultIfEmpty()
+                    join donViXuLy in _dbContext.DanhMucDonVis.AsNoTracking() on xuLyCurrent.DonViXuLyId equals donViXuLy.Id into donViXuLyJoin
+                    from donViXuLy in donViXuLyJoin.DefaultIfEmpty()
+                    where ids.Contains(h.Id)
+                    select new HoSoVanBanDonDocHangLoatItemModel
+                    {
+                        HoSoVanBanId = h.Id,
+                        MaHoSo = h.MaHoSo,
+                        TenHoSo = h.TenHoSo,
+                        TenBuocHienTai = buoc != null ? buoc.TenBuoc : null,
+                        TenDonViXuLyHienTai = donViXuLy != null ? donViXuLy.TenDonVi : null,
+                        HanXuLy = xuLyCurrent != null ? xuLyCurrent.HanXuLy : h.HanXuLy
+                    })
+                    .ToListAsync();
+
+                if (hoSos.Count == 0)
+                {
+                    return new CommonResponse("error", "Không tìm thấy hồ sơ phù hợp để đôn đốc.");
+                }
+
+                var trackingMap = await BuildTrackingMapAsync(ids);
+                foreach (var item in hoSos)
+                {
+                    if (!trackingMap.TryGetValue(item.HoSoVanBanId, out var tracking))
+                    {
+                        item.TenMucCanhBao = "Bình thường";
+                        continue;
+                    }
+
+                    var currentStep = tracking.Steps.FirstOrDefault(x => x.IsCurrent)
+                                      ?? tracking.Steps.OrderByDescending(x => x.ThuTuSapXep).FirstOrDefault();
+                    var fakeItem = new HoSoVanBanListItemModel();
+                    if (currentStep != null)
+                    {
+                        ResolveAlertInfo(fakeItem, currentStep);
+                        item.TenMucCanhBao = fakeItem.TenMucCanhBao;
+                    }
+                }
+
+                var model = new HoSoVanBanDonDocHangLoatFormModel
+                {
+                    HoSoVanBanIds = hoSos.Select(x => x.HoSoVanBanId).ToList(),
+                    TongSoHoSo = hoSos.Count,
+                    NoiDungDonDoc = $"Đề nghị các đơn vị khẩn trương rà soát, xử lý và báo cáo tiến độ các hồ sơ được đôn đốc tính đến ngày {DateTime.Today:dd/MM/yyyy}.",
+                    HoSos = hoSos.OrderBy(x => x.MaHoSo).ToList()
+                };
+
+                return new CommonResponse("success", "Thành công", model);
+            }
+            catch
+            {
+                return new CommonResponse();
+            }
+        }
+
+        public async Task<CommonResponse> GuiDonDocTienDoHangLoatAsync(HoSoVanBanDonDocHangLoatFormModel request)
+        {
+            try
+            {
+                var ids = request.HoSoVanBanIds.Where(x => x != Guid.Empty).Distinct().ToList();
+                if (ids.Count == 0)
+                {
+                    return new CommonResponse("error", "Bạn chưa chọn hồ sơ để đôn đốc.");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.NoiDungDonDoc))
+                {
+                    return new CommonResponse("error", "Nội dung đôn đốc không được để trống.");
+                }
+
+                var successCount = 0;
+                foreach (var id in ids)
+                {
+                    var singleRequest = new HoSoVanBanDonDocFormModel
+                    {
+                        HoSoVanBanId = id,
+                        NoiDungDonDoc = request.NoiDungDonDoc.Trim()
+                    };
+
+                    var result = await GuiDonDocTienDoAsync(singleRequest);
+                    if (result.Status == "success")
+                    {
+                        successCount++;
+                    }
+                }
+
+                if (successCount == 0)
+                {
+                    return new CommonResponse("error", "Không gửi được đôn đốc cho hồ sơ nào.");
+                }
+
+                return new CommonResponse("success", $"Đã gửi đôn đốc cho {successCount}/{ids.Count} hồ sơ.");
             }
             catch
             {
@@ -496,6 +1414,42 @@ namespace Services.Manages
                     TenDonVi = x.TenDonVi
                 })
                 .ToListAsync();
+        }
+
+        public async Task<List<SelectOptionModel>> GetNguoiXuLyOptionsAsync(Guid? donViId = null)
+        {
+            return await (
+                from user in _dbContext.Users.AsNoTracking()
+                join donVi in _dbContext.DanhMucDonVis.AsNoTracking() on user.DanhMucDonViId equals donVi.Id into donViJoin
+                from donVi in donViJoin.DefaultIfEmpty()
+                where user.Status == "Kích hoạt"
+                      && (!donViId.HasValue || donViId.Value == Guid.Empty || user.DanhMucDonViId == donViId.Value)
+                orderby user.Name
+                select new SelectOptionModel
+                {
+                    Value = user.Id.ToString(),
+                    Text = donVi != null ? $"{user.Name} - {donVi.TenDonVi}" : user.Name
+                }).ToListAsync();
+        }
+
+        public async Task<List<SelectOptionModel>> GetBuocTheoDoiTienDoOptionsAsync()
+        {
+            var items = await _dbContext.DanhMucBuocQuyTrinhs
+                .AsNoTracking()
+                .Where(x => _dbContext.DanhMucQuyTrinhSoanThaos.Any(q => q.Id == x.QuyTrinhSoanThaoId && q.LoaiQuyTrinh == NormalizeWorkflowType("XayDung")))
+                .OrderBy(x => x.ThuTuSapXep)
+                .ThenBy(x => x.TenBuoc)
+                .Select(x => new SelectOptionModel
+                {
+                    Value = x.MaBuoc,
+                    Text = x.TenBuoc
+                })
+                .ToListAsync();
+
+            return items
+                .GroupBy(x => x.Value)
+                .Select(x => x.First())
+                .ToList();
         }
 
         public async Task<List<HoSoDangKyOptionModel>> GetHoSoDangKyOptionsAsync(Guid? donViId = null, bool isSSA = false)
@@ -610,17 +1564,17 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             if (!request.TuNgaySoanThao.HasValue || !request.DenNgaySoanThao.HasValue)
             {
-                return new CommonResponse("error", "Thời gian soạn thảo bắt buộc phải nhập.");
+                return new CommonResponse("error", "Thá»i gian soáº¡n tháº£o báº¯t buá»™c pháº£i nháº­p.");
             }
 
             if (request.DenNgaySoanThao.Value.Date < request.TuNgaySoanThao.Value.Date)
             {
-                return new CommonResponse("error", "Đến ngày soạn thảo phải lớn hơn hoặc bằng từ ngày soạn thảo.");
+                return new CommonResponse("error", "Äáº¿n ngĂ y soáº¡n tháº£o pháº£i lá»›n hÆ¡n hoáº·c báº±ng tá»« ngĂ y soáº¡n tháº£o.");
             }
 
             if (request.Id == Guid.Empty)
@@ -638,7 +1592,7 @@ namespace Services.Manages
 
             if (await _dbContext.HoSoVanBans.AnyAsync(x => x.Id == request.Id))
             {
-                return new CommonResponse("error", "Mã hồ sơ đã tồn tại!");
+                return new CommonResponse("error", "MĂ£ há»“ sÆ¡ Ä‘Ă£ tá»“n táº¡i!");
             }
 
             request.BuocThoiHans = request.BuocThoiHans
@@ -652,7 +1606,7 @@ namespace Services.Manages
 
             if (quyTrinh == null)
             {
-                return new CommonResponse("error", "Không tìm thấy quy trình soạn thảo đang kích hoạt!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y quy trĂ¬nh soáº¡n tháº£o Ä‘ang kĂ­ch hoáº¡t!");
             }
 
             DanhMucBuocQuyTrinh? firstStep;
@@ -678,7 +1632,7 @@ namespace Services.Manages
 
             if (firstStep == null)
             {
-                return new CommonResponse("error", "Quy trình chưa có bước nào để khởi tạo hồ sơ!");
+                return new CommonResponse("error", "Quy trĂ¬nh chÆ°a cĂ³ bÆ°á»›c nĂ o Ä‘á»ƒ khá»Ÿi táº¡o há»“ sÆ¡!");
             }
 
             var stepDeadlinePlans = await BuildRequestedStepDeadlinePlansAsync(request.QuyTrinhSoanThaoId, request.BuocThoiHans);
@@ -752,7 +1706,7 @@ namespace Services.Manages
                     DanhMucTrangThaiId = dangXuLyStatusId,
                     IsCurrent = true,
                     KetQuaXuLy = null,
-                    NoiDungXuLy = "Khởi tạo hồ sơ vào quy trình.",
+                    NoiDungXuLy = "Khá»Ÿi táº¡o há»“ sÆ¡ vĂ o quy trĂ¬nh.",
                     GhiChu = request.GhiChu
                 };
 
@@ -766,9 +1720,9 @@ namespace Services.Manages
                     firstStep,
                     currentUser.DanhMucDonViId,
                     xuLyDauTien.DonViXuLyId,
-                    $"Hồ sơ '{hoSo.TenHoSo}' đã được khởi tạo và đang ở bước '{firstStep.TenBuoc}'.");
+                    $"Há»“ sÆ¡ '{hoSo.TenHoSo}' Ä‘Ă£ Ä‘Æ°á»£c khá»Ÿi táº¡o vĂ  Ä‘ang á»Ÿ bÆ°á»›c '{firstStep.TenBuoc}'.");
 
-                return new CommonResponse("success", "Thành công", hoSo.Id);
+                return new CommonResponse("success", "ThĂ nh cĂ´ng", hoSo.Id);
             }
             catch
             {
@@ -782,7 +1736,7 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             var hoSo = await _dbContext.HoSoVanBans
@@ -791,7 +1745,7 @@ namespace Services.Manages
 
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -801,7 +1755,7 @@ namespace Services.Manages
 
             if (!CanEditDangKyHoSo(currentUser, hoSo, currentStep, currentProcessing))
             {
-                return new CommonResponse("error", "Hồ sơ này đã được gửi đi hoặc bạn không có quyền cập nhật.");
+                return new CommonResponse("error", "Há»“ sÆ¡ nĂ y Ä‘Ă£ Ä‘Æ°á»£c gá»­i Ä‘i hoáº·c báº¡n khĂ´ng cĂ³ quyá»n cáº­p nháº­t.");
             }
 
             var buocThoiHans = await _dbContext.HoSoVanBanBuocThoiHans
@@ -858,7 +1812,7 @@ namespace Services.Manages
                 BuocThoiHans = buocThoiHans
             };
 
-            return new CommonResponse("success", "Thành công", model);
+            return new CommonResponse("success", "ThĂ nh cĂ´ng", model);
         }
 
         public async Task<CommonResponse> GetChuyenHoSoModelAsync(Guid hoSoVanBanId)
@@ -994,19 +1948,19 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Kh�ng x�c d?nh du?c t�i kho?n dang thao t�c!");
+                return new CommonResponse("error", "Khï¿½ng xï¿½c d?nh du?c tï¿½i kho?n dang thao tï¿½c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Kh�ng t�m th?y h? so c?n chuy?n x�t duy?t.");
+                return new CommonResponse("error", "Khï¿½ng tï¿½m th?y h? so c?n chuy?n xï¿½t duy?t.");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
             if (currentStep == null)
             {
-                return new CommonResponse("error", "Kh�ng x�c d?nh du?c bu?c hi?n t?i c?a h? so.");
+                return new CommonResponse("error", "Khï¿½ng xï¿½c d?nh du?c bu?c hi?n t?i c?a h? so.");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1017,7 +1971,7 @@ namespace Services.Manages
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "H? so n�y kh�ng thu?c don v? dang dang nh?p d? chuy?n x�t duy?t.");
+                return new CommonResponse("error", "H? so nï¿½y khï¿½ng thu?c don v? dang dang nh?p d? chuy?n xï¿½t duy?t.");
             }
 
             var nextTransition = await ResolveTransitionByResultsAsync(
@@ -1038,20 +1992,20 @@ namespace Services.Manages
 
             if (nextStep == null)
             {
-                return new CommonResponse("error", "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n x�t duy?t.");
+                return new CommonResponse("error", "Workflow chua c?u hï¿½nh bu?c k? ti?p cho nghi?p v? chuy?n xï¿½t duy?t.");
             }
 
             var nextStepDeadline = await ResolveNextStepDeadlineAsync(hoSo.Id, nextStep);
 
-            return new CommonResponse("success", "Th�nh c�ng", new HoSoVanBanXuLyStepModel
+            return new CommonResponse("success", "Thï¿½nh cï¿½ng", new HoSoVanBanXuLyStepModel
             {
                 HoSoVanBanId = hoSo.Id,
                 TenHoSo = hoSo.TenHoSo,
                 KetQuaXuLy = nextTransition?.DieuKienKetQua ?? "GUI_THAM_DINH",
                 NgayXuLy = DateTime.Now,
                 HanXuLy = nextStepDeadline,
-                NoiDungXuLy = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c x�t duy?t.",
-                GhiChu = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c x? l� k? ti?p."
+                NoiDungXuLy = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c xï¿½t duy?t.",
+                GhiChu = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c x? lï¿½ k? ti?p."
             });
         }
 
@@ -1060,13 +2014,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Kh�ng x�c d?nh du?c t�i kho?n dang thao t�c!");
+                return new CommonResponse("error", "Khï¿½ng xï¿½c d?nh du?c tï¿½i kho?n dang thao tï¿½c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Kh�ng t�m th?y h? so c?n chuy?n ph� duy?t.");
+                return new CommonResponse("error", "Khï¿½ng tï¿½m th?y h? so c?n chuy?n phï¿½ duy?t.");
             }
 
             var daCoBanGhiDanhGia = await _dbContext.HoSoVanBanDanhGias
@@ -1075,13 +2029,13 @@ namespace Services.Manages
 
             if (!daCoBanGhiDanhGia)
             {
-                return new CommonResponse("error", "H? so chua c� b?n ghi x�t duy?t n�n chua th? chuy?n sang ph� duy?t.");
+                return new CommonResponse("error", "H? so chua cï¿½ b?n ghi xï¿½t duy?t nï¿½n chua th? chuy?n sang phï¿½ duy?t.");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
             if (currentStep == null)
             {
-                return new CommonResponse("error", "Kh�ng x�c d?nh du?c bu?c hi?n t?i c?a h? so.");
+                return new CommonResponse("error", "Khï¿½ng xï¿½c d?nh du?c bu?c hi?n t?i c?a h? so.");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1092,7 +2046,7 @@ namespace Services.Manages
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "H? so n�y kh�ng thu?c don v? dang dang nh?p d? chuy?n ph� duy?t.");
+                return new CommonResponse("error", "H? so nï¿½y khï¿½ng thu?c don v? dang dang nh?p d? chuy?n phï¿½ duy?t.");
             }
 
             var nextTransition = await ResolveTransitionByResultsAsync(
@@ -1113,20 +2067,20 @@ namespace Services.Manages
 
             if (nextStep == null)
             {
-                return new CommonResponse("error", "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n ph� duy?t.");
+                return new CommonResponse("error", "Workflow chua c?u hï¿½nh bu?c k? ti?p cho nghi?p v? chuy?n phï¿½ duy?t.");
             }
 
             var nextStepDeadline = await ResolveNextStepDeadlineAsync(hoSo.Id, nextStep);
 
-            return new CommonResponse("success", "Th�nh c�ng", new HoSoVanBanXuLyStepModel
+            return new CommonResponse("success", "Thï¿½nh cï¿½ng", new HoSoVanBanXuLyStepModel
             {
                 HoSoVanBanId = hoSo.Id,
                 TenHoSo = hoSo.TenHoSo,
                 KetQuaXuLy = nextTransition?.DieuKienKetQua ?? "THAM_DINH_XONG",
                 NgayXuLy = DateTime.Now,
                 HanXuLy = nextStepDeadline,
-                NoiDungXuLy = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c ph� duy?t van b?n.",
-                GhiChu = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c ph� duy?t."
+                NoiDungXuLy = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c phï¿½ duy?t van b?n.",
+                GhiChu = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c phï¿½ duy?t."
             });
         }
 
@@ -1135,19 +2089,19 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Kh�ng x�c d?nh du?c t�i kho?n dang thao t�c!");
+                return new CommonResponse("error", "Khï¿½ng xï¿½c d?nh du?c tï¿½i kho?n dang thao tï¿½c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Kh�ng t�m th?y h? so c?n chuy?n ban h�nh.");
+                return new CommonResponse("error", "Khï¿½ng tï¿½m th?y h? so c?n chuy?n ban hï¿½nh.");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
             if (currentStep == null)
             {
-                return new CommonResponse("error", "Kh�ng x�c d?nh du?c bu?c hi?n t?i c?a h? so.");
+                return new CommonResponse("error", "Khï¿½ng xï¿½c d?nh du?c bu?c hi?n t?i c?a h? so.");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1158,7 +2112,7 @@ namespace Services.Manages
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "H? so n�y kh�ng thu?c don v? dang dang nh?p d? chuy?n ban h�nh.");
+                return new CommonResponse("error", "H? so nï¿½y khï¿½ng thu?c don v? dang dang nh?p d? chuy?n ban hï¿½nh.");
             }
 
             var nextTransition = await ResolveTransitionByResultsAsync(
@@ -1179,21 +2133,588 @@ namespace Services.Manages
 
             if (nextStep == null)
             {
-                return new CommonResponse("error", "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n ban h�nh.");
+                return new CommonResponse("error", "Workflow chua c?u hï¿½nh bu?c k? ti?p cho nghi?p v? chuy?n ban hï¿½nh.");
             }
 
             var nextStepDeadline = await ResolveNextStepDeadlineAsync(hoSo.Id, nextStep);
 
-            return new CommonResponse("success", "Th�nh c�ng", new HoSoVanBanXuLyStepModel
+            return new CommonResponse("success", "Thï¿½nh cï¿½ng", new HoSoVanBanXuLyStepModel
             {
                 HoSoVanBanId = hoSo.Id,
                 TenHoSo = hoSo.TenHoSo,
                 KetQuaXuLy = nextTransition?.DieuKienKetQua ?? "TRINH_THANH_CONG",
                 NgayXuLy = DateTime.Now,
                 HanXuLy = nextStepDeadline,
-                NoiDungXuLy = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c ban h�nh van b?n.",
-                GhiChu = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c ban h�nh."
+                NoiDungXuLy = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c ban hï¿½nh van b?n.",
+                GhiChu = $"Chuy?n h? so {hoSo.TenHoSo} sang bu?c ban hï¿½nh."
             });
+        }
+
+        public async Task<CommonResponse> GetBanHanhFormAsync(Guid hoSoVanBanId)
+        {
+            var data = await (
+                from hoSo in _dbContext.HoSoVanBans.AsNoTracking()
+                join vanBan in _dbContext.DanhMucVanBans.AsNoTracking() on hoSo.DanhMucVanBanId equals vanBan.Id
+                join donVi in _dbContext.DanhMucDonVis.AsNoTracking() on hoSo.DonViSoanThaoId equals donVi.Id
+                join buoc in _dbContext.DanhMucBuocQuyTrinhs.AsNoTracking() on hoSo.BuocHienTaiId equals buoc.Id
+                where hoSo.Id == hoSoVanBanId
+                select new HoSoVanBanBanHanhFormModel
+                {
+                    HoSoVanBanId = hoSo.Id,
+                    TenHoSo = hoSo.TenHoSo,
+                    TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                    TenDonViSoanThao = donVi.TenDonVi,
+                    TenBuocHienTai = buoc.TenBuoc,
+                    AttachedFileGroupId = hoSo.AttachedFileGroupId ?? hoSo.Id,
+                    LoaiVanBanBanHanh = hoSo.LoaiVanBanBanHanh,
+                    SoKyHieuBanHanh = hoSo.SoKyHieuBanHanh,
+                    TrichYeuBanHanh = hoSo.TrichYeuBanHanh,
+                    CoQuanBanHanhId = hoSo.CoQuanBanHanhId,
+                    NguoiKyId = hoSo.NguoiKyId,
+                    HoTenNguoiKy = hoSo.HoTenNguoiKy,
+                    ChucVuNguoiKy = hoSo.ChucVuNguoiKy,
+                    NgayKy = hoSo.NgayKy,
+                    NgayBanHanh = hoSo.NgayBanHanh,
+                    NgayCoHieuLuc = hoSo.NgayCoHieuLuc,
+                    NgayHetHieuLuc = hoSo.NgayHetHieuLuc,
+                    TrangThaiBanHanh = hoSo.TrangThaiBanHanh,
+                    VanBanPhapLuatId = hoSo.VanBanPhapLuatId,
+                    NgayCongKhai = hoSo.NgayCongKhai,
+                    DuongDanCongKhai = hoSo.DuongDanCongKhai,
+                    TongThoiGianXayDungNgay = hoSo.TongThoiGianXayDungNgay,
+                    TongThoiGianQuyDinhNgay = hoSo.TongThoiGianQuyDinhNgay,
+                    TyLeThoiGianXayDung = hoSo.TyLeThoiGianXayDung,
+                    DiemTienDoXayDung = hoSo.DiemTienDoXayDung,
+                    DiemChatLuongVanBan = hoSo.DiemChatLuongVanBan,
+                    TongDiemDanhGia = hoSo.TongDiemDanhGia,
+                    XepLoaiDanhGia = hoSo.XepLoaiDanhGia,
+                    NgayChamDiem = hoSo.NgayChamDiem,
+                    GhiChu = hoSo.GhiChu
+                }).FirstOrDefaultAsync();
+
+            if (data == null)
+            {
+                return new CommonResponse("error", "Không tìm thấy hồ sơ ban hành.");
+            }
+
+            data.CoQuanBanHanhOptions = await GetDonViOptionsAsync();
+            data.NguoiKyOptions = await _dbContext.Users.AsNoTracking()
+                .Where(x => !data.CoQuanBanHanhId.HasValue || data.CoQuanBanHanhId == Guid.Empty || x.DanhMucDonViId == data.CoQuanBanHanhId.Value)
+                .OrderBy(x => x.Name)
+                .Select(x => new GuidTextOptionModel
+                {
+                    Id = x.Id,
+                    Text = string.IsNullOrWhiteSpace(x.HoTenNguoiKy)
+                        ? x.Name + (string.IsNullOrWhiteSpace(x.ChucDanhKy) ? string.Empty : $" - {x.ChucDanhKy}")
+                        : x.HoTenNguoiKy + (string.IsNullOrWhiteSpace(x.ChucDanhKy) ? string.Empty : $" - {x.ChucDanhKy}")
+                }).ToListAsync();
+
+            data.QuyetDinhFileOptions = await _dbContext.AttachedFiles.AsNoTracking()
+                .Where(x => x.GroupId == data.AttachedFileGroupId && x.TableName == "HoSoVanBan")
+                .OrderByDescending(x => x.CreatedDate)
+                .Select(x => new GuidTextOptionModel
+                {
+                    Id = x.Id,
+                    Text = string.IsNullOrWhiteSpace(x.MoTa) ? (x.FileName ?? x.Id.ToString()) : $"{x.MoTa} - {x.FileName}"
+                }).ToListAsync();
+
+            var publicFile = data.VanBanPhapLuatId.HasValue
+                ? await _dbContext.AttachedFiles.AsNoTracking().FirstOrDefaultAsync(x => x.Id == data.VanBanPhapLuatId.Value)
+                : null;
+            if (publicFile != null)
+            {
+                data.QuyetDinhBanHanhFileId = await _dbContext.AttachedFiles.AsNoTracking()
+                    .Where(x => x.GroupId == data.AttachedFileGroupId && x.TableName == "HoSoVanBan" && x.FileName == publicFile.FileName)
+                    .Select(x => (Guid?)x.Id)
+                    .FirstOrDefaultAsync();
+            }
+
+            return new CommonResponse("success", "Thành công", data);
+        }
+
+        public async Task<CommonResponse> GetGiaHanXayDungFormAsync(Guid hoSoVanBanId)
+        {
+            var data = await (
+                from hoSo in _dbContext.HoSoVanBans.AsNoTracking()
+                join vanBan in _dbContext.DanhMucVanBans.AsNoTracking() on hoSo.DanhMucVanBanId equals vanBan.Id
+                join donVi in _dbContext.DanhMucDonVis.AsNoTracking() on hoSo.DonViSoanThaoId equals donVi.Id
+                join buoc in _dbContext.DanhMucBuocQuyTrinhs.AsNoTracking() on hoSo.BuocHienTaiId equals buoc.Id into buocJoin
+                from buoc in buocJoin.DefaultIfEmpty()
+                join xuLyCurrent in _dbContext.HoSoVanBanXuLys.AsNoTracking().Where(x => x.IsCurrent) on hoSo.Id equals xuLyCurrent.HoSoVanBanId into xuLyCurrentJoin
+                from xuLyCurrent in xuLyCurrentJoin.DefaultIfEmpty()
+                join donViXuLy in _dbContext.DanhMucDonVis.AsNoTracking() on xuLyCurrent.DonViXuLyId equals donViXuLy.Id into donViXuLyJoin
+                from donViXuLy in donViXuLyJoin.DefaultIfEmpty()
+                where hoSo.Id == hoSoVanBanId
+                select new HoSoVanBanGiaHanFormModel
+                {
+                    HoSoVanBanId = hoSo.Id,
+                    MaHoSo = hoSo.MaHoSo,
+                    TenHoSo = hoSo.TenHoSo,
+                    TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                    TenBuocHienTai = buoc != null ? buoc.TenBuoc : null,
+                    TenDonViSoanThao = donVi.TenDonVi,
+                    TenDonViXuLyHienTai = donViXuLy != null ? donViXuLy.TenDonVi : null,
+                    HanXuLyHienTai = xuLyCurrent != null ? xuLyCurrent.HanXuLy : hoSo.HanXuLy
+                }).FirstOrDefaultAsync();
+
+            if (data == null)
+            {
+                return new CommonResponse("error", "Không tìm thấy hồ sơ cần gia hạn.");
+            }
+
+            if (!data.HanXuLyHienTai.HasValue)
+            {
+                return new CommonResponse("error", "Hồ sơ hiện chưa có hạn xử lý để gia hạn.");
+            }
+
+            data.HanXuLyMoi = data.HanXuLyHienTai.Value.Date.AddDays(1);
+            data.SoNgayGiaHan = 1;
+            data.LichSus = await (
+                from row in _dbContext.HoSoVanBanGiaHans.AsNoTracking()
+                join user in _dbContext.Users.AsNoTracking() on row.NguoiGiaHanId equals user.Id into userJoin
+                from user in userJoin.DefaultIfEmpty()
+                where row.HoSoVanBanId == hoSoVanBanId
+                orderby row.CreatedDate descending
+                select new HoSoVanBanGiaHanHistoryItemModel
+                {
+                    Id = row.Id,
+                    HanXuLyCu = row.HanXuLyCu,
+                    HanXuLyMoi = row.HanXuLyMoi,
+                    SoNgayGiaHan = row.SoNgayGiaHan,
+                    LyDoGiaHan = row.LyDoGiaHan,
+                    TenNguoiGiaHan = user != null ? user.Name : null,
+                    CreatedDate = row.CreatedDate,
+                    AttachedFileGroupId = row.AttachedFileGroupId,
+                    GhiChu = row.GhiChu
+                }).ToListAsync();
+
+            return new CommonResponse("success", "Thành công", data);
+        }
+
+        public async Task<CommonResponse> SaveGiaHanXayDungAsync(HoSoVanBanGiaHanFormModel request)
+        {
+            var currentUser = _authService.GetUserInfo();
+            if (currentUser == null)
+            {
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác.");
+            }
+
+            if (!request.HanXuLyHienTai.HasValue)
+            {
+                return new CommonResponse("error", "Không xác định được hạn xử lý hiện tại.");
+            }
+
+            if (request.HanXuLyMoi.Date <= request.HanXuLyHienTai.Value.Date)
+            {
+                return new CommonResponse("error", "Hạn xử lý mới phải lớn hơn hạn xử lý hiện tại.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.LyDoGiaHan))
+            {
+                return new CommonResponse("error", "Bạn phải nhập lý do gia hạn.");
+            }
+
+            var hoSo = await _dbContext.HoSoVanBans.FirstOrDefaultAsync(x => x.Id == request.HoSoVanBanId);
+            if (hoSo == null)
+            {
+                return new CommonResponse("error", "Không tìm thấy hồ sơ cần gia hạn.");
+            }
+
+            var currentProcessing = await _dbContext.HoSoVanBanXuLys
+                .FirstOrDefaultAsync(x => x.HoSoVanBanId == request.HoSoVanBanId && x.IsCurrent);
+            var currentStep = await GetCurrentStepAsync(hoSo);
+
+            var soNgayGiaHan = (request.HanXuLyMoi.Date - request.HanXuLyHienTai.Value.Date).Days;
+            if (soNgayGiaHan <= 0)
+            {
+                return new CommonResponse("error", "Số ngày gia hạn phải lớn hơn 0.");
+            }
+
+            var currentStepPlan = hoSo.BuocHienTaiId.HasValue
+                ? await _dbContext.HoSoVanBanBuocThoiHans.FirstOrDefaultAsync(x => x.HoSoVanBanId == request.HoSoVanBanId && x.BuocQuyTrinhId == hoSo.BuocHienTaiId.Value)
+                : null;
+
+            var entity = new HoSoVanBanGiaHan
+            {
+                HoSoVanBanId = request.HoSoVanBanId,
+                BuocQuyTrinhId = hoSo.BuocHienTaiId,
+                NguoiGiaHanId = currentUser.Id,
+                HanXuLyCu = request.HanXuLyHienTai.Value.Date,
+                HanXuLyMoi = request.HanXuLyMoi.Date,
+                SoNgayGiaHan = soNgayGiaHan,
+                LyDoGiaHan = request.LyDoGiaHan?.Trim(),
+                AttachedFileGroupId = request.AttachedFileGroupId,
+                GhiChu = request.GhiChu?.Trim()
+            };
+
+            hoSo.HanXuLy = request.HanXuLyMoi.Date;
+            if (currentProcessing != null)
+            {
+                currentProcessing.HanXuLy = request.HanXuLyMoi.Date;
+            }
+
+            if (currentStepPlan != null)
+            {
+                currentStepPlan.SoNgayXuLy = (currentStepPlan.SoNgayXuLy ?? 0) + soNgayGiaHan;
+            }
+
+            _dbContext.HoSoVanBanGiaHans.Add(entity);
+            await _dbContext.SaveChangesAsync();
+
+            if (currentUser.DanhMucDonViId != Guid.Empty &&
+                currentUser.DanhMucDonViId != SoTuPhapDonViId &&
+                currentStep != null)
+            {
+                var noiDungThongBao = new StringBuilder()
+                    .Append($"[Gia hạn tiến độ] Hồ sơ {hoSo.MaHoSo} - {hoSo.TenHoSo} đã được gia hạn tại bước {currentStep.TenBuoc}. ")
+                    .Append($"Hạn cũ: {request.HanXuLyHienTai.Value:dd/MM/yyyy}; hạn mới: {request.HanXuLyMoi:dd/MM/yyyy}; thêm {soNgayGiaHan} ngày.")
+                    .Append(string.IsNullOrWhiteSpace(request.LyDoGiaHan) ? string.Empty : $" Lý do: {request.LyDoGiaHan.Trim()}.")
+                    .ToString();
+
+                await TaoThongBaoAsync(
+                    hoSo,
+                    currentStep,
+                    currentUser.DanhMucDonViId,
+                    SoTuPhapDonViId,
+                    noiDungThongBao);
+            }
+
+            return new CommonResponse("success", "Đã gia hạn thời gian xây dựng văn bản thành công.");
+        }
+
+        public async Task<CommonResponse> GetChamDiemXayDungFormAsync(Guid hoSoVanBanId)
+        {
+            var hoSo = await (
+                from x in _dbContext.HoSoVanBans.AsNoTracking()
+                join vanBan in _dbContext.DanhMucVanBans.AsNoTracking() on x.DanhMucVanBanId equals vanBan.Id
+                join donVi in _dbContext.DanhMucDonVis.AsNoTracking() on x.DonViSoanThaoId equals donVi.Id
+                where x.Id == hoSoVanBanId
+                select new HoSoVanBanChamDiemFormModel
+                {
+                    HoSoVanBanId = x.Id,
+                    MaHoSo = x.MaHoSo,
+                    TenHoSo = x.TenHoSo,
+                    TenLoaiVanBan = vanBan.TenLoaiVanBan,
+                    TenDonViSoanThao = donVi.TenDonVi,
+                    NgayTaoHoSo = x.NgayTaoHoSo,
+                    NgayBanHanh = x.NgayBanHanh,
+                    SoLanTraLaiHienTai = x.SoLanTraLaiHienTai,
+                    TongThoiGianXayDungNgay = x.TongThoiGianXayDungNgay,
+                    TongThoiGianQuyDinhNgay = x.TongThoiGianQuyDinhNgay,
+                    TyLeThoiGianXayDung = x.TyLeThoiGianXayDung
+                }).FirstOrDefaultAsync();
+
+            if (hoSo == null)
+            {
+                return new CommonResponse("error", "Không tìm thấy hồ sơ chấm điểm.");
+            }
+
+            if (!hoSo.NgayBanHanh.HasValue)
+            {
+                return new CommonResponse("error", "Chỉ chấm điểm cho hồ sơ đã ban hành.");
+            }
+
+            var existing = await _dbContext.HoSoVanBanChamDiems.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.HoSoVanBanId == hoSoVanBanId);
+
+            if (existing != null)
+            {
+                hoSo.Id = existing.Id;
+                hoSo.NgayChamDiem = existing.NgayChamDiem;
+                hoSo.TrangThai = existing.TrangThai;
+                hoSo.TongDiem = existing.TongDiem;
+                hoSo.XepLoai = existing.XepLoai;
+                hoSo.GhiChu = existing.GhiChu;
+                hoSo.DaCoBanGhiChamDiem = true;
+                hoSo.ChiTiets = await _dbContext.HoSoVanBanChamDiemChiTiets.AsNoTracking()
+                    .Where(x => x.HoSoVanBanChamDiemId == existing.Id)
+                    .OrderBy(x => x.CreatedDate)
+                    .Select(x => new HoSoVanBanChamDiemChiTietFormModel
+                    {
+                        Id = x.Id,
+                        DanhMucTieuChiDiemId = x.DanhMucTieuChiDiemId,
+                        MaTieuChi = x.MaTieuChi,
+                        TenTieuChi = x.TenTieuChi,
+                        LoaiTieuChi = x.LoaiTieuChi,
+                        DiemToiDa = x.DiemToiDa,
+                        GiaTriTinhDiem = x.GiaTriTinhDiem,
+                        DienGiaiGiaTri = x.DienGiaiGiaTri,
+                        DiemDeXuat = x.DiemDeXuat,
+                        DiemChinhThuc = x.DiemChinhThuc,
+                        GhiChu = x.GhiChu
+                    }).ToListAsync();
+
+                return new CommonResponse("success", "Thành công", hoSo);
+            }
+
+            var proposal = await BuildChamDiemProposalAsync(hoSoVanBanId);
+            if (proposal == null)
+            {
+                return new CommonResponse("error", "Chưa cấu hình danh mục tiêu chí chấm điểm.");
+            }
+
+            hoSo.TongThoiGianXayDungNgay = proposal.TongThoiGianXayDungNgay;
+            hoSo.TongThoiGianQuyDinhNgay = proposal.TongThoiGianQuyDinhNgay;
+            hoSo.TyLeThoiGianXayDung = proposal.TyLeThoiGianXayDung;
+            hoSo.NgayChamDiem = DateTime.Today;
+            hoSo.TrangThai = "NHAP";
+            hoSo.TongDiem = proposal.TongDiem;
+            hoSo.XepLoai = ResolveXepLoaiTongDiem(proposal.TongDiem);
+            hoSo.ChiTiets = proposal.ChiTiets.Select(x => new HoSoVanBanChamDiemChiTietFormModel
+            {
+                DanhMucTieuChiDiemId = x.DanhMucTieuChiDiemId,
+                MaTieuChi = x.MaTieuChi,
+                TenTieuChi = x.TenTieuChi,
+                LoaiTieuChi = x.LoaiTieuChi,
+                DiemToiDa = x.DiemToiDa,
+                GiaTriTinhDiem = x.GiaTriTinhDiem,
+                DienGiaiGiaTri = x.DienGiaiGiaTri,
+                DiemDeXuat = x.DiemDeXuat,
+                DiemChinhThuc = x.DiemDeXuat ?? 0
+            }).ToList();
+
+            return new CommonResponse("success", "Thành công", hoSo);
+        }
+
+        public async Task<CommonResponse> SaveBanHanhAsync(HoSoVanBanBanHanhFormModel request, bool xacNhanBanHanh)
+        {
+            var currentUser = _authService.GetUserInfo();
+            if (currentUser == null)
+            {
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác.");
+            }
+
+            var hoSo = await GetHoSoWithCurrentStepAsync(request.HoSoVanBanId);
+            var currentStep = hoSo == null ? null : await GetCurrentStepAsync(hoSo);
+            if (hoSo == null || currentStep == null || (currentStep.MaBuoc != "BUOC_06_THONG_QUA_BAN_HANH" && currentStep.MaBuoc != "BUOC_07_THONG_QUA_BAN_HANH"))
+            {
+                return new CommonResponse("error", "Hồ sơ hiện không ở bước ban hành.");
+            }
+
+            var currentProcessing = await _dbContext.HoSoVanBanXuLys
+                .Where(x => x.HoSoVanBanId == hoSo.Id && x.IsCurrent)
+                .OrderByDescending(x => x.NgayNhan)
+                .FirstOrDefaultAsync();
+            if (!CanCurrentUserXuLy(currentUser, currentProcessing))
+            {
+                return new CommonResponse("error", "Bạn không có quyền cập nhật hồ sơ này.");
+            }
+
+            if (xacNhanBanHanh)
+            {
+                if (string.IsNullOrWhiteSpace(request.SoKyHieuBanHanh) || !request.NgayBanHanh.HasValue || !request.NgayKy.HasValue || !request.QuyetDinhBanHanhFileId.HasValue)
+                {
+                    return new CommonResponse("error", "Khi xác nhận ban hành phải có số ký hiệu, ngày ký, ngày ban hành và file quyết định.");
+                }
+            }
+
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                hoSo.AttachedFileGroupId ??= request.AttachedFileGroupId != Guid.Empty ? request.AttachedFileGroupId : hoSo.Id;
+                hoSo.LoaiVanBanBanHanh = request.LoaiVanBanBanHanh?.Trim();
+                hoSo.SoKyHieuBanHanh = request.SoKyHieuBanHanh?.Trim();
+                hoSo.TrichYeuBanHanh = request.TrichYeuBanHanh?.Trim();
+                hoSo.CoQuanBanHanhId = request.CoQuanBanHanhId;
+                hoSo.NguoiKyId = request.NguoiKyId;
+                hoSo.HoTenNguoiKy = request.HoTenNguoiKy?.Trim();
+                hoSo.ChucVuNguoiKy = request.ChucVuNguoiKy?.Trim();
+                hoSo.NgayKy = request.NgayKy;
+                hoSo.NgayBanHanh = request.NgayBanHanh;
+                hoSo.NgayCoHieuLuc = request.NgayCoHieuLuc;
+                hoSo.NgayHetHieuLuc = request.NgayHetHieuLuc;
+                hoSo.NgayCongKhai = request.NgayCongKhai;
+                hoSo.DuongDanCongKhai = request.DuongDanCongKhai?.Trim();
+                hoSo.GhiChu = request.GhiChu?.Trim();
+                hoSo.TrangThaiBanHanh = xacNhanBanHanh ? "DA_BAN_HANH" : "CHUA_BAN_HANH";
+
+                var signer = request.NguoiKyId.HasValue
+                    ? await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.NguoiKyId.Value)
+                    : null;
+                if (signer != null)
+                {
+                    hoSo.HoTenNguoiKy = string.IsNullOrWhiteSpace(request.HoTenNguoiKy) ? (signer.HoTenNguoiKy ?? signer.Name) : request.HoTenNguoiKy.Trim();
+                    hoSo.ChucVuNguoiKy = string.IsNullOrWhiteSpace(request.ChucVuNguoiKy) ? signer.ChucDanhKy : request.ChucVuNguoiKy.Trim();
+                }
+
+                if (xacNhanBanHanh)
+                {
+                    var hoSoFiles = await _dbContext.AttachedFiles
+                        .Where(x => x.GroupId == hoSo.AttachedFileGroupId && x.TableName == "HoSoVanBan")
+                        .ToListAsync();
+                    var qdFile = hoSoFiles.FirstOrDefault(x => x.Id == request.QuyetDinhBanHanhFileId.Value);
+                    if (qdFile == null)
+                    {
+                        return new CommonResponse("error", "Không tìm thấy file quyết định đã chọn.");
+                    }
+
+                    foreach (var file in hoSoFiles)
+                    {
+                        file.Public = false;
+                        file.PhamViCongKhai = file.Id == qdFile.Id ? "CONG_KHAI" : "NOI_BO";
+                        file.LoaiTaiLieu = file.Id == qdFile.Id ? "QUYET_DINH_BAN_HANH" : (file.LoaiTaiLieu == "QUYET_DINH_BAN_HANH" ? "TAI_LIEU_HO_SO" : file.LoaiTaiLieu);
+                    }
+
+                    AttachedFile publicFile;
+                    if (hoSo.VanBanPhapLuatId.HasValue)
+                    {
+                        publicFile = await _dbContext.AttachedFiles.FirstOrDefaultAsync(x => x.Id == hoSo.VanBanPhapLuatId.Value)
+                            ?? new AttachedFile { TableName = "VanBanPhapLuat" };
+                    }
+                    else
+                    {
+                        publicFile = new AttachedFile { TableName = "VanBanPhapLuat" };
+                    }
+
+                    publicFile.SoVanBan = hoSo.SoKyHieuBanHanh ?? request.SoKyHieuBanHanh;
+                    publicFile.NgayBanHanh = hoSo.NgayBanHanh ?? request.NgayBanHanh ?? DateTime.Today;
+                    publicFile.NgayApDung = hoSo.NgayCoHieuLuc ?? hoSo.NgayBanHanh ?? request.NgayBanHanh ?? DateTime.Today;
+                    publicFile.MoTa = hoSo.TrichYeuBanHanh ?? request.TrichYeuBanHanh ?? hoSo.TenHoSo;
+                    publicFile.Url = hoSo.DuongDanCongKhai ?? request.DuongDanCongKhai;
+                    publicFile.FileName = qdFile.FileName;
+                    publicFile.ContentType = qdFile.ContentType;
+                    publicFile.FileContent = qdFile.FileContent;
+                    publicFile.Public = true;
+                    publicFile.PhamViCongKhai = "CONG_KHAI";
+                    publicFile.LoaiTaiLieu = "QUYET_DINH_BAN_HANH";
+                    publicFile.Status = "XD";
+                    publicFile.DonViId = hoSo.CoQuanBanHanhId ?? currentUser.DanhMucDonViId;
+
+                    if (hoSo.VanBanPhapLuatId.HasValue && publicFile.Id != Guid.Empty)
+                    {
+                        _dbContext.AttachedFiles.Update(publicFile);
+                    }
+                    else
+                    {
+                        _dbContext.AttachedFiles.Add(publicFile);
+                    }
+
+                    await _dbContext.SaveChangesAsync();
+                    hoSo.VanBanPhapLuatId = publicFile.Id;
+
+                    currentProcessing!.IsCurrent = false;
+                    currentProcessing.NgayXuLy = DateTime.Now;
+                    currentProcessing.KetQuaXuLy = "BAN_HANH_XONG";
+                    currentProcessing.NoiDungXuLy = hoSo.TrichYeuBanHanh ?? request.TrichYeuBanHanh;
+                    await AdvanceWorkflowAsync(hoSo, currentUser, null, null, "BAN_HANH_XONG", currentProcessing.NoiDungXuLy);
+                    await ApplyTieuChiDiemAsync(hoSo);
+                }
+
+                _dbContext.HoSoVanBans.Update(hoSo);
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new CommonResponse("success", xacNhanBanHanh ? "Đã cập nhật và xác nhận ban hành văn bản." : "Đã lưu nháp thông tin ban hành.");
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return new CommonResponse("error", "Không thể cập nhật thông tin ban hành.");
+            }
+        }
+
+        public async Task<CommonResponse> SaveChamDiemXayDungAsync(HoSoVanBanChamDiemFormModel request)
+        {
+            var currentUser = _authService.GetUserInfo();
+            if (currentUser == null)
+            {
+                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác.");
+            }
+
+            var hoSo = await _dbContext.HoSoVanBans.FirstOrDefaultAsync(x => x.Id == request.HoSoVanBanId);
+            if (hoSo == null || hoSo.TrangThaiBanHanh != "DA_BAN_HANH")
+            {
+                return new CommonResponse("error", "Chỉ chấm điểm cho hồ sơ đã ban hành.");
+            }
+
+            var chiTiets = request.ChiTiets ?? new List<HoSoVanBanChamDiemChiTietFormModel>();
+            if (chiTiets.Count == 0)
+            {
+                return new CommonResponse("error", "Bản ghi chấm điểm phải có ít nhất một tiêu chí.");
+            }
+
+            foreach (var item in chiTiets)
+            {
+                if (item.DiemChinhThuc < 0)
+                {
+                    return new CommonResponse("error", $"Điểm của tiêu chí {item.TenTieuChi} không được âm.");
+                }
+                if (item.DiemChinhThuc > item.DiemToiDa)
+                {
+                    return new CommonResponse("error", $"Điểm của tiêu chí {item.TenTieuChi} không được vượt quá điểm tối đa.");
+                }
+            }
+
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                var entity = await _dbContext.HoSoVanBanChamDiems
+                    .FirstOrDefaultAsync(x => x.HoSoVanBanId == request.HoSoVanBanId);
+
+                if (entity == null)
+                {
+                    entity = new HoSoVanBanChamDiem
+                    {
+                        HoSoVanBanId = request.HoSoVanBanId
+                    };
+                    _dbContext.HoSoVanBanChamDiems.Add(entity);
+                    await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    var oldDetails = await _dbContext.HoSoVanBanChamDiemChiTiets
+                        .Where(x => x.HoSoVanBanChamDiemId == entity.Id)
+                        .ToListAsync();
+                    if (oldDetails.Count > 0)
+                    {
+                        _dbContext.HoSoVanBanChamDiemChiTiets.RemoveRange(oldDetails);
+                    }
+                }
+
+                entity.NguoiChamDiemId = currentUser.Id;
+                entity.NgayChamDiem = request.NgayChamDiem;
+                entity.TrangThai = string.IsNullOrWhiteSpace(request.TrangThai) ? "NHAP" : request.TrangThai.Trim().ToUpperInvariant();
+                entity.GhiChu = string.IsNullOrWhiteSpace(request.GhiChu) ? null : request.GhiChu.Trim();
+                entity.TongDiem = chiTiets.Sum(x => x.DiemChinhThuc);
+                entity.XepLoai = ResolveXepLoaiTongDiem(entity.TongDiem);
+
+                var detailEntities = chiTiets.Select(x => new HoSoVanBanChamDiemChiTiet
+                {
+                    HoSoVanBanChamDiemId = entity.Id,
+                    DanhMucTieuChiDiemId = x.DanhMucTieuChiDiemId,
+                    MaTieuChi = x.MaTieuChi,
+                    TenTieuChi = x.TenTieuChi,
+                    LoaiTieuChi = x.LoaiTieuChi,
+                    GiaTriTinhDiem = x.GiaTriTinhDiem,
+                    DiemDeXuat = x.DiemDeXuat,
+                    DiemChinhThuc = x.DiemChinhThuc,
+                    DiemToiDa = x.DiemToiDa,
+                    DienGiaiGiaTri = x.DienGiaiGiaTri,
+                    GhiChu = string.IsNullOrWhiteSpace(x.GhiChu) ? null : x.GhiChu.Trim()
+                }).ToList();
+
+                _dbContext.HoSoVanBanChamDiemChiTiets.AddRange(detailEntities);
+
+                hoSo.TongThoiGianXayDungNgay = request.TongThoiGianXayDungNgay;
+                hoSo.TongThoiGianQuyDinhNgay = request.TongThoiGianQuyDinhNgay;
+                hoSo.TyLeThoiGianXayDung = request.TyLeThoiGianXayDung;
+                hoSo.DiemTienDoXayDung = chiTiets.FirstOrDefault(x => x.LoaiTieuChi == "THOI_GIAN")?.DiemChinhThuc;
+                hoSo.DiemChatLuongVanBan = chiTiets.FirstOrDefault(x => x.LoaiTieuChi == "CHAT_LUONG")?.DiemChinhThuc;
+                hoSo.TongDiemDanhGia = entity.TongDiem;
+                hoSo.XepLoaiDanhGia = entity.XepLoai;
+                hoSo.NgayChamDiem = entity.NgayChamDiem;
+
+                _dbContext.HoSoVanBans.Update(hoSo);
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new CommonResponse("success", "Đã lưu bản ghi chấm điểm.");
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return new CommonResponse("error", "Không thể lưu bản ghi chấm điểm.");
+            }
         }
 
         public async Task<CommonResponse> GetTaoHoSoSoanThaoTuDangKyModelAsync(Guid hoSoDangKyId)
@@ -1270,33 +2791,33 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             if (!request.TuNgaySoanThao.HasValue || !request.DenNgaySoanThao.HasValue)
             {
-                return new CommonResponse("error", "Thời gian soạn thảo bắt buộc phải nhập.");
+                return new CommonResponse("error", "Thá»i gian soáº¡n tháº£o báº¯t buá»™c pháº£i nháº­p.");
             }
 
             if (request.DenNgaySoanThao.Value.Date < request.TuNgaySoanThao.Value.Date)
             {
-                return new CommonResponse("error", "Đến ngày soạn thảo phải lớn hơn hoặc bằng từ ngày soạn thảo.");
+                return new CommonResponse("error", "Äáº¿n ngĂ y soáº¡n tháº£o pháº£i lá»›n hÆ¡n hoáº·c báº±ng tá»« ngĂ y soáº¡n tháº£o.");
             }
 
             if (request.Id == Guid.Empty)
             {
-                return new CommonResponse("error", "Thiếu thông tin hồ sơ cần cập nhật!");
+                return new CommonResponse("error", "Thiáº¿u thĂ´ng tin há»“ sÆ¡ cáº§n cáº­p nháº­t!");
             }
 
             if (string.IsNullOrWhiteSpace(request.TenHoSo))
             {
-                return new CommonResponse("error", "Tên hồ sơ không được để trống!");
+                return new CommonResponse("error", "TĂªn há»“ sÆ¡ khĂ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng!");
             }
 
             var hoSo = await _dbContext.HoSoVanBans.FirstOrDefaultAsync(x => x.Id == request.Id);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -1305,7 +2826,7 @@ namespace Services.Manages
 
             if (!CanEditDangKyHoSo(currentUser, hoSo, currentStep, currentProcessing))
             {
-                return new CommonResponse("error", "Hồ sơ này đã được gửi đi hoặc bạn không có quyền cập nhật.");
+                return new CommonResponse("error", "Há»“ sÆ¡ nĂ y Ä‘Ă£ Ä‘Æ°á»£c gá»­i Ä‘i hoáº·c báº¡n khĂ´ng cĂ³ quyá»n cáº­p nháº­t.");
             }
 
             request.BuocThoiHans = request.BuocThoiHans
@@ -1319,7 +2840,7 @@ namespace Services.Manages
 
             if (quyTrinh == null)
             {
-                return new CommonResponse("error", "Không tìm thấy quy trình soạn thảo đang kích hoạt!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y quy trĂ¬nh soáº¡n tháº£o Ä‘ang kĂ­ch hoáº¡t!");
             }
 
             var firstStep = await _dbContext.DanhMucBuocQuyTrinhs
@@ -1331,7 +2852,7 @@ namespace Services.Manages
 
             if (firstStep == null)
             {
-                return new CommonResponse("error", "Quy trình chưa có bước nào để cập nhật hồ sơ!");
+                return new CommonResponse("error", "Quy trĂ¬nh chÆ°a cĂ³ bÆ°á»›c nĂ o Ä‘á»ƒ cáº­p nháº­t há»“ sÆ¡!");
             }
 
             var stepDeadlinePlans = await BuildRequestedStepDeadlinePlansAsync(request.QuyTrinhSoanThaoId, request.BuocThoiHans);
@@ -1364,7 +2885,7 @@ namespace Services.Manages
                         : null;
                     currentProcessing.HanXuLy = hanXuLyBuocDau;
                     currentProcessing.GhiChu = request.GhiChu?.Trim();
-                    currentProcessing.NoiDungXuLy = "Cập nhật hồ sơ đăng ký trước khi chuyển bước tiếp theo.";
+                    currentProcessing.NoiDungXuLy = "Cáº­p nháº­t há»“ sÆ¡ Ä‘Äƒng kĂ½ trÆ°á»›c khi chuyá»ƒn bÆ°á»›c tiáº¿p theo.";
                 }
 
                 var oldStepPlans = await _dbContext.HoSoVanBanBuocThoiHans
@@ -1393,7 +2914,7 @@ namespace Services.Manages
 
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
-                return new CommonResponse("success", "Cập nhật hồ sơ thành công", hoSo.Id);
+                return new CommonResponse("success", "Cáº­p nháº­t há»“ sÆ¡ thĂ nh cĂ´ng", hoSo.Id);
             }
             catch
             {
@@ -1407,13 +2928,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(request.HoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -1424,7 +2945,7 @@ namespace Services.Manages
 
             if (currentStep.LoaiBuoc == "LayYKien" || currentStep.LoaiBuoc == "DanhGia")
             {
-                return new CommonResponse("error", "Bước hiện tại là bước đặc thù. Hãy dùng nghiệp vụ Lấy ý kiến hoặc Đánh giá.");
+                return new CommonResponse("error", "BÆ°á»›c hiá»‡n táº¡i lĂ  bÆ°á»›c Ä‘áº·c thĂ¹. HĂ£y dĂ¹ng nghiá»‡p vá»¥ Láº¥y Ă½ kiáº¿n hoáº·c ÄĂ¡nh giĂ¡.");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -1443,7 +2964,7 @@ namespace Services.Manages
                 var isSoanThaoStep = string.Equals(currentStep.LoaiBuoc, "SoanThao", StringComparison.OrdinalIgnoreCase);
                 if (currentProcessing != null && !currentUser.SSA && !currentProcessing.NguoiXuLyId.HasValue && !isSoanThaoStep)
                 {
-                    return new CommonResponse("error", "Hồ sơ chưa được nhận. Vui lòng bấm 'Nhận hồ sơ' trước khi xử lý.");
+                    return new CommonResponse("error", "Há»“ sÆ¡ chÆ°a Ä‘Æ°á»£c nháº­n. Vui lĂ²ng báº¥m 'Nháº­n há»“ sÆ¡' trÆ°á»›c khi xá»­ lĂ½.");
                 }
 
                 if (currentProcessing != null)
@@ -1497,7 +3018,7 @@ namespace Services.Manages
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return new CommonResponse("success", "Thành công", hoSo.Id);
+                return new CommonResponse("success", "ThĂ nh cĂ´ng", hoSo.Id);
             }
             catch
             {
@@ -1511,13 +3032,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1525,24 +3046,24 @@ namespace Services.Manages
 
             if (currentProcessing == null)
             {
-                return new CommonResponse("error", "Hồ sơ chưa phát sinh bước xử lý hiện tại.");
+                return new CommonResponse("error", "Há»“ sÆ¡ chÆ°a phĂ¡t sinh bÆ°á»›c xá»­ lĂ½ hiá»‡n táº¡i.");
             }
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "Hồ sơ này không thuộc đơn vị đang đăng nhập để nhận.");
+                return new CommonResponse("error", "Há»“ sÆ¡ nĂ y khĂ´ng thuá»™c Ä‘Æ¡n vá»‹ Ä‘ang Ä‘Äƒng nháº­p Ä‘á»ƒ nháº­n.");
             }
 
             if (currentProcessing.NguoiXuLyId.HasValue && !currentUser.SSA)
             {
-                return new CommonResponse("success", "Hồ sơ đã được nhận trước đó.");
+                return new CommonResponse("success", "Há»“ sÆ¡ Ä‘Ă£ Ä‘Æ°á»£c nháº­n trÆ°á»›c Ä‘Ă³.");
             }
 
             currentProcessing.NguoiXuLyId = currentUser.Id;
             currentProcessing.NgayNhan = DateTime.Now;
             await _dbContext.SaveChangesAsync();
 
-            return new CommonResponse("success", "Đã nhận hồ sơ thành công.");
+            return new CommonResponse("success", "ÄĂ£ nháº­n há»“ sÆ¡ thĂ nh cĂ´ng.");
         }
 
         public async Task<CommonResponse> NhanHoSoAsync(Guid hoSoVanBanId, string actionType = "NHAN_HO_SO", string? noiDungXuLy = null, string? ghiChu = null, DateTime? ngayXuLy = null, DateTime? hanXuLy = null)
@@ -1550,13 +3071,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1564,18 +3085,18 @@ namespace Services.Manages
 
             if (currentProcessing == null)
             {
-                return new CommonResponse("error", "Hồ sơ chưa phát sinh bước xử lý hiện tại.");
+                return new CommonResponse("error", "Há»“ sÆ¡ chÆ°a phĂ¡t sinh bÆ°á»›c xá»­ lĂ½ hiá»‡n táº¡i.");
             }
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "Hồ sơ này không thuộc đơn vị đang đăng nhập để nhận.");
+                return new CommonResponse("error", "Há»“ sÆ¡ nĂ y khĂ´ng thuá»™c Ä‘Æ¡n vá»‹ Ä‘ang Ä‘Äƒng nháº­p Ä‘á»ƒ nháº­n.");
             }
 
             var actionCode = NormalizeTiepNhanNghiepVuCode(actionType);
             if (string.IsNullOrWhiteSpace(actionCode))
             {
-                return new CommonResponse("error", "Thao tác nhận hồ sơ không hợp lệ.");
+                return new CommonResponse("error", "Thao tĂ¡c nháº­n há»“ sÆ¡ khĂ´ng há»£p lá»‡.");
             }
 
             var laThaoTacNhanBanDau = actionCode is "NHAN_HO_SO" or "NHAN_VA_CHUYEN_PHE_DUYET" or "PHE_DUYET_HO_SO";
@@ -1586,7 +3107,7 @@ namespace Services.Manages
             }
             else if (laThaoTacNhanBanDau && !currentUser.SSA)
             {
-                return new CommonResponse("success", "Hồ sơ đã được nhận trước đó.");
+                return new CommonResponse("success", "Há»“ sÆ¡ Ä‘Ă£ Ä‘Æ°á»£c nháº­n trÆ°á»›c Ä‘Ă³.");
             }
 
             currentProcessing.KetQuaXuLy = actionCode;
@@ -1601,7 +3122,7 @@ namespace Services.Manages
                 var currentStep = await GetCurrentStepAsync(hoSo);
                 if (currentStep == null)
                 {
-                    return new CommonResponse("error", "Kh�ng x�c d?nh du?c bu?c hi?n t?i c?a h? so.");
+                    return new CommonResponse("error", "Khï¿½ng xï¿½c d?nh du?c bu?c hi?n t?i c?a h? so.");
                 }
 
                 var ketQuaChuyenBuoc = actionCode switch
@@ -1619,7 +3140,7 @@ namespace Services.Manages
 
                     if (!daCoBanGhiDanhGia)
                     {
-                        return new CommonResponse("error", "H? so chua c� b?n ghi x�t duy?t n�n chua th? chuy?n sang ph� duy?t.");
+                        return new CommonResponse("error", "H? so chua cï¿½ b?n ghi xï¿½t duy?t nï¿½n chua th? chuy?n sang phï¿½ duy?t.");
                     }
                 }
 
@@ -1652,9 +3173,9 @@ namespace Services.Manages
                 {
                     return new CommonResponse("error", actionCode switch
                     {
-                        "CHUYEN_PHE_DUYET" => "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n ph� duy?t.",
-                        "CHUYEN_BAN_HANH" => "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n ban h�nh.",
-                        _ => "Workflow chua c?u h�nh bu?c k? ti?p cho nghi?p v? chuy?n x�t duy?t."
+                        "CHUYEN_PHE_DUYET" => "Workflow chua c?u hï¿½nh bu?c k? ti?p cho nghi?p v? chuy?n phï¿½ duy?t.",
+                        "CHUYEN_BAN_HANH" => "Workflow chua c?u hï¿½nh bu?c k? ti?p cho nghi?p v? chuy?n ban hï¿½nh.",
+                        _ => "Workflow chua c?u hï¿½nh bu?c k? ti?p cho nghi?p v? chuy?n xï¿½t duy?t."
                     });
                 }
 
@@ -1683,18 +3204,18 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Kh�ng x�c d?nh du?c t�i kho?n dang thao t�c!");
+                return new CommonResponse("error", "Khï¿½ng xï¿½c d?nh du?c tï¿½i kho?n dang thao tï¿½c!");
             }
 
             if (string.IsNullOrWhiteSpace(lyDoTraLai))
             {
-                return new CommonResponse("error", "B?n c?n nh?p l� do tr? l?i h? so.");
+                return new CommonResponse("error", "B?n c?n nh?p lï¿½ do tr? l?i h? so.");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Kh�ng t�m th?y h? so van b?n!");
+                return new CommonResponse("error", "Khï¿½ng tï¿½m th?y h? so van b?n!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -1703,7 +3224,7 @@ namespace Services.Manages
                                  string.Equals(currentStep.MaBuoc, "BUOC_03_THAM_DINH_VAN_BAN", StringComparison.OrdinalIgnoreCase));
             if (!laBuocDanhGia)
             {
-                return new CommonResponse("error", "H? so hi?n kh�ng ? bu?c th?m d?nh van b?n.");
+                return new CommonResponse("error", "H? so hi?n khï¿½ng ? bu?c th?m d?nh van b?n.");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1713,19 +3234,19 @@ namespace Services.Manages
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "H? so n�y kh�ng thu?c don v? dang dang nh?p d? tr? l?i.");
+                return new CommonResponse("error", "H? so nï¿½y khï¿½ng thu?c don v? dang dang nh?p d? tr? l?i.");
             }
 
             var soLanTraLaiToiDa = currentStep.SoLanTraLaiToiDa > 0 ? currentStep.SoLanTraLaiToiDa : 3;
             if (hoSo.SoLanTraLaiHienTai >= soLanTraLaiToiDa)
             {
-                return new CommonResponse("error", $"�� vu?t qu� s? l?n tr? l?i t?i da ({soLanTraLaiToiDa}) c?a bu?c n�y.");
+                return new CommonResponse("error", $"ï¿½ï¿½ vu?t quï¿½ s? l?n tr? l?i t?i da ({soLanTraLaiToiDa}) c?a bu?c nï¿½y.");
             }
 
             var maBuocTraLai = await ResolveDraftReturnStepCodeAsync(hoSo.QuyTrinhSoanThaoId);
             if (string.IsNullOrWhiteSpace(maBuocTraLai))
             {
-                return new CommonResponse("error", "Kh�ng x�c d?nh du?c bu?c tr? l?i cho h? so n�y.");
+                return new CommonResponse("error", "Khï¿½ng xï¿½c d?nh du?c bu?c tr? l?i cho h? so nï¿½y.");
             }
 
             var nextStep = await _dbContext.DanhMucBuocQuyTrinhs
@@ -1734,7 +3255,7 @@ namespace Services.Manages
 
             if (nextStep == null)
             {
-                return new CommonResponse("error", "Kh�ng t�m th?y bu?c so?n th?o d? tr? l?i h? so.");
+                return new CommonResponse("error", "Khï¿½ng tï¿½m th?y bu?c so?n th?o d? tr? l?i h? so.");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -1761,13 +3282,13 @@ namespace Services.Manages
                     currentUser.DanhMucDonViId,
                     currentUser.Id,
                     "TRA_LAI_HO_SO_DANH_GIA",
-                    $"Tr? l?i h? so t? bu?c d�nh gi� l?n {hoSo.SoLanTraLaiHienTai}");
+                    $"Tr? l?i h? so t? bu?c dï¿½nh giï¿½ l?n {hoSo.SoLanTraLaiHienTai}");
 
                 await AdvanceWorkflowAsync(hoSo, currentUser, nextStep, null, "TRA_LAI_HO_SO", lyDoTraLai.Trim());
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return new CommonResponse("success", "�� tr? l?i h? so v? bu?c so?n th?o.");
+                return new CommonResponse("success", "ï¿½ï¿½ tr? l?i h? so v? bu?c so?n th?o.");
             }
             catch
             {
@@ -1781,19 +3302,19 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(request.HoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
             if (currentStep == null || !string.Equals(currentStep.LoaiBuoc, "SoanThao", StringComparison.OrdinalIgnoreCase))
             {
-                return new CommonResponse("error", "Hồ sơ hiện không ở bước soạn thảo để chuyển lấy góp ý.");
+                return new CommonResponse("error", "Há»“ sÆ¡ hiá»‡n khĂ´ng á»Ÿ bÆ°á»›c soáº¡n tháº£o Ä‘á»ƒ chuyá»ƒn láº¥y gĂ³p Ă½.");
             }
 
             var currentProcessing = await _dbContext.HoSoVanBanXuLys
@@ -1803,13 +3324,13 @@ namespace Services.Manages
 
             if (!CanCurrentUserXuLy(currentUser, currentProcessing))
             {
-                return new CommonResponse("error", "Hồ sơ này đã được chuyển sang đơn vị khác. Bạn không thể cập nhật nữa!");
+                return new CommonResponse("error", "Há»“ sÆ¡ nĂ y Ä‘Ă£ Ä‘Æ°á»£c chuyá»ƒn sang Ä‘Æ¡n vá»‹ khĂ¡c. Báº¡n khĂ´ng thá»ƒ cáº­p nháº­t ná»¯a!");
             }
 
             var actionMode = NormalizeLayYKienActionMode(request.ActionMode);
             if (actionMode == "GUI_DON_VI_GOP_Y" && request.DonViDuocLayYKienIds.Count == 0)
             {
-                return new CommonResponse("error", "Bạn phải chọn ít nhất 1 đơn vị để gửi góp ý.");
+                return new CommonResponse("error", "Báº¡n pháº£i chá»n Ă­t nháº¥t 1 Ä‘Æ¡n vá»‹ Ä‘á»ƒ gá»­i gĂ³p Ă½.");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -1852,7 +3373,7 @@ namespace Services.Manages
                             NgayGui = now,
                             HanPhanHoi = request.HanPhanHoi,
                             TrangThaiPhanHoi = "CHO_GOP_Y",
-                            GhiChu = "Đơn vị soạn thảo gửi đề nghị góp ý."
+                            GhiChu = "ÄÆ¡n vá»‹ soáº¡n tháº£o gá»­i Ä‘á» nghá»‹ gĂ³p Ă½."
                         });
 
                         await TaoThongBaoAsync(
@@ -1860,7 +3381,7 @@ namespace Services.Manages
                             currentStep,
                             currentUser.DanhMucDonViId,
                             donViId,
-                            $"Hồ sơ '{hoSo.TenHoSo}' đang lấy góp ý từ đơn vị của bạn.");
+                            $"Há»“ sÆ¡ '{hoSo.TenHoSo}' Ä‘ang láº¥y gĂ³p Ă½ tá»« Ä‘Æ¡n vá»‹ cá»§a báº¡n.");
                     }
                 }
                 else
@@ -1873,18 +3394,18 @@ namespace Services.Manages
                         NgayGui = now,
                         HanPhanHoi = request.HanPhanHoi,
                         TrangThaiPhanHoi = "CHO_CAP_NHAT_KET_QUA",
-                        GhiChu = "Đơn vị soạn thảo tự cập nhật kết quả góp ý."
+                        GhiChu = "ÄÆ¡n vá»‹ soáº¡n tháº£o tá»± cáº­p nháº­t káº¿t quáº£ gĂ³p Ă½."
                     });
                 }
 
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
-                return new CommonResponse("success", "Đã chuyển hồ sơ sang bước lấy góp ý.");
+                return new CommonResponse("success", "ÄĂ£ chuyá»ƒn há»“ sÆ¡ sang bÆ°á»›c láº¥y gĂ³p Ă½.");
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return new CommonResponse("error", $"Không thể khởi tạo bước lấy góp ý: {ex.Message}");
+                return new CommonResponse("error", $"KhĂ´ng thá»ƒ khá»Ÿi táº¡o bÆ°á»›c láº¥y gĂ³p Ă½: {ex.Message}");
             }
         }
 
@@ -1893,24 +3414,24 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             if (string.IsNullOrWhiteSpace(lyDoTraLai))
             {
-                return new CommonResponse("error", "Bạn phải nhập lý do trả lại hồ sơ.");
+                return new CommonResponse("error", "Báº¡n pháº£i nháº­p lĂ½ do tráº£ láº¡i há»“ sÆ¡.");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(hoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
             if (currentStep == null || currentStep.MaBuoc != "BUOC_02_THONG_NHAT")
             {
-                return new CommonResponse("error", "Hồ sơ hiện không ở bước xét duyệt đăng ký để trả lại.");
+                return new CommonResponse("error", "Há»“ sÆ¡ hiá»‡n khĂ´ng á»Ÿ bÆ°á»›c xĂ©t duyá»‡t Ä‘Äƒng kĂ½ Ä‘á»ƒ tráº£ láº¡i.");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -1923,12 +3444,12 @@ namespace Services.Manages
 
                 if (!CanCurrentUserXuLy(currentUser, currentProcessing))
                 {
-                    return new CommonResponse("error", "Hồ sơ này không thuộc đơn vị đang đăng nhập để xử lý.");
+                    return new CommonResponse("error", "Há»“ sÆ¡ nĂ y khĂ´ng thuá»™c Ä‘Æ¡n vá»‹ Ä‘ang Ä‘Äƒng nháº­p Ä‘á»ƒ xá»­ lĂ½.");
                 }
 
                 if (currentProcessing != null && !currentUser.SSA && !currentProcessing.NguoiXuLyId.HasValue)
                 {
-                    return new CommonResponse("error", "Hồ sơ chưa được nhận. Vui lòng nhận hồ sơ trước khi trả lại.");
+                    return new CommonResponse("error", "Há»“ sÆ¡ chÆ°a Ä‘Æ°á»£c nháº­n. Vui lĂ²ng nháº­n há»“ sÆ¡ trÆ°á»›c khi tráº£ láº¡i.");
                 }
 
                 if (currentProcessing != null)
@@ -1943,7 +3464,7 @@ namespace Services.Manages
                 var nextStep = await ResolveFallbackStepAsync(hoSo.QuyTrinhSoanThaoId, currentStep.MaBuoc, "KHONG_DONG_Y");
                 if (nextStep == null)
                 {
-                    return new CommonResponse("error", "Không xác định được bước quay lại khi trả hồ sơ.");
+                    return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c bÆ°á»›c quay láº¡i khi tráº£ há»“ sÆ¡.");
                 }
 
                 hoSo.SoLanTraLaiHienTai += 1;
@@ -1962,7 +3483,7 @@ namespace Services.Manages
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return new CommonResponse("success", "Đã trả lại hồ sơ về bước đăng ký.");
+                return new CommonResponse("success", "ÄĂ£ tráº£ láº¡i há»“ sÆ¡ vá» bÆ°á»›c Ä‘Äƒng kĂ½.");
             }
             catch
             {
@@ -2261,13 +3782,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(request.HoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -2280,12 +3801,12 @@ namespace Services.Manages
             var dangLayGopY = string.Equals(currentProcessing?.KetQuaXuLy, "DANG_LAY_GOP_Y", StringComparison.OrdinalIgnoreCase);
             if (currentStep == null || (currentStep.LoaiBuoc != "LayYKien" && !dangLayGopY))
             {
-                return new CommonResponse("error", "Hồ sơ hiện không ở nghiệp vụ lấy ý kiến!");
+                return new CommonResponse("error", "Há»“ sÆ¡ hiá»‡n khĂ´ng á»Ÿ nghiá»‡p vá»¥ láº¥y Ă½ kiáº¿n!");
             }
 
             if (currentStep.YeuCauFileDinhKem && !request.AttachedFileGroupId.HasValue)
             {
-                return new CommonResponse("error", "Bước này yêu cầu có file đính kèm kết quả lấy ý kiến!");
+                return new CommonResponse("error", "BÆ°á»›c nĂ y yĂªu cáº§u cĂ³ file Ä‘Ă­nh kĂ¨m káº¿t quáº£ láº¥y Ă½ kiáº¿n!");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -2312,7 +3833,7 @@ namespace Services.Manages
                 {
                     if (!request.DonViDuocLayYKienId.HasValue || request.DonViDuocLayYKienId == Guid.Empty)
                     {
-                        return new CommonResponse("error", "Thiếu thông tin đơn vị phản hồi góp ý.");
+                        return new CommonResponse("error", "Thiáº¿u thĂ´ng tin Ä‘Æ¡n vá»‹ pháº£n há»“i gĂ³p Ă½.");
                     }
 
                     layYKien = existingRows
@@ -2322,7 +3843,7 @@ namespace Services.Manages
 
                     if (layYKien == null)
                     {
-                        return new CommonResponse("error", "Không tìm thấy yêu cầu góp ý của đơn vị được chọn.");
+                        return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y yĂªu cáº§u gĂ³p Ă½ cá»§a Ä‘Æ¡n vá»‹ Ä‘Æ°á»£c chá»n.");
                     }
 
                     layYKien.NoiDungPhanHoi = request.NoiDungPhanHoi?.Trim();
@@ -2333,7 +3854,7 @@ namespace Services.Manages
 
                     await _dbContext.SaveChangesAsync();
                     await transaction.CommitAsync();
-                    return new CommonResponse("success", "Đã cập nhật ý kiến của đơn vị góp ý.", layYKien.Id);
+                    return new CommonResponse("success", "ÄĂ£ cáº­p nháº­t Ă½ kiáº¿n cá»§a Ä‘Æ¡n vá»‹ gĂ³p Ă½.", layYKien.Id);
                 }
 
                 if (actionMode == "TONG_HOP_Y_KIEN")
@@ -2344,7 +3865,7 @@ namespace Services.Manages
                         x.DonViDuocLayYKienId == null || x.DonViDuocLayYKienId == Guid.Empty);
                     if (invalidUnitRow != null)
                     {
-                        return new CommonResponse("error", "Vui lòng chọn đơn vị góp ý cho tất cả các dòng trước khi lưu.");
+                        return new CommonResponse("error", "Vui lĂ²ng chá»n Ä‘Æ¡n vá»‹ gĂ³p Ă½ cho táº¥t cáº£ cĂ¡c dĂ²ng trÆ°á»›c khi lÆ°u.");
                     }
 
                     var updateRows = request.CacLayYKien
@@ -2493,7 +4014,7 @@ namespace Services.Manages
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return new CommonResponse("success", "Thành công", layYKien.Id);
+                return new CommonResponse("success", "ThĂ nh cĂ´ng", layYKien.Id);
             }
             catch
             {
@@ -2507,13 +4028,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             var hoSo = await GetHoSoWithCurrentStepAsync(request.HoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
             }
 
             var currentStep = await GetCurrentStepAsync(hoSo);
@@ -2522,7 +4043,7 @@ namespace Services.Manages
                                  string.Equals(currentStep.MaBuoc, "BUOC_03_THAM_DINH_VAN_BAN", StringComparison.OrdinalIgnoreCase));
             if (!laBuocDanhGia)
             {
-                return new CommonResponse("error", "H? so hi?n kh�ng ? bu?c th?m d?nh van b?n.");
+                return new CommonResponse("error", "H? so hi?n khï¿½ng ? bu?c th?m d?nh van b?n.");
             }
 
             var ketQua = request.KetQuaDanhGia.Trim().ToUpperInvariant();
@@ -2530,12 +4051,12 @@ namespace Services.Manages
             var laTraLaiThamDinh = ketQua == "KHONG_DAT" || ketQua.StartsWith("KHONG_DAT_LAN_", StringComparison.OrdinalIgnoreCase);
             if (!ketQuaDuocChapNhan.Contains(ketQua) && !laTraLaiThamDinh)
             {
-                return new CommonResponse("error", "K?t qu? x�t duy?t ch? ch?p nh?n DAT, THAM_DINH_XONG ho?c c�c tr?ng th�i KHONG_DAT_LAN_1..3!");
+                return new CommonResponse("error", "K?t qu? xï¿½t duy?t ch? ch?p nh?n DAT, THAM_DINH_XONG ho?c cï¿½c tr?ng thï¿½i KHONG_DAT_LAN_1..3!");
             }
 
             if (currentStep.YeuCauFileDinhKem && !request.AttachedFileGroupId.HasValue)
             {
-                return new CommonResponse("error", "Bước đánh giá hiện tại yêu cầu file đính kèm!");
+                return new CommonResponse("error", "BÆ°á»›c Ä‘Ă¡nh giĂ¡ hiá»‡n táº¡i yĂªu cáº§u file Ä‘Ă­nh kĂ¨m!");
             }
 
             await using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -2594,7 +4115,7 @@ namespace Services.Manages
 
                     if (nextStep == null)
                     {
-                        return new CommonResponse("error", "Không tìm thấy bước trả lại theo mã bước đã nhập!");
+                        return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y bÆ°á»›c tráº£ láº¡i theo mĂ£ bÆ°á»›c Ä‘Ă£ nháº­p!");
                     }
 
                     traLaiBuocId = nextStep.Id;
@@ -2654,7 +4175,7 @@ namespace Services.Manages
                 await _dbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return new CommonResponse("success", "Thành công", danhGia.Id);
+                return new CommonResponse("success", "ThĂ nh cĂ´ng", danhGia.Id);
             }
             catch (Exception ex)
             {
@@ -2668,13 +4189,13 @@ namespace Services.Manages
             var currentUser = _authService.GetUserInfo();
             if (currentUser == null)
             {
-                return new CommonResponse("error", "Không xác định được tài khoản đang thao tác!");
+                return new CommonResponse("error", "KhĂ´ng xĂ¡c Ä‘á»‹nh Ä‘Æ°á»£c tĂ i khoáº£n Ä‘ang thao tĂ¡c!");
             }
 
             var hoSo = await _dbContext.HoSoVanBans.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.HoSoVanBanId);
             if (hoSo == null)
             {
-                return new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!");
             }
 
             var danhGia = await _dbContext.HoSoVanBanDanhGias
@@ -2683,7 +4204,7 @@ namespace Services.Manages
 
             if (danhGia == null)
             {
-                return new CommonResponse("error", "Không tìm thấy lần đánh giá cần phản hồi!");
+                return new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y láº§n Ä‘Ă¡nh giĂ¡ cáº§n pháº£n há»“i!");
             }
 
             try
@@ -2703,7 +4224,7 @@ namespace Services.Manages
 
                 _dbContext.HoSoVanBanPhanHoiDanhGias.Add(phanHoi);
                 await _dbContext.SaveChangesAsync();
-                return new CommonResponse("success", "Thành công", phanHoi.Id);
+                return new CommonResponse("success", "ThĂ nh cĂ´ng", phanHoi.Id);
             }
             catch
             {
@@ -2770,14 +4291,14 @@ namespace Services.Manages
 
                     if (string.Equals(model.LoaiBuocHienTai, "SoanThao", StringComparison.OrdinalIgnoreCase))
                     {
-                        model.TenBuocHienTai = "Đang soạn thảo";
+                        model.TenBuocHienTai = "Äang soáº¡n tháº£o";
                     }
 
                     if (string.Equals(model.TrangThaiNghiepVuTiepNhan, "DANG_LAY_GOP_Y", StringComparison.OrdinalIgnoreCase))
                     {
                         model.CanNhanHoSo = false;
                         model.CanXuLyBuocHienTai = false;
-                        model.TenBuocHienTai = "�ang l?y � ki?n g�p �";
+                        model.TenBuocHienTai = "ï¿½ang l?y ï¿½ ki?n gï¿½p ï¿½";
                     }
 
                     var trackingMap = await BuildTrackingMapAsync(new[] { hoSoVanBanId });
@@ -2790,9 +4311,9 @@ namespace Services.Manages
                     if (model.NgayHoanThanh.HasValue ||
                         (model.TienDoSummary.TongSoBuoc > 0 && model.TienDoSummary.SoBuocHoanThanh >= model.TienDoSummary.TongSoBuoc))
                     {
-                        model.TenTrangThai = "Đã hoàn thành";
+                        model.TenTrangThai = "ÄĂ£ hoĂ n thĂ nh";
                         model.MaMauTrangThai = "#28A745";
-                        model.TenBuocHienTai = "Đã hoàn thành";
+                        model.TenBuocHienTai = "ÄĂ£ hoĂ n thĂ nh";
                         model.CanXuLyBuocHienTai = false;
                     }
 
@@ -2800,9 +4321,9 @@ namespace Services.Manages
                         (model.TienDoSummary.TongSoBuoc > 0 && model.TienDoSummary.SoBuocHoanThanh >= model.TienDoSummary.TongSoBuoc))
                     {
                         var hoanThanhQuaHan = model.TienDoSummary.SoBuocQuaHan > 0;
-                        model.TenTrangThai = hoanThanhQuaHan ? "Hoàn thành quá hạn" : "Hoàn thành đúng hạn";
+                        model.TenTrangThai = hoanThanhQuaHan ? "HoĂ n thĂ nh quĂ¡ háº¡n" : "HoĂ n thĂ nh Ä‘Ăºng háº¡n";
                         model.MaMauTrangThai = hoanThanhQuaHan ? "#DC3545" : "#28A745";
-                        model.TenBuocHienTai = "Đã hoàn thành";
+                        model.TenBuocHienTai = "ÄĂ£ hoĂ n thĂ nh";
                         model.CanXuLyBuocHienTai = false;
                     }
 
@@ -2882,11 +4403,14 @@ namespace Services.Manages
                             !string.Equals(x.TrangThaiPhanHoi, "DA_CO_Y_KIEN", StringComparison.OrdinalIgnoreCase) &&
                             !string.Equals(x.TrangThaiPhanHoi, "DA_TONG_HOP_Y_KIEN", StringComparison.OrdinalIgnoreCase));
                     }
+
+                    model.LichSuDonDocs = await GetLichSuDonDocAsync(model.MaHoSo);
+                    model.LichSuGiaHans = await GetLichSuGiaHanAsync(hoSoVanBanId);
                 }
 
                 return model == null
-                    ? new CommonResponse("error", "Không tìm thấy hồ sơ văn bản!")
-                    : new CommonResponse("success", "Thành công", model);
+                    ? new CommonResponse("error", "KhĂ´ng tĂ¬m tháº¥y há»“ sÆ¡ vÄƒn báº£n!")
+                    : new CommonResponse("success", "ThĂ nh cĂ´ng", model);
             }
             catch
             {
@@ -2914,10 +4438,10 @@ namespace Services.Manages
                         FileId = x.Id,
                         GroupId = x.GroupId,
                         TableName = x.TableName ?? "HoSoVanBanDuThao",
-                        FileName = x.FileName ?? "T?p d�nh k�m",
+                        FileName = x.FileName ?? "T?p dï¿½nh kï¿½m",
                         MoTa = x.MoTa,
                         NguonHienThi = "D? th?o hi?n t?i",
-                        NhanHienThi = "D? th?o hi?n t?i | " + (x.FileName ?? "T?p d�nh k�m"),
+                        NhanHienThi = "D? th?o hi?n t?i | " + (x.FileName ?? "T?p dï¿½nh kï¿½m"),
                         NgayTao = x.CreatedDate,
                         FileExtension = x.FileName != null ? Path.GetExtension(x.FileName).ToLowerInvariant() : null,
                         LaDocx = x.FileName != null && string.Equals(Path.GetExtension(x.FileName), ".docx", StringComparison.OrdinalIgnoreCase)
@@ -2936,10 +4460,10 @@ namespace Services.Manages
                         FileId = file.Id,
                         GroupId = file.GroupId,
                         TableName = file.TableName ?? "HoSoVanBanDuThaoVersion",
-                        FileName = file.FileName ?? "T?p d�nh k�m",
+                        FileName = file.FileName ?? "T?p dï¿½nh kï¿½m",
                         MoTa = file.MoTa,
                         NguonHienThi = NormalizeDraftCompareSourceLabel(version.TenVersion),
-                        NhanHienThi = NormalizeDraftCompareSourceLabel(version.TenVersion) + " | " + (file.FileName ?? "T?p d�nh k�m"),
+                        NhanHienThi = NormalizeDraftCompareSourceLabel(version.TenVersion) + " | " + (file.FileName ?? "T?p dï¿½nh kï¿½m"),
                         NgayTao = version.NgayTaoVersion,
                         FileExtension = file.FileName != null ? Path.GetExtension(file.FileName).ToLowerInvariant() : null,
                         LaDocx = file.FileName != null && string.Equals(Path.GetExtension(file.FileName), ".docx", StringComparison.OrdinalIgnoreCase)
@@ -2966,8 +4490,8 @@ namespace Services.Manages
 
                 if (fileOptions.Count < 2)
                 {
-                    model.CanhBao = "C?n �t nh?t 2 file d? th?o .doc ho?c .docx d? th?c hi?n so s�nh.";
-                    return new CommonResponse("success", "Th�nh c�ng", model);
+                    model.CanhBao = "C?n ï¿½t nh?t 2 file d? th?o .doc ho?c .docx d? th?c hi?n so sï¿½nh.";
+                    return new CommonResponse("success", "Thï¿½nh cï¿½ng", model);
                 }
 
                 model.SourceFileId = sourceFileId ?? fileOptions[0].FileId;
@@ -2977,14 +4501,14 @@ namespace Services.Manages
 
                 if (model.SourceFile == null || model.TargetFile == null)
                 {
-                    model.CanhBao = "Kh�ng x�c d?nh du?c d? 2 file d? so s�nh.";
-                    return new CommonResponse("success", "Th�nh c�ng", model);
+                    model.CanhBao = "Khï¿½ng xï¿½c d?nh du?c d? 2 file d? so sï¿½nh.";
+                    return new CommonResponse("success", "Thï¿½nh cï¿½ng", model);
                 }
 
                 if (!model.SourceFile.LaDocx || !model.TargetFile.LaDocx)
                 {
-                    model.CanhBao = "Ch?c nang so s�nh n?i dung hi?n h? tr? tr?c ti?p cho file .docx. V?i file .doc, b?n v?n c� th? m?/t?i file d? d?i chi?u th? c�ng.";
-                    return new CommonResponse("success", "Th�nh c�ng", model);
+                    model.CanhBao = "Ch?c nang so sï¿½nh n?i dung hi?n h? tr? tr?c ti?p cho file .docx. V?i file .doc, b?n v?n cï¿½ th? m?/t?i file d? d?i chi?u th? cï¿½ng.";
+                    return new CommonResponse("success", "Thï¿½nh cï¿½ng", model);
                 }
 
                 var sourceEntity = await _dbContext.AttachedFiles
@@ -2999,8 +4523,8 @@ namespace Services.Manages
                     .FirstOrDefaultAsync();
                 if (sourceEntity?.FileContent == null || targetEntity?.FileContent == null)
                 {
-                    model.CanhBao = "Kh�ng d?c du?c n?i dung 1 trong 2 file d� ch?n.";
-                    return new CommonResponse("success", "Th�nh c�ng", model);
+                    model.CanhBao = "Khï¿½ng d?c du?c n?i dung 1 trong 2 file dï¿½ ch?n.";
+                    return new CommonResponse("success", "Thï¿½nh cï¿½ng", model);
                 }
 
                 var leftLines = ExtractDocxLines(sourceEntity.FileContent);
@@ -3013,11 +4537,11 @@ namespace Services.Manages
                 model.SoDongXoa = model.DiffRows.Count(x => x.Status == "removed");
                 model.SoDongSua = model.DiffRows.Count(x => x.Status == "changed");
 
-                return new CommonResponse("success", "Th�nh c�ng", model);
+                return new CommonResponse("success", "Thï¿½nh cï¿½ng", model);
             }
             catch (Exception ex)
             {
-                return new CommonResponse("error", $"Kh�ng th? so s�nh d? th?o: {ex.Message}");
+                return new CommonResponse("error", $"Khï¿½ng th? so sï¿½nh d? th?o: {ex.Message}");
             }
         }
 
@@ -3029,9 +4553,9 @@ namespace Services.Manages
             }
 
             var normalized = sourceLabel.Trim();
-            if (normalized.StartsWith("Phi�n b?n d? th?o l?n ", StringComparison.OrdinalIgnoreCase))
+            if (normalized.StartsWith("Phiï¿½n b?n d? th?o l?n ", StringComparison.OrdinalIgnoreCase))
             {
-                return "D? th?o l?n " + normalized["Phi�n b?n d? th?o l?n ".Length..];
+                return "D? th?o l?n " + normalized["Phiï¿½n b?n d? th?o l?n ".Length..];
             }
 
             return normalized;
@@ -3079,7 +4603,7 @@ namespace Services.Manages
 
                     if (row == null)
                     {
-                        return new CommonResponse("error", "Đơn vị hiện tại không có yêu cầu góp ý cho hồ sơ này.");
+                        return new CommonResponse("error", "ÄÆ¡n vá»‹ hiá»‡n táº¡i khĂ´ng cĂ³ yĂªu cáº§u gĂ³p Ă½ cho há»“ sÆ¡ nĂ y.");
                     }
 
                     form.DonViDuocLayYKienId = row.DonViDuocLayYKienId;
@@ -3096,11 +4620,11 @@ namespace Services.Manages
                     form.TrangThaiPhanHoi = "DA_GAN_KET_QUA_Y_KIEN";
                 }
 
-                return new CommonResponse("success", "Thành công", form);
+                return new CommonResponse("success", "ThĂ nh cĂ´ng", form);
             }
             catch (Exception ex)
             {
-                return new CommonResponse("error", $"Không thể tải form lấy góp ý: {ex.Message}");
+                return new CommonResponse("error", $"KhĂ´ng thá»ƒ táº£i form láº¥y gĂ³p Ă½: {ex.Message}");
             }
         }
 
@@ -3130,6 +4654,65 @@ namespace Services.Manages
                     HanPhanHoi = row.HanPhanHoi,
                     NgayPhanHoi = row.NgayPhanHoi,
                     TrangThaiPhanHoi = row.TrangThaiPhanHoi,
+                    AttachedFileGroupId = row.AttachedFileGroupId,
+                    GhiChu = row.GhiChu
+                }).ToListAsync();
+        }
+
+        private async Task<List<HoSoVanBanDonDocHistoryItemModel>> GetLichSuDonDocAsync(string maHoSo)
+        {
+            if (string.IsNullOrWhiteSpace(maHoSo))
+            {
+                return new List<HoSoVanBanDonDocHistoryItemModel>();
+            }
+
+            var keyword = $"TimKiem={maHoSo}";
+            var currentDonViId = _authService.GetUserInfo()?.DanhMucDonViId ?? Guid.Empty;
+
+            var items = await (
+                from notification in _dbContext.Notifications.AsNoTracking()
+                join donViGui in _dbContext.DanhMucDonVis.AsNoTracking() on notification.DonViGui equals donViGui.Id into donViGuiJoin
+                from donViGui in donViGuiJoin.DefaultIfEmpty()
+                join donViNhan in _dbContext.DanhMucDonVis.AsNoTracking() on notification.DonViTiepNhan equals donViNhan.Id into donViNhanJoin
+                from donViNhan in donViNhanJoin.DefaultIfEmpty()
+                where notification.ParameterDanhSach != null
+                      && notification.ParameterDanhSach.Contains(keyword)
+                      && notification.NoiDung != null
+                      && notification.NoiDung.Contains("[Đôn đốc tiến độ]")
+                orderby notification.CreatedDate descending
+                select new HoSoVanBanDonDocHistoryItemModel
+                {
+                    Id = notification.Id,
+                    DonViGuiId = notification.DonViGui,
+                    TenDonViGui = donViGui != null ? donViGui.TenDonVi : null,
+                    DonViNhanId = notification.DonViTiepNhan,
+                    TenDonViNhan = donViNhan != null ? donViNhan.TenDonVi : null,
+                    NoiDung = notification.NoiDung ?? string.Empty,
+                    CreatedDate = notification.CreatedDate,
+                    DaXem = currentDonViId != Guid.Empty && notification.DonViView.Contains(currentDonViId)
+                })
+                .ToListAsync();
+
+            return items;
+        }
+
+        private async Task<List<HoSoVanBanGiaHanHistoryItemModel>> GetLichSuGiaHanAsync(Guid hoSoVanBanId)
+        {
+            return await (
+                from row in _dbContext.HoSoVanBanGiaHans.AsNoTracking()
+                join user in _dbContext.Users.AsNoTracking() on row.NguoiGiaHanId equals user.Id into userJoin
+                from user in userJoin.DefaultIfEmpty()
+                where row.HoSoVanBanId == hoSoVanBanId
+                orderby row.CreatedDate descending
+                select new HoSoVanBanGiaHanHistoryItemModel
+                {
+                    Id = row.Id,
+                    HanXuLyCu = row.HanXuLyCu,
+                    HanXuLyMoi = row.HanXuLyMoi,
+                    SoNgayGiaHan = row.SoNgayGiaHan,
+                    LyDoGiaHan = row.LyDoGiaHan,
+                    TenNguoiGiaHan = user != null ? user.Name : null,
+                    CreatedDate = row.CreatedDate,
                     AttachedFileGroupId = row.AttachedFileGroupId,
                     GhiChu = row.GhiChu
                 }).ToListAsync();
@@ -3236,7 +4819,7 @@ namespace Services.Manages
                 DanhMucTrangThaiId = dangXuLyStatusId,
                 IsCurrent = true,
                 KetQuaXuLy = null,
-                NoiDungXuLy = $"Chuyển từ bước trước với kết quả '{ketQua}'. {(string.IsNullOrWhiteSpace(noiDung) ? string.Empty : noiDung)}".Trim(),
+                NoiDungXuLy = $"Chuyá»ƒn tá»« bÆ°á»›c trÆ°á»›c vá»›i káº¿t quáº£ '{ketQua}'. {(string.IsNullOrWhiteSpace(noiDung) ? string.Empty : noiDung)}".Trim(),
                 GhiChu = null
             };
 
@@ -3247,7 +4830,7 @@ namespace Services.Manages
                 nextStep,
                 currentUser.DanhMucDonViId,
                 donViXuLyId,
-                $"Hồ sơ '{hoSo.TenHoSo}' đã chuyển sang bước '{nextStep.TenBuoc}'.");
+                $"Há»“ sÆ¡ '{hoSo.TenHoSo}' Ä‘Ă£ chuyá»ƒn sang bÆ°á»›c '{nextStep.TenBuoc}'.");
         }
 
         private async Task<Guid> ResolveAssignedDonViXuLyIdAsync(
@@ -3600,7 +5183,7 @@ namespace Services.Manages
 
             if (draftFiles.Count == 0)
             {
-                return new CommonResponse("error", "Ph?i d�nh k�m �t nh?t 1 file d? th?o tru?c khi chuy?n th?m d?nh.");
+                return new CommonResponse("error", "Ph?i dï¿½nh kï¿½m ï¿½t nh?t 1 file d? th?o tru?c khi chuy?n th?m d?nh.");
             }
 
             var requiredDraftVersionLabel = ResolveDraftVersionLabel(requiredDraftVersionNumber);
@@ -3613,7 +5196,7 @@ namespace Services.Manages
 
             if (requiredDraftFiles.Count == 0)
             {
-                return new CommonResponse("error", $"Ph?i c� �t nh?t 1 file \"{requiredDraftVersionLabel}\" tru?c khi chuy?n x�t duy?t d? th?o.");
+                return new CommonResponse("error", $"Ph?i cï¿½ ï¿½t nh?t 1 file \"{requiredDraftVersionLabel}\" tru?c khi chuy?n xï¿½t duy?t d? th?o.");
             }
 
             var hasWordFile = requiredDraftFiles.Any(file =>
@@ -3621,8 +5204,8 @@ namespace Services.Manages
                 DraftFileExtensions.Contains(Path.GetExtension(file.FileName).ToLowerInvariant()));
 
             return hasWordFile
-                ? new CommonResponse("success", "Th�nh c�ng")
-                : new CommonResponse("error", $"Ph?i c� �t nh?t 1 file \"{requiredDraftVersionLabel}\" d?nh d?ng .doc ho?c .docx tru?c khi chuy?n x�t duy?t d? th?o.");
+                ? new CommonResponse("success", "Thï¿½nh cï¿½ng")
+                : new CommonResponse("error", $"Ph?i cï¿½ ï¿½t nh?t 1 file \"{requiredDraftVersionLabel}\" d?nh d?ng .doc ho?c .docx tru?c khi chuy?n xï¿½t duy?t d? th?o.");
         }
 
         private async Task<string?> ResolveDraftReturnStepCodeAsync(Guid quyTrinhSoanThaoId)
@@ -3662,7 +5245,7 @@ namespace Services.Manages
                 HoSoVanBanId = hoSo.Id,
                 LanVersion = nextVersion + 1,
                 SoLanTraLai = hoSo.SoLanTraLaiHienTai,
-                TenVersion = $"Phi�n b?n d? th?o l?n {nextVersion + 1}",
+                TenVersion = $"Phiï¿½n b?n d? th?o l?n {nextVersion + 1}",
                 AttachedFileGroupId = Guid.NewGuid(),
                 DonViTaoId = donViTaoId,
                 NguoiTaoId = nguoiTaoId,
@@ -3865,12 +5448,12 @@ namespace Services.Manages
                 new()
                 {
                     Value = "CAP_NHAT_KET_QUA",
-                    Text = "�on v? so?n th?o t? c?p nh?t k?t qu? g�p �"
+                    Text = "ÄÆ¡n vá»‹ soáº¡n tháº£o tá»± cáº­p nháº­t káº¿t quáº£ gĂ³p Ă½"
                 },
                 new()
                 {
                     Value = "GUI_DON_VI_GOP_Y",
-                    Text = "G?i l?y g�p � d?n t?ng don v? r?i t?ng h?p l?i"
+                    Text = "Gá»­i láº¥y gĂ³p Ă½ Ä‘áº¿n tá»«ng Ä‘Æ¡n vá»‹ rá»“i tá»•ng há»£p láº¡i"
                 }
             };
         }
@@ -3893,10 +5476,10 @@ namespace Services.Manages
         {
             return maBuocHienTai switch
             {
-                "BUOC_01_DANG_KY" => "Chuyển văn bản đến đơn vị tiếp nhận",
-                "BUOC_02_THONG_NHAT" => "Phản hồi VP UBND về đăng ký xây dựng",
-                "BUOC_06_TRINH_THAM_QUYEN" => "Phản hồi kết quả trình cơ quan có thẩm quyền",
-                _ => $"Cập nhật bước {(string.IsNullOrWhiteSpace(tenBuocHienTai) ? "hiện tại" : tenBuocHienTai)}"
+                "BUOC_01_DANG_KY" => "Chuyá»ƒn vÄƒn báº£n Ä‘áº¿n Ä‘Æ¡n vá»‹ tiáº¿p nháº­n",
+                "BUOC_02_THONG_NHAT" => "Pháº£n há»“i VP UBND vá» Ä‘Äƒng kĂ½ xĂ¢y dá»±ng",
+                "BUOC_06_TRINH_THAM_QUYEN" => "Pháº£n há»“i káº¿t quáº£ trĂ¬nh cÆ¡ quan cĂ³ tháº©m quyá»n",
+                _ => $"Cáº­p nháº­t bÆ°á»›c {(string.IsNullOrWhiteSpace(tenBuocHienTai) ? "hiá»‡n táº¡i" : tenBuocHienTai)}"
             };
         }
 
@@ -3904,10 +5487,10 @@ namespace Services.Manages
         {
             return maBuocHienTai switch
             {
-                "BUOC_01_DANG_KY" => "Chuyển đến bước 2",
-                "BUOC_02_THONG_NHAT" => "Gửi kết quả phê duyệt đăng ký",
-                "BUOC_06_TRINH_THAM_QUYEN" => "Gửi kết quả phê duyệt văn bản",
-                _ => $"Hoàn thành {(string.IsNullOrWhiteSpace(tenBuocHienTai) ? "bước hiện tại" : tenBuocHienTai)}"
+                "BUOC_01_DANG_KY" => "Chuyá»ƒn Ä‘áº¿n bÆ°á»›c 2",
+                "BUOC_02_THONG_NHAT" => "Gá»­i káº¿t quáº£ phĂª duyá»‡t Ä‘Äƒng kĂ½",
+                "BUOC_06_TRINH_THAM_QUYEN" => "Gá»­i káº¿t quáº£ phĂª duyá»‡t vÄƒn báº£n",
+                _ => $"HoĂ n thĂ nh {(string.IsNullOrWhiteSpace(tenBuocHienTai) ? "bÆ°á»›c hiá»‡n táº¡i" : tenBuocHienTai)}"
             };
         }
 
@@ -3919,7 +5502,7 @@ namespace Services.Manages
                 return string.IsNullOrWhiteSpace(normalizedNote) ? null : normalizedNote;
             }
 
-            var attachedFileNote = $"Tài liệu đính kèm group: {attachedFileGroupId.Value}";
+            var attachedFileNote = $"TĂ i liá»‡u Ä‘Ă­nh kĂ¨m group: {attachedFileGroupId.Value}";
             if (string.IsNullOrWhiteSpace(normalizedNote))
             {
                 return attachedFileNote;
@@ -4057,14 +5640,14 @@ namespace Services.Manages
         {
             return NormalizeTiepNhanNghiepVuCode(actionType) switch
             {
-                "NHAN_HO_SO" => "Đã nhận hồ sơ",
-                "NHAN_VA_CHUYEN_PHE_DUYET" => "Đã nhận và chuyển phê duyệt",
-                "PHE_DUYET_HO_SO" => "Đã phê duyệt hồ sơ",
-                "TRA_LAI_HO_SO" => "Đã trả lại hồ sơ",
-                "CHUYEN_PHE_DUYET" => "Đã chuyển phê duyệt",
-                "CHUYEN_BAN_HANH" => "Đã chuyển ban hành",
-                "CHUYEN_XET_DUYET_DANH_GIA" => "Đã chuyển xử lý đánh giá",
-                "DANG_LAY_GOP_Y" => "Đang lấy góp ý",
+                "NHAN_HO_SO" => "ÄĂ£ nháº­n há»“ sÆ¡",
+                "NHAN_VA_CHUYEN_PHE_DUYET" => "ÄĂ£ nháº­n vĂ  chuyá»ƒn phĂª duyá»‡t",
+                "PHE_DUYET_HO_SO" => "ÄĂ£ phĂª duyá»‡t há»“ sÆ¡",
+                "TRA_LAI_HO_SO" => "ÄĂ£ tráº£ láº¡i há»“ sÆ¡",
+                "CHUYEN_PHE_DUYET" => "ÄĂ£ chuyá»ƒn phĂª duyá»‡t",
+                "CHUYEN_BAN_HANH" => "ÄĂ£ chuyá»ƒn ban hĂ nh",
+                "CHUYEN_XET_DUYET_DANH_GIA" => "ÄĂ£ chuyá»ƒn xá»­ lĂ½ Ä‘Ă¡nh giĂ¡",
+                "DANG_LAY_GOP_Y" => "Äang láº¥y gĂ³p Ă½",
                 _ => string.Empty
             };
         }
@@ -4078,15 +5661,15 @@ namespace Services.Manages
         {
             return NormalizeTiepNhanNghiepVuCode(actionType) switch
             {
-                "NHAN_HO_SO" => "Đã nhận hồ sơ thành công.",
-                "NHAN_VA_CHUYEN_PHE_DUYET" => "Đã nhận hồ sơ và ghi nhận chuyển phê duyệt.",
-                "PHE_DUYET_HO_SO" => "Đã ghi nhận phê duyệt hồ sơ.",
-                "TRA_LAI_HO_SO" => "Đã ghi nhận trả lại hồ sơ.",
-                "CHUYEN_PHE_DUYET" => "Đã ghi nhận chuyển phê duyệt.",
-                "CHUYEN_BAN_HANH" => "Đã ghi nhận chuyển ban hành.",
-                "CHUYEN_XET_DUYET_DANH_GIA" => "Đã chuyển hồ sơ sang màn hình xử lý đánh giá.",
-                "DANG_LAY_GOP_Y" => "Đã chuyển sang tr�ng thái lấy góp ý.",
-                _ => "Cập nhật trạng thái nghiệp vụ thành công."
+                "NHAN_HO_SO" => "ÄĂ£ nháº­n há»“ sÆ¡ thĂ nh cĂ´ng.",
+                "NHAN_VA_CHUYEN_PHE_DUYET" => "ÄĂ£ nháº­n há»“ sÆ¡ vĂ  ghi nháº­n chuyá»ƒn phĂª duyá»‡t.",
+                "PHE_DUYET_HO_SO" => "ÄĂ£ ghi nháº­n phĂª duyá»‡t há»“ sÆ¡.",
+                "TRA_LAI_HO_SO" => "ÄĂ£ ghi nháº­n tráº£ láº¡i há»“ sÆ¡.",
+                "CHUYEN_PHE_DUYET" => "ÄĂ£ ghi nháº­n chuyá»ƒn phĂª duyá»‡t.",
+                "CHUYEN_BAN_HANH" => "ÄĂ£ ghi nháº­n chuyá»ƒn ban hĂ nh.",
+                "CHUYEN_XET_DUYET_DANH_GIA" => "ÄĂ£ chuyá»ƒn há»“ sÆ¡ sang mĂ n hĂ¬nh xá»­ lĂ½ Ä‘Ă¡nh giĂ¡.",
+                "DANG_LAY_GOP_Y" => "ÄĂ£ chuyá»ƒn sang trï¿½ng thĂ¡i láº¥y gĂ³p Ă½.",
+                _ => "Cáº­p nháº­t tráº¡ng thĂ¡i nghiá»‡p vá»¥ thĂ nh cĂ´ng."
             };
         }
 
@@ -4230,9 +5813,9 @@ namespace Services.Manages
             if (processing == null)
             {
                 model.MaTrangThaiTheoDoi = "CHUA_THUC_HIEN";
-                model.TenTrangThaiTheoDoi = "Chưa thực hiện";
+                model.TenTrangThaiTheoDoi = "ChÆ°a thá»±c hiá»‡n";
                 model.MaMauTrangThaiTheoDoi = "#CED4DA";
-                model.GhiChuTheoDoi = "Bước này chưa phát sinh xử lý.";
+                model.GhiChuTheoDoi = "BÆ°á»›c nĂ y chÆ°a phĂ¡t sinh xá»­ lĂ½.";
                 return model;
             }
 
@@ -4253,10 +5836,10 @@ namespace Services.Manages
                 if (processing.HanXuLy.HasValue && now > processing.HanXuLy.Value)
                 {
                     model.MaTrangThaiTheoDoi = "QUA_HAN";
-                    model.TenTrangThaiTheoDoi = "Đang xử lý quá hạn";
+                    model.TenTrangThaiTheoDoi = "Äang xá»­ lĂ½ quĂ¡ háº¡n";
                     model.MaMauTrangThaiTheoDoi = mauQuaHan;
                     model.SoNgayTre = (int)Math.Ceiling((now - processing.HanXuLy.Value).TotalDays);
-                    model.GhiChuTheoDoi = $"Bước đang xử lý và đã quá hạn {Math.Max(model.SoNgayTre ?? 0, 0)} ngày.";
+                    model.GhiChuTheoDoi = $"BÆ°á»›c Ä‘ang xá»­ lĂ½ vĂ  Ä‘Ă£ quĂ¡ háº¡n {Math.Max(model.SoNgayTre ?? 0, 0)} ngĂ y.";
                     return model;
                 }
 
@@ -4266,16 +5849,16 @@ namespace Services.Manages
                     now >= processing.HanXuLy.Value.AddDays(-soNgayCanhBao))
                 {
                     model.MaTrangThaiTheoDoi = "SAP_DEN_HAN";
-                    model.TenTrangThaiTheoDoi = "Sắp đến hạn";
+                    model.TenTrangThaiTheoDoi = "Sáº¯p Ä‘áº¿n háº¡n";
                     model.MaMauTrangThaiTheoDoi = mauSapHan;
-                    model.GhiChuTheoDoi = "Bước đang xử lý và đã đến ngưỡng cảnh báo sắp hạn.";
+                    model.GhiChuTheoDoi = "BÆ°á»›c Ä‘ang xá»­ lĂ½ vĂ  Ä‘Ă£ Ä‘áº¿n ngÆ°á»¡ng cáº£nh bĂ¡o sáº¯p háº¡n.";
                     return model;
                 }
 
                 model.MaTrangThaiTheoDoi = "DANG_XU_LY";
-                model.TenTrangThaiTheoDoi = "Đang xử lý";
+                model.TenTrangThaiTheoDoi = "Äang xá»­ lĂ½";
                 model.MaMauTrangThaiTheoDoi = mauDangXuLy;
-                model.GhiChuTheoDoi = "Bước đang được thực hiện.";
+                model.GhiChuTheoDoi = "BÆ°á»›c Ä‘ang Ä‘Æ°á»£c thá»±c hiá»‡n.";
                 return model;
             }
 
@@ -4284,25 +5867,67 @@ namespace Services.Manages
                 if (processing.HanXuLy.HasValue && processing.NgayXuLy.Value > processing.HanXuLy.Value)
                 {
                     model.MaTrangThaiTheoDoi = "HOAN_THANH_QUA_HAN";
-                    model.TenTrangThaiTheoDoi = "Hoàn thành quá hạn";
+                    model.TenTrangThaiTheoDoi = "HoĂ n thĂ nh quĂ¡ háº¡n";
                     model.MaMauTrangThaiTheoDoi = mauQuaHan;
                     model.SoNgayTre = (int)Math.Ceiling((processing.NgayXuLy.Value - processing.HanXuLy.Value).TotalDays);
-                    model.GhiChuTheoDoi = $"Bước đã hoàn thành nhưng trễ {Math.Max(model.SoNgayTre ?? 0, 0)} ngày.";
+                    model.GhiChuTheoDoi = $"BÆ°á»›c Ä‘Ă£ hoĂ n thĂ nh nhÆ°ng trá»… {Math.Max(model.SoNgayTre ?? 0, 0)} ngĂ y.";
                     return model;
                 }
 
                 model.MaTrangThaiTheoDoi = "HOAN_THANH_DUNG_HAN";
-                model.TenTrangThaiTheoDoi = "Hoàn thành đúng hạn";
+                model.TenTrangThaiTheoDoi = "HoĂ n thĂ nh Ä‘Ăºng háº¡n";
                 model.MaMauTrangThaiTheoDoi = mauDangXuLy;
-                model.GhiChuTheoDoi = "Bước đã hoàn thành trong hạn.";
+                model.GhiChuTheoDoi = "BÆ°á»›c Ä‘Ă£ hoĂ n thĂ nh trong háº¡n.";
                 return model;
             }
 
             model.MaTrangThaiTheoDoi = "CHUA_THUC_HIEN";
-            model.TenTrangThaiTheoDoi = "Chưa thực hiện";
+            model.TenTrangThaiTheoDoi = "ChÆ°a thá»±c hiá»‡n";
             model.MaMauTrangThaiTheoDoi = "#CED4DA";
-            model.GhiChuTheoDoi = "Bước chưa có kết quả xử lý.";
+            model.GhiChuTheoDoi = "BÆ°á»›c chÆ°a cĂ³ káº¿t quáº£ xá»­ lĂ½.";
             return model;
+        }
+
+        private static void ResolveAlertInfo(HoSoVanBanListItemModel item, HoSoVanBanBuocTheoDoiModel currentStep)
+        {
+            item.GhiChuCanhBao = currentStep.GhiChuTheoDoi;
+
+            if (item.SoLanTraLaiHienTai >= 2)
+            {
+                item.MucCanhBao = "TRA_LAI_NHIEU";
+                item.TenMucCanhBao = "Trả lại nhiều lần";
+                item.MaMauCanhBao = "#6F42C1";
+                return;
+            }
+
+            if (currentStep.MaTrangThaiTheoDoi == "QUA_HAN")
+            {
+                item.MucCanhBao = "QUA_HAN";
+                item.TenMucCanhBao = "Quá hạn";
+                item.MaMauCanhBao = "#DC3545";
+                item.SoNgayQuaHanHienTai = Math.Max(currentStep.SoNgayTre ?? 0, 0);
+                return;
+            }
+
+            if (currentStep.MaTrangThaiTheoDoi == "SAP_DEN_HAN")
+            {
+                item.MucCanhBao = "SAP_DEN_HAN";
+                item.TenMucCanhBao = "Sắp đến hạn";
+                item.MaMauCanhBao = "#FFC107";
+                if (currentStep.HanXuLy.HasValue)
+                {
+                    item.SoNgayConLai = Math.Max((int)Math.Ceiling((currentStep.HanXuLy.Value.Date - DateTime.Today).TotalDays), 0);
+                }
+                return;
+            }
+
+            item.MucCanhBao = "BINH_THUONG";
+            item.TenMucCanhBao = "Bình thường";
+            item.MaMauCanhBao = "#28A745";
+            if (currentStep.HanXuLy.HasValue && currentStep.MaTrangThaiTheoDoi == "DANG_XU_LY")
+            {
+                item.SoNgayConLai = Math.Max((int)Math.Ceiling((currentStep.HanXuLy.Value.Date - DateTime.Today).TotalDays), 0);
+            }
         }
 
         private async Task<Dictionary<string, string>> GetStatusColorMapAsync()
@@ -4390,6 +6015,141 @@ namespace Services.Manages
             };
         }
 
+        private async Task ApplyTieuChiDiemAsync(HoSoVanBan hoSo)
+        {
+            var proposal = await BuildChamDiemProposalAsync(hoSo.Id);
+            if (proposal == null)
+            {
+                ClearScore(hoSo);
+                return;
+            }
+            hoSo.TongThoiGianXayDungNgay = proposal.TongThoiGianXayDungNgay;
+            hoSo.TongThoiGianQuyDinhNgay = proposal.TongThoiGianQuyDinhNgay;
+            hoSo.TyLeThoiGianXayDung = proposal.TyLeThoiGianXayDung;
+            hoSo.DiemTienDoXayDung = proposal.ChiTiets.FirstOrDefault(x => x.LoaiTieuChi == "THOI_GIAN")?.DiemDeXuat;
+            hoSo.DiemChatLuongVanBan = proposal.ChiTiets.FirstOrDefault(x => x.LoaiTieuChi == "CHAT_LUONG")?.DiemDeXuat;
+            hoSo.TongDiemDanhGia = proposal.TongDiem;
+            hoSo.XepLoaiDanhGia = ResolveXepLoaiTongDiem(proposal.TongDiem);
+            hoSo.NgayChamDiem = DateTime.Now;
+        }
+
+        private async Task<ChamDiemProposal?> BuildChamDiemProposalAsync(Guid hoSoVanBanId)
+        {
+            var hoSo = await _dbContext.HoSoVanBans.AsNoTracking().FirstOrDefaultAsync(x => x.Id == hoSoVanBanId);
+            if (hoSo == null)
+            {
+                return null;
+            }
+
+            var tieuChis = await _dbContext.DanhMucTieuChiDiems
+                .AsNoTracking()
+                .Where(x => x.TrangThai)
+                .OrderBy(x => x.ThuTuSapXep)
+                .ToListAsync();
+            if (tieuChis.Count == 0)
+            {
+                return null;
+            }
+
+            var mucs = await _dbContext.DanhMucTieuChiDiemMucs
+                .AsNoTracking()
+                .Where(x => x.TrangThai)
+                .OrderBy(x => x.ThuTuSapXep)
+                .ThenBy(x => x.TuGiaTri)
+                .ToListAsync();
+
+            var ngayKetThuc = hoSo.NgayBanHanh ?? hoSo.NgayHoanThanh ?? DateTime.Today;
+            var tongNgayThucTe = Math.Max(1, (ngayKetThuc.Date - hoSo.NgayTaoHoSo.Date).Days + 1);
+
+            var tongNgayQuyDinh = await _dbContext.HoSoVanBanBuocThoiHans
+                .AsNoTracking()
+                .Where(x => x.HoSoVanBanId == hoSo.Id && x.SoNgayXuLy.HasValue && x.SoNgayXuLy.Value > 0)
+                .SumAsync(x => (int?)x.SoNgayXuLy) ?? 0;
+
+            if (tongNgayQuyDinh <= 0 && hoSo.HanXuLy.HasValue)
+            {
+                tongNgayQuyDinh = Math.Max(1, (hoSo.HanXuLy.Value.Date - hoSo.NgayTaoHoSo.Date).Days + 1);
+            }
+
+            decimal? tyLeThoiGian = null;
+            if (tongNgayQuyDinh > 0)
+            {
+                tyLeThoiGian = Math.Round(tongNgayThucTe * 100m / tongNgayQuyDinh, 2, MidpointRounding.AwayFromZero);
+            }
+
+            var result = new ChamDiemProposal
+            {
+                TongThoiGianXayDungNgay = tongNgayThucTe,
+                TongThoiGianQuyDinhNgay = tongNgayQuyDinh > 0 ? tongNgayQuyDinh : null,
+                TyLeThoiGianXayDung = tyLeThoiGian
+            };
+
+            foreach (var tieuChi in tieuChis)
+            {
+                decimal? giaTri = tieuChi.LoaiTieuChi switch
+                {
+                    "THOI_GIAN" => tyLeThoiGian,
+                    "CHAT_LUONG" => hoSo.SoLanTraLaiHienTai,
+                    _ => null
+                };
+
+                var muc = giaTri.HasValue
+                    ? mucs.Where(x => x.DanhMucTieuChiDiemId == tieuChi.Id).FirstOrDefault(x => MatchMucDiem(x, giaTri.Value))
+                    : null;
+
+                var diem = muc?.Diem;
+                if (diem.HasValue)
+                {
+                    result.TongDiem += diem.Value;
+                }
+
+                result.ChiTiets.Add(new ChamDiemProposalChiTiet
+                {
+                    DanhMucTieuChiDiemId = tieuChi.Id,
+                    MaTieuChi = tieuChi.MaTieuChi,
+                    TenTieuChi = tieuChi.TenTieuChi,
+                    LoaiTieuChi = tieuChi.LoaiTieuChi,
+                    DiemToiDa = tieuChi.DiemToiDa,
+                    GiaTriTinhDiem = giaTri,
+                    DienGiaiGiaTri = muc?.NhanHienThi,
+                    DiemDeXuat = diem
+                });
+            }
+
+            return result;
+        }
+
+        private static bool MatchMucDiem(DanhMucTieuChiDiemMuc muc, decimal giaTri)
+        {
+            var hopLeTu = !muc.TuGiaTri.HasValue
+                || (muc.BaoGomTuGiaTri ? giaTri >= muc.TuGiaTri.Value : giaTri > muc.TuGiaTri.Value);
+            var hopLeDen = !muc.DenGiaTri.HasValue
+                || (muc.BaoGomDenGiaTri ? giaTri <= muc.DenGiaTri.Value : giaTri < muc.DenGiaTri.Value);
+
+            return hopLeTu && hopLeDen;
+        }
+
+        private static string ResolveXepLoaiTongDiem(decimal tongDiem)
+        {
+            if (tongDiem >= 90) return "XUAT_SAC";
+            if (tongDiem >= 80) return "TOT";
+            if (tongDiem >= 65) return "KHA";
+            if (tongDiem >= 50) return "TRUNG_BINH";
+            return "CAN_CAI_THIEN";
+        }
+
+        private static void ClearScore(HoSoVanBan hoSo)
+        {
+            hoSo.TongThoiGianXayDungNgay = null;
+            hoSo.TongThoiGianQuyDinhNgay = null;
+            hoSo.TyLeThoiGianXayDung = null;
+            hoSo.DiemTienDoXayDung = null;
+            hoSo.DiemChatLuongVanBan = null;
+            hoSo.TongDiemDanhGia = null;
+            hoSo.XepLoaiDanhGia = null;
+            hoSo.NgayChamDiem = null;
+        }
+
         private sealed class NotificationNavigationConfig
         {
             public string ControllerNameDanhSach { get; set; } = "HoSoVanBan";
@@ -4404,6 +6164,27 @@ namespace Services.Manages
         {
             public HoSoVanBanTienDoSummaryModel Summary { get; set; } = new();
             public List<HoSoVanBanBuocTheoDoiModel> Steps { get; set; } = new();
+        }
+
+        private sealed class ChamDiemProposal
+        {
+            public int? TongThoiGianXayDungNgay { get; set; }
+            public int? TongThoiGianQuyDinhNgay { get; set; }
+            public decimal? TyLeThoiGianXayDung { get; set; }
+            public decimal TongDiem { get; set; }
+            public List<ChamDiemProposalChiTiet> ChiTiets { get; set; } = new();
+        }
+
+        private sealed class ChamDiemProposalChiTiet
+        {
+            public Guid DanhMucTieuChiDiemId { get; set; }
+            public string MaTieuChi { get; set; } = string.Empty;
+            public string TenTieuChi { get; set; } = string.Empty;
+            public string LoaiTieuChi { get; set; } = string.Empty;
+            public decimal DiemToiDa { get; set; }
+            public decimal? GiaTriTinhDiem { get; set; }
+            public string? DienGiaiGiaTri { get; set; }
+            public decimal? DiemDeXuat { get; set; }
         }
     }
 }

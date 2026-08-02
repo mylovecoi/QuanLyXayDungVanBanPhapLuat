@@ -1,0 +1,493 @@
+@using DataAccess.Entities.QuanLyDanhMuc
+@using Services.Manages
+@using Services.Model
+@using UI.ViewModels
+@model IEnumerable<HoSoVanBanListItemModel>
+
+@{
+    var session = HttpContextAccessor?.HttpContext?.Session;
+    var pageInfo = ViewData["PageInfo"] as VMPageInfo;
+    var pageSize = pageInfo?.PageSize ?? 5;
+    var timKiem = pageInfo?.Search ?? string.Empty;
+    var role = ViewData["Role"]?.ToString() ?? string.Empty;
+    var recordId = pageInfo?.RecordStart ?? 1;
+    var donViOptions = ViewData["DonViOptions"] as List<DonViOptionModel> ?? new List<DonViOptionModel>();
+    var danhMucVanBanOptions = ViewData["DanhMucVanBanOptions"] as List<DanhMucVanBan> ?? new List<DanhMucVanBan>();
+    var nguoiXuLyOptions = ViewData["NguoiXuLyOptions"] as List<SelectOptionModel> ?? new List<SelectOptionModel>();
+    var trangThaiOptions = ViewData["TrangThaiOptions"] as List<SelectOptionModel> ?? new List<SelectOptionModel>();
+    var buocDangKyOptions = ViewData["BuocDangKyOptions"] as List<SelectOptionModel> ?? new List<SelectOptionModel>();
+    Guid? selectedDonViId = ViewData["SelectedDonViId"] is Guid selected ? selected : ViewData["SelectedDonViId"] as Guid?;
+    Guid? selectedDanhMucVanBanId = ViewData["SelectedDanhMucVanBanId"] is Guid selectedVanBan ? selectedVanBan : ViewData["SelectedDanhMucVanBanId"] as Guid?;
+    Guid? selectedNguoiXuLyId = ViewData["SelectedNguoiXuLyId"] is Guid selectedNguoiXuLy ? selectedNguoiXuLy : ViewData["SelectedNguoiXuLyId"] as Guid?;
+    var selectedDonViName = ViewData["SelectedDonViName"]?.ToString();
+    var selectedMaTrangThai = ViewData["SelectedMaTrangThai"]?.ToString();
+    var selectedMaBuoc = ViewData["SelectedMaBuoc"]?.ToString();
+    var isSSA = ViewData["IsSSA"] is bool flag && flag;
+    var hasSavedDefaultFilter = ViewData["HasSavedDefaultFilter"] is bool hasDefault && hasDefault;
+    var tuNgayTao = ViewData["TuNgayTao"] as DateTime?;
+    var denNgayTao = ViewData["DenNgayTao"] as DateTime?;
+    var tuHanXuLy = ViewData["TuHanXuLy"] as DateTime?;
+    var denHanXuLy = ViewData["DenHanXuLy"] as DateTime?;
+    var tuNgayHoanThanh = ViewData["TuNgayHoanThanh"] as DateTime?;
+    var denNgayHoanThanh = ViewData["DenNgayHoanThanh"] as DateTime?;
+    var routePrefix = ViewData["RoutePrefix"]?.ToString() ?? "/Manages/TraCuuDangKyVanBan";
+}
+
+@section custom_script {
+    <script>
+        $(document).ready(function () {
+            $('#PageSize_Search').change(ReloadFrm);
+            $('#DonViId_Search').change(function () {
+                ReloadFrm();
+            });
+            $('#txt_Search').keypress(function (e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    ReloadFrm();
+                }
+            });
+        });
+
+        function buildAdvancedFilters() {
+            return '&DanhMucVanBanId=' + ($('#DanhMucVanBanId_Search').val() || '')
+                + '&NguoiXuLyId=' + ($('#NguoiXuLyId_Search').val() || '')
+                + '&MaTrangThai=' + ($('#MaTrangThai_Search').val() || '')
+                + '&MaBuoc=' + ($('#MaBuoc_Search').val() || '')
+                + '&TuNgayTao=' + ($('#TuNgayTao_Search').val() || '')
+                + '&DenNgayTao=' + ($('#DenNgayTao_Search').val() || '')
+                + '&TuHanXuLy=' + ($('#TuHanXuLy_Search').val() || '')
+                + '&DenHanXuLy=' + ($('#DenHanXuLy_Search').val() || '')
+                + '&TuNgayHoanThanh=' + ($('#TuNgayHoanThanh_Search').val() || '')
+                + '&DenNgayHoanThanh=' + ($('#DenNgayHoanThanh_Search').val() || '');
+        }
+
+        function ReloadFrm() {
+            var currentPathUrl = window.location.pathname + '?';
+            var timKiem = 'TimKiem=' + ($('#txt_Search').val() || '');
+            var pageSize = '&PageSize=' + ($('#PageSize_Search').val() || '5');
+            var donViId = '&DonViId=' + ($('#DonViId_Search').val() || '');
+            window.location.href = currentPathUrl + timKiem + pageSize + donViId + buildAdvancedFilters();
+        }
+
+        function ClickPage(pageSelect) {
+            var currentPathUrl = window.location.pathname + '?';
+            var timKiem = 'TimKiem=' + ($('#txt_Search').val() || '');
+            var pageSize = '&PageSize=' + ($('#PageSize_Search').val() || '5');
+            var donViId = '&DonViId=' + ($('#DonViId_Search').val() || '');
+            var pageCurrent = '&PageCurrent=' + pageSelect;
+            window.location.href = currentPathUrl + timKiem + pageSize + donViId + buildAdvancedFilters() + pageCurrent;
+        }
+
+        function ClearTxtSearch() {
+            $('#txt_Search').val('');
+            ReloadFrm();
+        }
+
+        function ExportExcel() {
+            var url = '/Manages/TraCuuDangKyVanBan/ExportExcel?'
+                + 'TimKiem=' + encodeURIComponent($('#txt_Search').val() || '')
+                + '&DonViId=' + encodeURIComponent($('#DonViId_Search').val() || '')
+                + '&DanhMucVanBanId=' + encodeURIComponent($('#DanhMucVanBanId_Search').val() || '')
+                + '&NguoiXuLyId=' + encodeURIComponent($('#NguoiXuLyId_Search').val() || '')
+                + '&MaTrangThai=' + encodeURIComponent($('#MaTrangThai_Search').val() || '')
+                + '&MaBuoc=' + encodeURIComponent($('#MaBuoc_Search').val() || '')
+                + '&TuNgayTao=' + encodeURIComponent($('#TuNgayTao_Search').val() || '')
+                + '&DenNgayTao=' + encodeURIComponent($('#DenNgayTao_Search').val() || '')
+                + '&TuHanXuLy=' + encodeURIComponent($('#TuHanXuLy_Search').val() || '')
+                + '&DenHanXuLy=' + encodeURIComponent($('#DenHanXuLy_Search').val() || '')
+                + '&TuNgayHoanThanh=' + encodeURIComponent($('#TuNgayHoanThanh_Search').val() || '')
+                + '&DenNgayHoanThanh=' + encodeURIComponent($('#DenNgayHoanThanh_Search').val() || '');
+            window.location.href = url;
+        }
+
+        function SaveDefaultFilter() {
+            $.ajax({
+                url: '@routePrefix/SaveDefaultFilter',
+                type: 'POST',
+                headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                data: {
+                    TimKiem: $('#txt_Search').val() || '',
+                    DonViId: $('#DonViId_Search').val() || '',
+                    DanhMucVanBanId: $('#DanhMucVanBanId_Search').val() || '',
+                    NguoiXuLyId: $('#NguoiXuLyId_Search').val() || '',
+                    MaTrangThai: $('#MaTrangThai_Search').val() || '',
+                    MaBuoc: $('#MaBuoc_Search').val() || '',
+                    TuNgayTao: $('#TuNgayTao_Search').val() || '',
+                    DenNgayTao: $('#DenNgayTao_Search').val() || '',
+                    TuHanXuLy: $('#TuHanXuLy_Search').val() || '',
+                    DenHanXuLy: $('#DenHanXuLy_Search').val() || '',
+                    TuNgayHoanThanh: $('#TuNgayHoanThanh_Search').val() || '',
+                    DenNgayHoanThanh: $('#DenNgayHoanThanh_Search').val() || ''
+                },
+                success: function (res) {
+                    if (res.status === 'success') {
+                        toastr.success(res.message || 'Đã lưu bộ lọc mặc định.');
+                        window.location.reload();
+                    } else {
+                        toastr.error(res.message || 'Không thể lưu bộ lọc mặc định.');
+                    }
+                },
+                error: function () { toastr.error('Không thể lưu bộ lọc mặc định.'); }
+            });
+        }
+
+        function ClearDefaultFilter() {
+            $.ajax({
+                url: '@routePrefix/ClearDefaultFilter',
+                type: 'POST',
+                headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                success: function (res) {
+                    if (res.status === 'success') {
+                        toastr.success(res.message || 'Đã xóa bộ lọc mặc định.');
+                        window.location.href = '@routePrefix';
+                    } else {
+                        toastr.error(res.message || 'Không thể xóa bộ lọc mặc định.');
+                    }
+                },
+                error: function () { toastr.error('Không thể xóa bộ lọc mặc định.'); }
+            });
+        }
+
+        function Show(id) {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+            $.ajax({
+                url: '@routePrefix/Show',
+                type: 'POST',
+                headers: { 'RequestVerificationToken': csrfToken },
+                data: { id: id },
+                success: function (data) {
+                    $('#frm_show').html(data);
+                    $('#Show_Modal').modal('show');
+                },
+                error: function () { toastr.error('Không thể tải dữ liệu!', 'Lỗi!'); }
+            });
+        }
+
+        function ShowTimeline(id) {
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val();
+            $.ajax({
+                url: '@routePrefix/Timeline',
+                type: 'POST',
+                headers: { 'RequestVerificationToken': csrfToken },
+                data: { id: id },
+                success: function (data) {
+                    $('#frm_timeline').html(data);
+                    $('#Timeline_Modal').modal('show');
+                },
+                error: function () { toastr.error('Không thể tải timeline!', 'Lỗi!'); }
+            });
+        }
+    </script>
+}
+
+<div class="card card-custom">
+    <div class="card-header flex-wrap border-0 pt-6 pb-0">
+        <div class="card-title">
+            <h3 class="card-label">
+                <b>@ViewData["Title"]?.ToString()?.ToUpper()</b>
+                <span class="d-block text-muted pt-2 font-size-sm">Tra cứu hồ sơ đăng ký văn bản</span>
+            </h3>
+        </div>
+        <div class="card-toolbar">
+            @if (session != null && FuntionGlobal.CheckPermission(session, role, "Index"))
+            {
+                <button type="button" class="btn btn-info font-weight-bolder mr-2" onclick="SaveDefaultFilter()">
+                    <i class="la la-save"></i>Lưu bộ lọc mặc định
+                </button>
+                @if (hasSavedDefaultFilter)
+                {
+                    <button type="button" class="btn btn-light-warning font-weight-bolder mr-2" onclick="ClearDefaultFilter()">
+                        <i class="la la-undo"></i>Xóa bộ lọc mặc định
+                    </button>
+                }
+                <button type="button" class="btn btn-success font-weight-bolder" onclick="ExportExcel()">
+                    <i class="la la-file-excel-o"></i>Xuất Excel
+                </button>
+            }
+        </div>
+    </div>
+
+    @Html.AntiForgeryToken()
+
+    <div class="card-body pt-0">
+        <hr />
+
+        @if (!string.IsNullOrWhiteSpace(selectedDonViName))
+        {
+            <div class="alert alert-light-primary d-flex align-items-center mb-6">
+                <i class="la la-building icon-xl mr-3 text-primary"></i>
+                <div>
+                    <div class="font-weight-bold">Đang xem dữ liệu của đơn vị</div>
+                    <div>@selectedDonViName</div>
+                </div>
+            </div>
+        }
+        else if (isSSA)
+        {
+            <div class="alert alert-light-warning d-flex align-items-center mb-6">
+                <i class="la la-sitemap icon-xl mr-3 text-warning"></i>
+                <div>
+                    <div class="font-weight-bold">Tài khoản SSA được chọn đơn vị khi tra cứu</div>
+                    <div>Bạn có thể chọn một đơn vị cụ thể hoặc để trống để xem toàn bộ.</div>
+                </div>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Hiển thị</label>
+                    <select class="form-control" id="PageSize_Search">
+                        <option value="5" selected="@(pageSize == 5 ? "selected" : null)">5 thông tin</option>
+                        <option value="10" selected="@(pageSize == 10 ? "selected" : null)">10 thông tin</option>
+                        <option value="20" selected="@(pageSize == 20 ? "selected" : null)">20 thông tin</option>
+                        <option value="50" selected="@(pageSize == 50 ? "selected" : null)">50 thông tin</option>
+                        <option value="100" selected="@(pageSize == 100 ? "selected" : null)">100 thông tin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-xl-4">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Đơn vị</label>
+                    <select class="form-control" id="DonViId_Search" @(isSSA ? null : "disabled")>
+                        @if (isSSA)
+                        {
+                            <option value="">-- Tất cả đơn vị --</option>
+                        }
+                        @foreach (var item in donViOptions)
+                        {
+                            <option value="@item.Id" selected="@(selectedDonViId.HasValue && selectedDonViId.Value == item.Id ? "selected" : null)">@item.TenDonVi</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-xl-5">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Tìm kiếm</label>
+                    <div class="input-group">
+                        <input class="form-control" id="txt_Search" placeholder="Tìm kiếm..." value="@timKiem" />
+                        <div class="input-group-prepend">
+                            <button class="btn btn-danger" type="button" onclick="ClearTxtSearch()"><i class="las la-times-circle"></i></button>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" onclick="ReloadFrm()"><i class="las la-search"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Loại văn bản</label>
+                    <select class="form-control" id="DanhMucVanBanId_Search">
+                        <option value="">-- Tất cả loại văn bản --</option>
+                        @foreach (var item in danhMucVanBanOptions)
+                        {
+                            <option value="@item.Id" selected="@(selectedDanhMucVanBanId.HasValue && selectedDanhMucVanBanId.Value == item.Id ? "selected" : null)">@item.TenLoaiVanBan</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Người xử lý hiện tại</label>
+                    <select class="form-control" id="NguoiXuLyId_Search">
+                        <option value="">-- Tất cả người xử lý --</option>
+                        @foreach (var item in nguoiXuLyOptions)
+                        {
+                            var isSelectedNguoiXuLy = selectedNguoiXuLyId.HasValue && selectedNguoiXuLyId.Value.ToString() == item.Value;
+                            <option value="@item.Value" selected="@(isSelectedNguoiXuLy ? "selected" : null)">@item.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Trạng thái</label>
+                    <select class="form-control" id="MaTrangThai_Search">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        @foreach (var item in trangThaiOptions)
+                        {
+                            <option value="@item.Value" selected="@(selectedMaTrangThai == item.Value ? "selected" : null)">@item.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Bước hiện tại</label>
+                    <select class="form-control" id="MaBuoc_Search">
+                        <option value="">-- Tất cả bước --</option>
+                        @foreach (var item in buocDangKyOptions)
+                        {
+                            <option value="@item.Value" selected="@(selectedMaBuoc == item.Value ? "selected" : null)">@item.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Từ ngày tạo</label>
+                    <input type="date" class="form-control" id="TuNgayTao_Search" value="@(tuNgayTao.HasValue ? tuNgayTao.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Đến ngày tạo</label>
+                    <input type="date" class="form-control" id="DenNgayTao_Search" value="@(denNgayTao.HasValue ? denNgayTao.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Từ hạn xử lý</label>
+                    <input type="date" class="form-control" id="TuHanXuLy_Search" value="@(tuHanXuLy.HasValue ? tuHanXuLy.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Đến hạn xử lý</label>
+                    <input type="date" class="form-control" id="DenHanXuLy_Search" value="@(denHanXuLy.HasValue ? denHanXuLy.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-6">
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Từ ngày hoàn thành</label>
+                    <input type="date" class="form-control" id="TuNgayHoanThanh_Search" value="@(tuNgayHoanThanh.HasValue ? tuNgayHoanThanh.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                </div>
+            </div>
+            <div class="col-xl-3">
+                <div class="form-group">
+                    <label class="text-blue font-weight-bold">Đến ngày hoàn thành</label>
+                    <input type="date" class="form-control" id="DenNgayHoanThanh_Search" value="@(denNgayHoanThanh.HasValue ? denNgayHoanThanh.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                </div>
+            </div>
+            <div class="col-xl-6 d-flex align-items-end justify-content-end">
+                <div class="form-group mb-0">
+                    <button type="button" class="btn btn-light-danger mr-2" onclick="window.location.href='@routePrefix'">Xóa lọc</button>
+                    <button type="button" class="btn btn-primary" onclick="ReloadFrm()">Áp dụng bộ lọc</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive border rounded-lg mb-8">
+            <table class="table table-striped table-hover table-responsive-lg rounded-lg m-0">
+                <thead>
+                    <tr class="table-active text-center">
+                        <th width="4%">#</th>
+                        <th width="24%">Thông tin hồ sơ</th>
+                        <th width="16%">Loại VB / Quy trình</th>
+                        <th width="15%">Bước hiện tại</th>
+                        <th width="13%">Đơn vị</th>
+                        <th width="12%">Trạng thái</th>
+                        <th width="8%">Ngày HT</th>
+                        <th width="8%">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            var record = recordId++;
+                            <tr class="@FuntionGlobal.GetClassTable(record)">
+                                <td class="text-center align-middle">@record</td>
+                                <td class="align-middle">
+                                    <div class="font-weight-bold text-primary">@item.TenHoSo</div>
+                                    <div>Mã hồ sơ: @item.MaHoSo</div>
+                                    <div>Tạo ngày: @FuntionGlobal.ConvertDateTimeToStr(item.NgayTaoHoSo)</div>
+                                    <div>Hạn xử lý: @(item.HanXuLy.HasValue ? FuntionGlobal.ConvertDateToStr(item.HanXuLy.Value) : "-")</div>
+                                </td>
+                                <td class="align-middle">
+                                    <div>@item.TenLoaiVanBan</div>
+                                    <div class="text-muted">@item.TenQuyTrinh</div>
+                                </td>
+                                <td class="align-middle">@item.TenBuocHienTai</td>
+                                <td class="align-middle">
+                                    <div><span class="font-weight-bold">Khởi tạo:</span> @(string.IsNullOrWhiteSpace(item.TenDonViSoanThao) ? "-" : item.TenDonViSoanThao)</div>
+                                    <div><span class="font-weight-bold">Đang xử lý:</span> @(string.IsNullOrWhiteSpace(item.TenDonViXuLyHienTai) ? "-" : item.TenDonViXuLyHienTai)</div>
+                                </td>
+                                <td class="text-center align-middle">
+                                    @if (!string.IsNullOrWhiteSpace(item.TenTrangThai))
+                                    {
+                                        <span class="badge" style="background-color:@(string.IsNullOrWhiteSpace(item.MaMauTrangThai) ? "#6c757d" : item.MaMauTrangThai);color:#212529;padding:8px 12px;">
+                                            @item.TenTrangThai
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-light">-</span>
+                                    }
+                                </td>
+                                <td class="text-center align-middle">@(item.NgayHoanThanh.HasValue ? FuntionGlobal.ConvertDateToStr(item.NgayHoanThanh.Value) : "-")</td>
+                                <td class="text-center align-middle">
+                                    <button type="button" onclick="Show('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Xem chi tiết">
+                                        <i class="icon-lg la la-eye text-primary"></i>
+                                    </button>
+                                    <button type="button" onclick="ShowTimeline('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Xem timeline">
+                                        <i class="icon-lg la la-stream text-info"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td class="text-center" colspan="8">Không tìm thấy thông tin.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @await Html.PartialAsync("~/Views/Shared/Pagination.cshtml")
+    </div>
+</div>
+
+<div class="modal fade" id="Show_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Thông tin hồ sơ</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="frm_show"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="Timeline_Modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="card-label">
+                    Timeline @ViewData["Title"]
+                    <span class="d-block text-muted pt-2 font-size-sm">Theo dõi bằng timeline của hồ sơ</span>
+                </h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <i aria-hidden="true" class="ki ki-close"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="frm_timeline"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light-primary font-weight-bold" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>

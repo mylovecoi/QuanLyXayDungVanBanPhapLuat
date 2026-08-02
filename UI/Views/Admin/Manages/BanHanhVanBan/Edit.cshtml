@@ -1,0 +1,139 @@
+@model Services.Manages.HoSoVanBanBanHanhFormModel
+
+@{
+    var isLocked = string.Equals(Model.TrangThaiBanHanh, "DA_BAN_HANH", StringComparison.OrdinalIgnoreCase);
+}
+
+@section custom_script {
+<script>
+    $(function () {
+        loadAttachedFiles();
+    });
+
+    function loadAttachedFiles() {
+        $('#attachedFileBanHanh').load('@Url.Action("GetAttachedFiles", "AttachedFile")?GroupId=@Model.AttachedFileGroupId&TableName=HoSoVanBan');
+    }
+</script>
+}
+
+<div class="card card-custom">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="card-label">BAN HÀNH VĂN BẢN<span class="d-block text-muted pt-2 font-size-sm">@Model.TenHoSo</span></h3>
+        </div>
+    </div>
+    <form method="post" action="/Manages/BanHanhVanBan/Edit">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="HoSoVanBanId" />
+        <input type="hidden" asp-for="AttachedFileGroupId" />
+        <div class="card-body">
+            <div asp-validation-summary="All" class="text-danger mb-4"></div>
+            <div class="alert alert-light-info">
+                <b>Loại văn bản:</b> @Model.TenLoaiVanBan &nbsp;
+                <b>Đơn vị soạn thảo:</b> @Model.TenDonViSoanThao &nbsp;
+                <b>Bước:</b> @Model.TenBuocHienTai
+            </div>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label>Loại văn bản ban hành</label>
+                    <input asp-for="LoaiVanBanBanHanh" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Số ký hiệu</label>
+                    <input asp-for="SoKyHieuBanHanh" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Cơ quan ban hành</label>
+                    <select asp-for="CoQuanBanHanhId" class="form-control" disabled="@isLocked">
+                        <option value="">-- Chọn cơ quan ban hành --</option>
+                        @foreach (var item in Model.CoQuanBanHanhOptions)
+                        {
+                            <option value="@item.Id">@item.TenDonVi</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-8 form-group">
+                    <label>Trích yếu ban hành</label>
+                    <input asp-for="TrichYeuBanHanh" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Người ký</label>
+                    <select asp-for="NguoiKyId" class="form-control" disabled="@isLocked">
+                        <option value="">-- Chọn người ký --</option>
+                        @foreach (var item in Model.NguoiKyOptions)
+                        {
+                            <option value="@item.Id">@item.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Họ tên người ký</label>
+                    <input asp-for="HoTenNguoiKy" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Chức vụ người ký</label>
+                    <input asp-for="ChucVuNguoiKy" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label>Ngày ký</label>
+                    <input asp-for="NgayKy" type="date" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label>Ngày ban hành</label>
+                    <input asp-for="NgayBanHanh" type="date" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label>Ngày có hiệu lực</label>
+                    <input asp-for="NgayCoHieuLuc" type="date" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label>Ngày hết hiệu lực</label>
+                    <input asp-for="NgayHetHieuLuc" type="date" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>File quyết định công khai</label>
+                    <select asp-for="QuyetDinhBanHanhFileId" class="form-control" disabled="@isLocked">
+                        <option value="">-- Chọn file quyết định --</option>
+                        @foreach (var item in Model.QuyetDinhFileOptions)
+                        {
+                            <option value="@item.Id">@item.Text</option>
+                        }
+                    </select>
+                    <small class="text-muted">Chỉ file được chọn ở đây sẽ được đưa ra hệ thống văn bản công khai.</small>
+                </div>
+                <div class="col-md-3 form-group">
+                    <label>Ngày công khai</label>
+                    <input asp-for="NgayCongKhai" type="date" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label>Đường dẫn công khai</label>
+                    <input asp-for="DuongDanCongKhai" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-12 form-group">
+                    <label>Ghi chú</label>
+                    <textarea asp-for="GhiChu" class="form-control" rows="2" readonly="@isLocked"></textarea>
+                </div>
+            </div>
+
+            <div class="card border mt-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="text-primary mb-0">File hồ sơ ban hành</h5>
+                        <button type="button" class="btn btn-light-primary btn-sm" onclick="loadAttachedFiles()">Tải lại danh sách file</button>
+                    </div>
+                    <div id="attachedFileBanHanh">
+                        <div class="text-center text-muted py-5">Đang tải khu vực file đính kèm...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-right">
+            <a href="/Manages/BanHanhVanBan" class="btn btn-light mr-2">Quay lại</a>
+            @if (!isLocked)
+            {
+                <button name="submitAction" value="SAVE" class="btn btn-light-primary mr-2">Lưu nháp</button>
+                <button name="submitAction" value="CONFIRM" class="btn btn-primary" onclick="return confirm('Xác nhận ban hành và hoàn tất hồ sơ?')">Xác nhận ban hành</button>
+            }
+        </div>
+    </form>
+</div>

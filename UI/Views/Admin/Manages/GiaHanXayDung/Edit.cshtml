@@ -1,0 +1,137 @@
+@model Services.Manages.HoSoVanBanGiaHanFormModel
+
+@section custom_script {
+<script>
+    $(function () {
+        loadAttachedFiles();
+        $('#HanXuLyMoi').change(syncSoNgayGiaHan);
+        syncSoNgayGiaHan();
+    });
+
+    function loadAttachedFiles() {
+        $('#attachedFileGiaHan').load('@Url.Action("GetAttachedFiles", "AttachedFile")?GroupId=@Model.AttachedFileGroupId&TableName=HoSoVanBanGiaHan');
+    }
+
+    function syncSoNgayGiaHan() {
+        const oldDate = new Date('@Model.HanXuLyHienTai?.ToString("yyyy-MM-dd")');
+        const newValue = $('#HanXuLyMoi').val();
+        if (!newValue) return;
+        const newDate = new Date(newValue);
+        const diff = Math.round((newDate - oldDate) / (1000 * 60 * 60 * 24));
+        $('#SoNgayGiaHan').val(diff > 0 ? diff : 0);
+    }
+</script>
+}
+
+<div class="card card-custom">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="card-label">GIA HẠN THỜI GIAN XÂY DỰNG<span class="d-block text-muted pt-2 font-size-sm">@Model.TenHoSo</span></h3>
+        </div>
+    </div>
+    <form method="post" action="/Manages/GiaHanXayDung/Edit">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="HoSoVanBanId" />
+        <input type="hidden" asp-for="AttachedFileGroupId" />
+        <input type="hidden" asp-for="TenHoSo" />
+        <input type="hidden" asp-for="MaHoSo" />
+        <input type="hidden" asp-for="TenLoaiVanBan" />
+        <input type="hidden" asp-for="TenBuocHienTai" />
+        <input type="hidden" asp-for="TenDonViSoanThao" />
+        <input type="hidden" asp-for="TenDonViXuLyHienTai" />
+        <div class="card-body">
+            <div asp-validation-summary="All" class="text-danger mb-4"></div>
+            <div class="alert alert-light-info">
+                <b>Mã hồ sơ:</b> @Model.MaHoSo &nbsp;
+                <b>Loại văn bản:</b> @Model.TenLoaiVanBan &nbsp;
+                <b>Bước:</b> @Model.TenBuocHienTai
+            </div>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label>Đơn vị soạn thảo</label>
+                    <input class="form-control" value="@Model.TenDonViSoanThao" readonly />
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Đơn vị đang xử lý</label>
+                    <input class="form-control" value="@Model.TenDonViXuLyHienTai" readonly />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Hạn xử lý hiện tại</label>
+                    <input asp-for="HanXuLyHienTai" type="date" class="form-control" readonly />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Hạn xử lý mới <span class="text-danger">*</span></label>
+                    <input asp-for="HanXuLyMoi" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Số ngày gia hạn</label>
+                    <input asp-for="SoNgayGiaHan" class="form-control" readonly />
+                </div>
+                <div class="col-md-12 form-group">
+                    <label>Lý do gia hạn <span class="text-danger">*</span></label>
+                    <textarea asp-for="LyDoGiaHan" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="col-md-12 form-group">
+                    <label>Ghi chú</label>
+                    <textarea asp-for="GhiChu" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+
+            <div class="card border mt-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="text-primary mb-0">File đính kèm gia hạn</h5>
+                        <button type="button" class="btn btn-light-primary btn-sm" onclick="loadAttachedFiles()">Tải lại danh sách file</button>
+                    </div>
+                    <div id="attachedFileGiaHan">
+                        <div class="text-center text-muted py-5">Đang tải khu vực file đính kèm...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border mt-4">
+                <div class="card-body">
+                    <h5 class="text-primary mb-3">Lịch sử gia hạn</h5>
+                    @if (Model.LichSus.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr class="table-active text-center">
+                                        <th>Thời gian</th>
+                                        <th>Hạn cũ</th>
+                                        <th>Hạn mới</th>
+                                        <th>Số ngày</th>
+                                        <th>Người gia hạn</th>
+                                        <th>Lý do</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.LichSus)
+                                    {
+                                        <tr>
+                                            <td class="text-center">@item.CreatedDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td class="text-center">@item.HanXuLyCu.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-center">@item.HanXuLyMoi.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-center">@item.SoNgayGiaHan</td>
+                                            <td>@(item.TenNguoiGiaHan ?? "-")</td>
+                                            <td>@(item.LyDoGiaHan ?? item.GhiChu ?? "-")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted">Chưa phát sinh lịch sử gia hạn.</div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-right">
+            <a href="/Manages/GiaHanXayDung" class="btn btn-light mr-2">Quay lại</a>
+            <button class="btn btn-primary" onclick="return confirm('Xác nhận gia hạn thời gian xây dựng văn bản?')">Lưu gia hạn</button>
+        </div>
+    </form>
+</div>

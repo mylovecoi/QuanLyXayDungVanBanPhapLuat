@@ -1,194 +1,199 @@
-@{
-	var dashboardImages = ViewData["DashboardImages"] as List<string> ?? new List<string>();
-	// var first = true;
-}
+@using System.Text.Json
 @model Services.DTOs.HomeResponseDto
-@if (dashboardImages != null && dashboardImages.Count() > 0)
-{
-	// <div class="d-flex flex-row-fluid bgi-size-cover bgi-position-top" style="height: 300px;">
-	// 	<div id="imageCarousel" class="carousel slide w-100 h-100" data-bs-ride="carousel" data-bs-interval="10000">
-	// 		<div class="carousel-inner h-100 rounded">
-	// 			@foreach (var img in dashboardImages)
-	// 			{
-	// 				<div class="carousel-item @(first ? "active" : "") h-100">
-	// 					<div class="d-flex flex-row-fluid bgi-size-cover bgi-position-top"
-	// 					style="background-image: url('@Url.Content(img)'); height: 300px;">
-	// 					</div>
-	// 				</div>
-	// 				first = false;
-	// 			}
-	// 		</div>
-	// 	</div>
-	// </div>
-	<div style="height: 50px;"></div>
+
+@{
+    var summary = Model?.Summary ?? new Services.DTOs.DashboardSummaryDto();
+    var hotWarnings = Model?.ThiHanhCanhBao ?? new List<Services.DTOs.DashboardCanhBaoItemDto>();
+    var chartJson = JsonSerializer.Serialize(Model ?? new Services.DTOs.HomeResponseDto());
 }
-else
-{
-	<div style="height: 50px;"></div>
-}
-<div class="container-fluid mt-n10">
-	<!-- TỔNG HỢP HỒ SƠ TOÀN HỆ THỐNG -->
-	<h2 class="mb-5 text-dark font-weight-bold">Tổng hợp hồ sơ toàn hệ thống</h2>
-	<div class="row">
-		<div class="col-12">
-			<div class="card card-custom gutter-b shadow">
-				<div class="card-header h-auto">
-					<div class="card-title py-5">
-						<h3 class="card-label font-weight-boldest">Diễn biến số lượng hồ sơ theo tháng (Năm <span class="tonghop-chart-year">@DateTime.Now.Year</span>)</h3>
-					</div>
-				</div>
-				<div class="card-body" style="min-height: 380px;">
-					<div id="CharCombinedSinWaveByYear">
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
 
-	<!-- HỒ SƠ ĐỊNH GIÁ -->
-	<h2 class="mb-5 text-dark font-weight-bold">Dữ liệu định giá hàng hóa dịch vụ</h2>
-	<div class="row">
-		<div class="col-xl-6 col-lg-12">
-			<div class="card card-custom gutter-b shadow">
-				<div class="card-header h-auto">
-					<div class="card-title py-5">
-						<h3 class="card-label font-weight-boldest">Biểu đồ Số lượng hồ sơ định giá theo danh mục</h3>
-					</div>
-				</div>
-				<div class="card-body" style="min-height: 350px;">
-					<div id="CharColumTotalDinhGiaByYear">
-					</div>
-				</div>
-			</div>
-		</div>
+<div class="container-fluid">
+    <div class="row mb-6">
+        <div class="col-12">
+            <div class="card card-custom shadow">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h3 class="card-label text-danger">Cảnh báo nóng cần theo dõi</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <a href="/Manages/GiaHanXayDung" class="text-decoration-none">
+                                <div class="border rounded p-5 h-100 bg-light-warning">
+                                    <div class="text-dark font-weight-bold mb-2">Hồ sơ văn bản đang xử lý</div>
+                                    <div class="font-size-h2 font-weight-bolder text-warning">@summary.HoSoDangXuLy</div>
+                                    <div class="text-muted">Bấm để theo dõi xử lý hoặc gia hạn</div>
+                                </div>
+                            </a>
+                        </div>
+                        @foreach (var item in hotWarnings)
+                        {
+                            var bgClass = item.MaCanhBao == "QUA_HAN" ? "bg-light-danger" : item.MaCanhBao == "CHAM_TIEN_DO" ? "bg-light-warning" : "bg-light-primary";
+                            var textClass = item.MaCanhBao == "QUA_HAN" ? "text-danger" : item.MaCanhBao == "CHAM_TIEN_DO" ? "text-warning" : "text-primary";
+                            <div class="col-xl-3 col-md-6 mb-4">
+                                <a href="/Manages/DanhGiaKetQuaThiHanhPhapLuat?CanhBao=@item.MaCanhBao" class="text-decoration-none">
+                                    <div class="border rounded p-5 h-100 @bgClass">
+                                        <div class="text-dark font-weight-bold mb-2">@item.TieuChi</div>
+                                        <div class="font-size-h2 font-weight-bolder @textClass">@item.SoLuong</div>
+                                        <div class="text-muted">Bấm để xem danh sách chi tiết</div>
+                                    </div>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-		<div class="col-xl-6 col-lg-12">
-			<div class="card card-custom gutter-b shadow">
-				<div class="card-header h-auto">
-					<div class="card-title py-5">
-						<h3 class="card-label font-weight-boldest">Biểu đồ Tỷ lệ hồ sơ định giá theo danh mục</h3>
-					</div>
-				</div>
-				<div class="card-body" style="min-height: 350px; display: flex; flex-direction: column; justify-content: center;">
-					<div id="CharDonutDinhGiaStatus">
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="row mb-6">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="/Manages/TraCuuDangKyVanBan" class="text-decoration-none">
+                <div class="card card-custom gutter-b shadow h-100">
+                    <div class="card-body">
+                        <div class="text-muted font-weight-bold">Tổng hồ sơ văn bản</div>
+                        <div class="font-size-h1 font-weight-bolder text-primary">@summary.TongHoSoVanBan</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="/Manages/GiaHanXayDung" class="text-decoration-none">
+                <div class="card card-custom gutter-b shadow h-100">
+                    <div class="card-body">
+                        <div class="text-muted font-weight-bold">Hồ sơ đang xử lý</div>
+                        <div class="font-size-h1 font-weight-bolder text-warning">@summary.HoSoDangXuLy</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="/Manages/TraCuuDangKyVanBan?MaBuoc=HOAN_THANH" class="text-decoration-none">
+                <div class="card card-custom gutter-b shadow h-100">
+                    <div class="card-body">
+                        <div class="text-muted font-weight-bold">Hồ sơ đã hoàn thành</div>
+                        <div class="font-size-h1 font-weight-bolder text-success">@summary.HoSoDaHoanThanh</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="/Manages/BanHanhVanBan" class="text-decoration-none">
+                <div class="card card-custom gutter-b shadow h-100">
+                    <div class="card-body">
+                        <div class="text-muted font-weight-bold">Hồ sơ đã ban hành</div>
+                        <div class="font-size-h1 font-weight-bolder text-info">@summary.HoSoDaBanHanh</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
 
-	<!-- HỒ SƠ KÊ KHAI ĐĂNG KÝ GIÁ -->
-	<h2 class="mb-5 mt-5 text-dark font-weight-bold">Dữ liệu kê khai đăng ký giá</h2>
-	<div class="row">
-		<div class="col-xl-6 col-lg-12">
-			<div class="card card-custom gutter-b shadow">
-				<div class="card-header h-auto">
-					<div class="card-title py-5">
-						<h3 class="card-label font-weight-boldest">Số lượng hồ sơ kê khai đăng ký giá theo tháng (Năm <span class="kekhai-chart-year">@DateTime.Now.Year</span>)</h3>
-					</div>
-				</div>
-				<div class="card-body" style="min-height: 350px;">
-					<div id="CharColumTotalKeKhaiByYear">
-					</div>
-				</div>
-			</div>
-		</div>
+    <div class="row mb-6">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="/Manages/DanhSachKeHoachThiHanhPhapLuat" class="text-decoration-none">
+                <div class="card card-custom gutter-b shadow h-100">
+                    <div class="card-body">
+                        <div class="text-muted font-weight-bold">Kế hoạch thi hành</div>
+                        <div class="font-size-h1 font-weight-bolder text-primary">@summary.TongKeHoachThiHanh</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="/Manages/DanhGiaKetQuaThiHanhPhapLuat?CanhBao=QUA_HAN" class="text-decoration-none">
+                <div class="card card-custom gutter-b shadow h-100">
+                    <div class="card-body">
+                        <div class="text-muted font-weight-bold">Nhiệm vụ quá hạn</div>
+                        <div class="font-size-h1 font-weight-bolder text-danger">@summary.NhiemVuThiHanhQuaHan</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="/Manages/DanhGiaKetQuaThiHanhPhapLuat?CanhBao=CHAM_TIEN_DO" class="text-decoration-none">
+                <div class="card card-custom gutter-b shadow h-100">
+                    <div class="card-body">
+                        <div class="text-muted font-weight-bold">Chậm tiến độ</div>
+                        <div class="font-size-h1 font-weight-bolder text-warning">@summary.NhiemVuThiHanhChamTienDo</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <a href="/Manages/DanhGiaKetQuaThiHanhPhapLuat?CanhBao=CHUA_NHAP_LIEU" class="text-decoration-none">
+                <div class="card card-custom gutter-b shadow h-100">
+                    <div class="card-body">
+                        <div class="text-muted font-weight-bold">Chưa nhập liệu</div>
+                        <div class="font-size-h1 font-weight-bolder text-dark">@summary.NhiemVuThiHanhChuaNhapLieu</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
 
-		<div class="col-xl-6 col-lg-12">
-			<div class="card card-custom gutter-b shadow">
-				<div class="card-header h-auto">
-					<div class="card-title py-5">
-						<h3 class="card-label font-weight-boldest">Tỷ lệ hồ sơ kê khai đăng ký giá theo trạng thái</h3>
-					</div>
-				</div>
-				<div class="card-body" style="min-height: 350px; display: flex; flex-direction: column; justify-content: center;">
-					<div id="CharDonutKeKhaiStatus">
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="row">
+        <div class="col-xl-8 mb-6">
+            <div class="card card-custom shadow">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h3 class="card-label">Diễn biến hồ sơ văn bản theo tháng (@summary.NamThongKe)</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="dashboard_ho_so_monthly" style="min-height: 360px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 mb-6">
+            <div class="card card-custom shadow">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h3 class="card-label">Xếp loại chấm điểm</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="dashboard_xep_loai" style="min-height: 360px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<!-- HỒ SƠ GIÁ THỊ TRƯỜNG -->
-	<h2 class="mb-5 mt-5 text-dark font-weight-bold">Dữ liệu giá thị trường</h2>
-	<div class="row">
-		<div class="col-xl-6 col-lg-12">
-			<div class="card card-custom gutter-b shadow">
-				<div class="card-header h-auto">
-					<div class="card-title py-5">
-						<h3 class="card-label font-weight-boldest">Số lượng hồ sơ giá thị trường theo tháng (Năm <span class="giathitruong-chart-year">@DateTime.Now.Year</span>)</h3>
-					</div>
-				</div>
-				<div class="card-body" style="min-height: 350px;">
-					<div id="CharColumTotalGiaThiTruongByYear">
-					</div>
-				</div>
-			</div>
-		</div>
+    <div class="row">
+        <div class="col-xl-6 mb-6">
+            <div class="card card-custom shadow">
+                <div class="card-header"><div class="card-title"><h3 class="card-label">Hồ sơ theo bước hiện tại</h3></div></div>
+                <div class="card-body"><div id="dashboard_by_step" style="min-height: 340px;"></div></div>
+            </div>
+        </div>
+        <div class="col-xl-6 mb-6">
+            <div class="card card-custom shadow">
+                <div class="card-header"><div class="card-title"><h3 class="card-label">Hồ sơ theo đơn vị soạn thảo</h3></div></div>
+                <div class="card-body"><div id="dashboard_by_donvi" style="min-height: 340px;"></div></div>
+            </div>
+        </div>
+    </div>
 
-		<div class="col-xl-6 col-lg-12">
-			<div class="card card-custom gutter-b shadow">
-				<div class="card-header h-auto">
-					<div class="card-title py-5">
-						<h3 class="card-label font-weight-boldest">Tỷ lệ hồ sơ giá thị trường theo trạng thái</h3>
-					</div>
-				</div>
-				<div class="card-body" style="min-height: 350px; display: flex; flex-direction: column; justify-content: center;">
-					<div id="CharDonutGiaThiTruongStatus">
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- HỒ SƠ THẨM ĐỊNH GIÁ -->
-	<h2 class="mb-5 mt-5 text-dark font-weight-bold">Dữ liệu thẩm định giá</h2>
-	<div class="row">
-		<div class="col-xl-6 col-lg-12">
-			<div class="card card-custom gutter-b shadow">
-				<div class="card-header h-auto">
-					<div class="card-title py-5">
-						<h3 class="card-label font-weight-boldest">Số lượng hồ sơ thẩm định giá theo tháng (Năm <span class="thamdinhgia-chart-year">@DateTime.Now.Year</span>)</h3>
-					</div>
-				</div>
-				<div class="card-body" style="min-height: 350px;">
-					<div id="CharColumTotalThamDinhGiaByYear">
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="col-xl-6 col-lg-12">
-			<div class="card card-custom gutter-b shadow">
-				<div class="card-header h-auto">
-					<div class="card-title py-5">
-						<h3 class="card-label font-weight-boldest">Tỷ lệ hồ sơ thẩm định giá theo trạng thái</h3>
-					</div>
-				</div>
-				<div class="card-body" style="min-height: 350px; display: flex; flex-direction: column; justify-content: center;">
-					<div id="CharDonutThamDinhGiaStatus">
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	@* @await Html.PartialAsync("~/Views/Admin/Home/Dashboard/Supports.cshtml") *@
+    <div class="row">
+        <div class="col-xl-6 mb-6">
+            <div class="card card-custom shadow">
+                <div class="card-header"><div class="card-title"><h3 class="card-label">Tình trạng nhiệm vụ thi hành pháp luật</h3></div></div>
+                <div class="card-body"><div id="dashboard_thihanh_status" style="min-height: 340px;"></div></div>
+            </div>
+        </div>
+        <div class="col-xl-6 mb-6">
+            <div class="card card-custom shadow">
+                <div class="card-header"><div class="card-title"><h3 class="card-label">Cảnh báo thi hành pháp luật</h3></div></div>
+                <div class="card-body"><div id="dashboard_thihanh_warning" style="min-height: 340px;"></div></div>
+            </div>
+        </div>
+    </div>
 </div>
 
-@section custom_style {
-
-}
-
 @section custom_script {
-@* <script src="~/assets/js/bootstrap5.3.3.bundle.min.js"></script> *@
-	<script src="~/js/site.js" asp-append-version="true"></script>
-	<script src="~/js/pages/Admin/Home/dashboard.js" asp-append-version="true"></script>
-
-	<script>
-		$(document).ready(() => {
-			// perfectScrollbar.active('#ThuTucHanhChinhDataTable');
-			// perfectScrollbar.active('#HeThongVanBanaDataTable');
-		});
-	</script>
+    <script>
+        window.homeDashboardData = @Html.Raw(chartJson);
+    </script>
+    <script src="~/js/pages/Admin/Home/dashboard.js" asp-append-version="true"></script>
 }

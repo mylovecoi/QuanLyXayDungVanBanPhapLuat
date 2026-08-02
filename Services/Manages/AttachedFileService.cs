@@ -70,6 +70,8 @@ namespace Services.Manages
                     TableName = request.TableName,
                     MoTa = request.MoTa,
                     PhanLoaiDuThao = request.PhanLoaiDuThao,
+                    LoaiTaiLieu = request.LoaiTaiLieu,
+                    PhamViCongKhai = string.IsNullOrWhiteSpace(request.PhamViCongKhai) ? "NOI_BO" : request.PhamViCongKhai,
                     Url = request.Url,
                     Public = request.Public,
                     Status = "CXD",

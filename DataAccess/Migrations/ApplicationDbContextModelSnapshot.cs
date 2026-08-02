@@ -86,6 +86,10 @@ namespace DataAccess.Migrations
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("LoaiTaiLieu")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("MoTa")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -95,6 +99,11 @@ namespace DataAccess.Migrations
 
                     b.Property<DateTime>("NgayBanHanh")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("PhamViCongKhai")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("PhanLoaiDuThao")
                         .HasMaxLength(50)
@@ -139,6 +148,13 @@ namespace DataAccess.Migrations
                     b.Property<Guid?>("BuocHienTaiId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ChucVuNguoiKy")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<Guid?>("CoQuanBanHanhId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
@@ -151,14 +167,34 @@ namespace DataAccess.Migrations
                     b.Property<Guid>("DanhMucVanBanId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("DiemChatLuongVanBan")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("DiemTienDoXayDung")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
                     b.Property<Guid>("DonViSoanThaoId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DuongDanCongKhai")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("GhiChu")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("HanXuLy")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("HoTenNguoiKy")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("LoaiVanBanBanHanh")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("MaHoSo")
                         .IsRequired()
@@ -167,17 +203,42 @@ namespace DataAccess.Migrations
                     b.Property<string>("MoTa")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("NgayBanHanh")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayChamDiem")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayCoHieuLuc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayCongKhai")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayHetHieuLuc")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("NgayHoanThanh")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayKy")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("NgayTaoHoSo")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("NguoiKyId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("NguoiTaoId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("QuyTrinhSoanThaoId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SoKyHieuBanHanh")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("SoLanTraLaiHienTai")
                         .HasColumnType("int");
@@ -186,21 +247,55 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal?>("TongDiemDanhGia")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int?>("TongThoiGianQuyDinhNgay")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TongThoiGianXayDungNgay")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrangThaiBanHanh")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("TrichYeuBanHanh")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<decimal?>("TyLeThoiGianXayDung")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
                     b.Property<Guid>("UpdatedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("VanBanPhapLuatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("XepLoaiDanhGia")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BuocHienTaiId");
+
+                    b.HasIndex("CoQuanBanHanhId");
 
                     b.HasIndex("DanhMucTrangThaiId");
 
                     b.HasIndex("DanhMucVanBanId");
 
                     b.HasIndex("DonViSoanThaoId");
+
+                    b.HasIndex("NguoiKyId");
 
                     b.HasIndex("NguoiTaoId");
 
@@ -252,6 +347,129 @@ namespace DataAccess.Migrations
                     b.HasIndex("HoSoVanBanId");
 
                     b.ToTable("HoSoVanBanBuocThoiHans");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanChamDiem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("HoSoVanBanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("NgayChamDiem")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("NguoiChamDiemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("TongDiem")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("XepLoai")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoSoVanBanId")
+                        .IsUnique();
+
+                    b.HasIndex("NguoiChamDiemId");
+
+                    b.ToTable("HoSoVanBanChamDiems");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanChamDiemChiTiet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DanhMucTieuChiDiemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("DiemChinhThuc")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("DiemDeXuat")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("DiemToiDa")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("DienGiaiGiaTri")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("GiaTriTinhDiem")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("HoSoVanBanChamDiemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LoaiTieuChi")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("MaTieuChi")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TenTieuChi")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DanhMucTieuChiDiemId");
+
+                    b.HasIndex("HoSoVanBanChamDiemId");
+
+                    b.ToTable("HoSoVanBanChamDiemChiTiets");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanDanhGia", b =>
@@ -321,6 +539,121 @@ namespace DataAccess.Migrations
                     b.HasIndex("TraLaiBuocId");
 
                     b.ToTable("HoSoVanBanDanhGias");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanDotLayYKien", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AttachedFileGroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BuocQuyTrinhId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CheDoNhapYKien")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("CoQuanLayYKien")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("HanPhanHoi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("HinhThucLayYKien")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<Guid>("HoSoVanBanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("KetQuaChung")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("LanLayYKien")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("NgayCoKetQua")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayGuiLayYKien")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayTongHop")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("NguoiTongHopId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NoiDungTiepThu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NoiDungTongHop")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NoiDungYeuCau")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SoDongY")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoDongYCoYKien")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoKhongDongY")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SoKhongPhanHoi")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SoVanBanLayYKien")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("TongSoThanhVien")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal?>("TyLeDongY")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BuocQuyTrinhId");
+
+                    b.HasIndex("NguoiTongHopId");
+
+                    b.HasIndex("HoSoVanBanId", "BuocQuyTrinhId", "CoQuanLayYKien", "LanLayYKien")
+                        .IsUnique();
+
+                    b.ToTable("HoSoVanBanDotLayYKiens");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanDuThao", b =>
@@ -445,6 +778,63 @@ namespace DataAccess.Migrations
                     b.HasIndex("HoSoVanBanId");
 
                     b.ToTable("HoSoVanBanDuThaoVersions");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanGiaHan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AttachedFileGroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BuocQuyTrinhId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("HanXuLyCu")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("HanXuLyMoi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("HoSoVanBanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("LyDoGiaHan")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("NguoiGiaHanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SoNgayGiaHan")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BuocQuyTrinhId");
+
+                    b.HasIndex("HoSoVanBanId");
+
+                    b.HasIndex("NguoiGiaHanId");
+
+                    b.ToTable("HoSoVanBanGiaHans");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanLayYKien", b =>
@@ -644,6 +1034,95 @@ namespace DataAccess.Migrations
                     b.ToTable("HoSoVanBanXuLys");
                 });
 
+            modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanYKienThanhVien", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AttachedFileGroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ChucVu")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<bool>("CoQuyenBieuQuyet")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DonViId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DotLayYKienId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("HanPhanHoi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("HoTenThanhVien")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("KetQuaYKien")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime?>("NgayGui")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayPhanHoi")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NoiDungTiepThu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NoiDungYKien")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TenDonVi")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<Guid?>("ThanhVienId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ThuTuHienThi")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrangThaiPhanHoi")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DonViId");
+
+                    b.HasIndex("ThanhVienId");
+
+                    b.HasIndex("DotLayYKienId", "ThanhVienId")
+                        .IsUnique()
+                        .HasFilter("[ThanhVienId] IS NOT NULL");
+
+                    b.ToTable("HoSoVanBanYKienThanhViens");
+                });
+
             modelBuilder.Entity("DataAccess.Entities.Manages.Notification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -699,6 +1178,574 @@ namespace DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatChiTietNhiemVu", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DonViThucHienId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DonViTinh")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("GiaTriChiTieu")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("HanHoanThanh")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("KetQuaYeuCau")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LoaiChiTiet")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("MaChiTiet")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("NgayBatDau")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("NguoiPhuTrachChinhId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("NhiemVuId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NoiDungChiTiet")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TenChiTiet")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("ThuTuSapXep")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("TyLeHoanThanh")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DonViThucHienId");
+
+                    b.HasIndex("NguoiPhuTrachChinhId");
+
+                    b.HasIndex("NhiemVuId", "MaChiTiet")
+                        .IsUnique();
+
+                    b.ToTable("ThiHanhPhapLuatChiTietNhiemVus");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatChiTietPhoiHop", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChiTietNhiemVuId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("NguoiDungId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VaiTro")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NguoiDungId");
+
+                    b.HasIndex("ChiTietNhiemVuId", "NguoiDungId")
+                        .IsUnique();
+
+                    b.ToTable("ThiHanhPhapLuatChiTietPhoiHops");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatDanhGia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ChiTietNhiemVuId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DonViDuocDanhGiaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("KeHoachId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("KetQuaDanhGia")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("KienNghiXuLy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MucDoCanhBao")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("NgayDanhGia")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("NguoiDanhGiaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("NhiemVuId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NoiDungDanhGia")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("YeuCauBoSung")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChiTietNhiemVuId");
+
+                    b.HasIndex("DonViDuocDanhGiaId");
+
+                    b.HasIndex("KeHoachId");
+
+                    b.HasIndex("NguoiDanhGiaId");
+
+                    b.HasIndex("NhiemVuId");
+
+                    b.ToTable("ThiHanhPhapLuatDanhGias");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatKeHoach", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AttachedFileGroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CoQuanBanHanhVanBanCanCu")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DanhMucVanBanId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DonViChuTriId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaKeHoach")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("MoTa")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Nam")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("NgayBanHanhVanBanCanCu")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayBatDau")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayCongBo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayKetThuc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SoKyHieuVanBanCanCu")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("TenKeHoach")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("TrichYeuVanBanCanCu")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DanhMucVanBanId");
+
+                    b.HasIndex("DonViChuTriId");
+
+                    b.HasIndex("MaKeHoach")
+                        .IsUnique();
+
+                    b.ToTable("ThiHanhPhapLuatKeHoachs");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatKeHoachDonVi", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("DaXem")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("DonViId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("KeHoachId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("NgayNhanKeHoach")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayXem")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VaiTro")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DonViId");
+
+                    b.HasIndex("KeHoachId", "DonViId", "VaiTro")
+                        .IsUnique();
+
+                    b.ToTable("ThiHanhPhapLuatKeHoachDonVis");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatNhiemVu", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DonViChuTriId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("HanHoanThanh")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("KeHoachId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("MaNhiemVu")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("MucDoUuTien")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("NgayBatDau")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("NguoiDieuPhoiId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NoiDungNhiemVu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TenNhiemVu")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("ThuTuSapXep")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("YeuCauBaoCao")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DonViChuTriId");
+
+                    b.HasIndex("NguoiDieuPhoiId");
+
+                    b.HasIndex("KeHoachId", "MaNhiemVu")
+                        .IsUnique();
+
+                    b.ToTable("ThiHanhPhapLuatNhiemVus");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatTienDo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AttachedFileGroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChiTietNhiemVuId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeXuatKienNghi")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("DonViCapNhatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KetQuaThucHien")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KhoKhanVuongMac")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("NgayCapNhat")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("NguoiCapNhatId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NoiDungBaoCao")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrangThaiBaoCao")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("TyLeHoanThanh")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChiTietNhiemVuId");
+
+                    b.HasIndex("DonViCapNhatId");
+
+                    b.HasIndex("NguoiCapNhatId");
+
+                    b.ToTable("ThiHanhPhapLuatTienDos");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatTongHop", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AttachedFileGroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("KeHoachId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("KetLuan")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KienNghi")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("NgayTongHop")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("NguoiTongHopId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NhanXetTongHop")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SoChiTietChamTienDo")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoChiTietChuaHoanThanh")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoChiTietChuaNhapLieu")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoChiTietDaHoanThanh")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoChiTietQuaHan")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TongSoChiTietNhiemVu")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal>("TyLeHoanThanh")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KeHoachId");
+
+                    b.HasIndex("NguoiTongHopId");
+
+                    b.ToTable("ThiHanhPhapLuatTongHops");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.QuanLyDanhMuc.DanhMucBuocQuyTrinh", b =>
@@ -889,6 +1936,132 @@ namespace DataAccess.Migrations
                     b.HasIndex("DanhMucVanBanId");
 
                     b.ToTable("DanhMucQuyTrinhSoanThaos");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.QuanLyDanhMuc.DanhMucTieuChiDiem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("DiemToiDa")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("DonViGiaTri")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KieuGiaTri")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LoaiTieuChi")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("MaTieuChi")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("MoTa")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TenTieuChi")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("ThuTuSapXep")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("TrangThai")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MaTieuChi")
+                        .IsUnique();
+
+                    b.ToTable("DanhMucTieuChiDiems");
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.QuanLyDanhMuc.DanhMucTieuChiDiemMuc", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("BaoGomDenGiaTri")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("BaoGomTuGiaTri")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DanhMucTieuChiDiemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("DenGiaTri")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Diem")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("GhiChu")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NhanHienThi")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("ThuTuSapXep")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("TrangThai")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("TuGiaTri")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DanhMucTieuChiDiemId");
+
+                    b.ToTable("DanhMucTieuChiDiemMucs");
                 });
 
             modelBuilder.Entity("DataAccess.Entities.QuanLyDanhMuc.DanhMucTrangThai", b =>
@@ -1678,6 +2851,11 @@ namespace DataAccess.Migrations
                         .HasForeignKey("BuocHienTaiId")
                         .OnDelete(DeleteBehavior.NoAction);
 
+                    b.HasOne("DataAccess.Entities.Settings.DanhMucDonVi", null)
+                        .WithMany()
+                        .HasForeignKey("CoQuanBanHanhId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("DataAccess.Entities.QuanLyDanhMuc.DanhMucTrangThai", null)
                         .WithMany()
                         .HasForeignKey("DanhMucTrangThaiId")
@@ -1694,6 +2872,11 @@ namespace DataAccess.Migrations
                         .HasForeignKey("DonViSoanThaoId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiKyId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("DataAccess.Entities.Systems.User", null)
                         .WithMany()
@@ -1719,6 +2902,35 @@ namespace DataAccess.Migrations
                     b.HasOne("DataAccess.Entities.Manages.HoSoVanBan", null)
                         .WithMany()
                         .HasForeignKey("HoSoVanBanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanChamDiem", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Manages.HoSoVanBan", null)
+                        .WithMany()
+                        .HasForeignKey("HoSoVanBanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiChamDiemId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanChamDiemChiTiet", b =>
+                {
+                    b.HasOne("DataAccess.Entities.QuanLyDanhMuc.DanhMucTieuChiDiem", null)
+                        .WithMany()
+                        .HasForeignKey("DanhMucTieuChiDiemId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Manages.HoSoVanBanChamDiem", null)
+                        .WithMany()
+                        .HasForeignKey("HoSoVanBanChamDiemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1754,6 +2966,26 @@ namespace DataAccess.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
                 });
 
+            modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanDotLayYKien", b =>
+                {
+                    b.HasOne("DataAccess.Entities.QuanLyDanhMuc.DanhMucBuocQuyTrinh", null)
+                        .WithMany()
+                        .HasForeignKey("BuocQuyTrinhId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Manages.HoSoVanBan", null)
+                        .WithMany()
+                        .HasForeignKey("HoSoVanBanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiTongHopId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
             modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanDuThao", b =>
                 {
                     b.HasOne("DataAccess.Entities.Manages.HoSoVanBan", null)
@@ -1770,6 +3002,25 @@ namespace DataAccess.Migrations
                         .HasForeignKey("HoSoVanBanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanGiaHan", b =>
+                {
+                    b.HasOne("DataAccess.Entities.QuanLyDanhMuc.DanhMucBuocQuyTrinh", null)
+                        .WithMany()
+                        .HasForeignKey("BuocQuyTrinhId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DataAccess.Entities.Manages.HoSoVanBan", null)
+                        .WithMany()
+                        .HasForeignKey("HoSoVanBanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiGiaHanId")
+                        .OnDelete(DeleteBehavior.NoAction);
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanLayYKien", b =>
@@ -1854,6 +3105,173 @@ namespace DataAccess.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
                 });
 
+            modelBuilder.Entity("DataAccess.Entities.Manages.HoSoVanBanYKienThanhVien", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Settings.DanhMucDonVi", null)
+                        .WithMany()
+                        .HasForeignKey("DonViId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DataAccess.Entities.Manages.HoSoVanBanDotLayYKien", null)
+                        .WithMany()
+                        .HasForeignKey("DotLayYKienId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("ThanhVienId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatChiTietNhiemVu", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Settings.DanhMucDonVi", null)
+                        .WithMany()
+                        .HasForeignKey("DonViThucHienId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiPhuTrachChinhId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DataAccess.Entities.Manages.ThiHanhPhapLuatNhiemVu", null)
+                        .WithMany()
+                        .HasForeignKey("NhiemVuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatChiTietPhoiHop", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Manages.ThiHanhPhapLuatChiTietNhiemVu", null)
+                        .WithMany()
+                        .HasForeignKey("ChiTietNhiemVuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiDungId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatDanhGia", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Manages.ThiHanhPhapLuatChiTietNhiemVu", null)
+                        .WithMany()
+                        .HasForeignKey("ChiTietNhiemVuId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DataAccess.Entities.Settings.DanhMucDonVi", null)
+                        .WithMany()
+                        .HasForeignKey("DonViDuocDanhGiaId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Manages.ThiHanhPhapLuatKeHoach", null)
+                        .WithMany()
+                        .HasForeignKey("KeHoachId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiDanhGiaId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DataAccess.Entities.Manages.ThiHanhPhapLuatNhiemVu", null)
+                        .WithMany()
+                        .HasForeignKey("NhiemVuId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatKeHoach", b =>
+                {
+                    b.HasOne("DataAccess.Entities.QuanLyDanhMuc.DanhMucVanBan", null)
+                        .WithMany()
+                        .HasForeignKey("DanhMucVanBanId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("DataAccess.Entities.Settings.DanhMucDonVi", null)
+                        .WithMany()
+                        .HasForeignKey("DonViChuTriId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatKeHoachDonVi", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Settings.DanhMucDonVi", null)
+                        .WithMany()
+                        .HasForeignKey("DonViId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Manages.ThiHanhPhapLuatKeHoach", null)
+                        .WithMany()
+                        .HasForeignKey("KeHoachId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatNhiemVu", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Settings.DanhMucDonVi", null)
+                        .WithMany()
+                        .HasForeignKey("DonViChuTriId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Manages.ThiHanhPhapLuatKeHoach", null)
+                        .WithMany()
+                        .HasForeignKey("KeHoachId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiDieuPhoiId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatTienDo", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Manages.ThiHanhPhapLuatChiTietNhiemVu", null)
+                        .WithMany()
+                        .HasForeignKey("ChiTietNhiemVuId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Settings.DanhMucDonVi", null)
+                        .WithMany()
+                        .HasForeignKey("DonViCapNhatId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiCapNhatId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.Manages.ThiHanhPhapLuatTongHop", b =>
+                {
+                    b.HasOne("DataAccess.Entities.Manages.ThiHanhPhapLuatKeHoach", null)
+                        .WithMany()
+                        .HasForeignKey("KeHoachId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.Entities.Systems.User", null)
+                        .WithMany()
+                        .HasForeignKey("NguoiTongHopId")
+                        .OnDelete(DeleteBehavior.NoAction);
+                });
+
             modelBuilder.Entity("DataAccess.Entities.QuanLyDanhMuc.DanhMucBuocQuyTrinh", b =>
                 {
                     b.HasOne("DataAccess.Entities.Settings.DanhMucDonVi", null)
@@ -1895,6 +3313,15 @@ namespace DataAccess.Migrations
                         .WithMany()
                         .HasForeignKey("DanhMucVanBanId")
                         .OnDelete(DeleteBehavior.NoAction);
+                });
+
+            modelBuilder.Entity("DataAccess.Entities.QuanLyDanhMuc.DanhMucTieuChiDiemMuc", b =>
+                {
+                    b.HasOne("DataAccess.Entities.QuanLyDanhMuc.DanhMucTieuChiDiem", null)
+                        .WithMany()
+                        .HasForeignKey("DanhMucTieuChiDiemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DataAccess.Entities.Settings.DanhMucCanBo", b =>

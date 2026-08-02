@@ -80,14 +80,98 @@ END;
 IF EXISTS (SELECT 1 FROM RoleActions WHERE Id = '20000000-0000-0000-0000-000000000027')
 BEGIN
     UPDATE RoleActions
-    SET Role = 'VanBanQPPL.XayDungVanBan.GopYDanhGia',
-        Title = N'Góp ý đánh giá',
-        Controller = 'DangPhatTrien',
-        Action = 'GopYDanhGia',
-        [Table] = 'DangPhatTrien',
+    SET Role = 'VanBanQPPL.XayDungVanBan.LayYKienUBND',
+        Title = N'Lấy ý kiến UBND',
+        Controller = 'LayYKienUBND',
+        Action = 'Index',
+        [Table] = 'HoSoVanBans',
         UpdatedBy = @SystemUser,
         UpdatedDate = @Now
     WHERE Id = '20000000-0000-0000-0000-000000000027';
+END;
+
+IF NOT EXISTS (SELECT 1 FROM RoleActions WHERE Id = '20000000-0000-0000-0000-000000000051')
+BEGIN
+    INSERT INTO RoleActions
+    (
+        Id, CreatedBy, CreatedDate, UpdatedBy, UpdatedDate,
+        STTSapXep, PhanLoai, Level, Role, RoleGroupId,
+        Title, Controller, Action, Parameter, [Table],
+        Status, UseGroup, Icon
+    )
+    VALUES
+    (
+        '20000000-0000-0000-0000-000000000051', @SystemUser, @Now, @SystemUser, @Now,
+        4, 'Detail', 2, 'VanBanQPPL.DangKyXayDung.TraCuuDangKyVanBan', '20000000-0000-0000-0000-000000000021',
+        N'Tra cứu đăng ký văn bản', 'TraCuuDangKyVanBan', 'Index', NULL, 'HoSoVanBans',
+        N'Kich hoat', NULL, NULL
+    );
+END;
+
+IF EXISTS (SELECT 1 FROM RoleActions WHERE Id = '20000000-0000-0000-0000-000000000051')
+BEGIN
+    UPDATE RoleActions
+    SET Title = N'Tra cứu đăng ký văn bản',
+        Controller = 'TraCuuDangKyVanBan',
+        Action = 'Index',
+        [Table] = 'HoSoVanBans',
+        UpdatedBy = @SystemUser,
+        UpdatedDate = @Now
+    WHERE Id = '20000000-0000-0000-0000-000000000051';
+END;
+
+IF NOT EXISTS (SELECT 1 FROM RoleActions WHERE Id = '20000000-0000-0000-0000-000000000047')
+BEGIN
+    INSERT INTO RoleActions
+    (
+        Id, CreatedBy, CreatedDate, UpdatedBy, UpdatedDate,
+        STT, [Level], [Type], Role, ParentId,
+        Title, Controller, Action, [Data], [Table],
+        Status, Description, Icon
+    )
+    VALUES
+    (
+        '20000000-0000-0000-0000-000000000047', @SystemUser, @Now, @SystemUser, @Now,
+        3, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.LayYKienHDND', '20000000-0000-0000-0000-000000000025',
+        N'Lấy ý kiến HĐND', 'LayYKienHDND', 'Index', NULL, 'HoSoVanBans',
+        N'Kích hoạt', NULL, NULL
+    );
+END;
+
+IF NOT EXISTS (SELECT 1 FROM RoleActions WHERE Id = '20000000-0000-0000-0000-000000000049')
+BEGIN
+    INSERT INTO RoleActions
+    (
+        Id, CreatedBy, CreatedDate, UpdatedBy, UpdatedDate,
+        STTSapXep, PhanLoai, Level, Role, RoleGroupId,
+        Title, Controller, Action, Parameter, [Table],
+        Status, UseGroup, Icon
+    )
+    VALUES
+    (
+        '20000000-0000-0000-0000-000000000049', @SystemUser, @Now, @SystemUser, @Now,
+        5, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.ChamDiemXayDung', '20000000-0000-0000-0000-000000000025',
+        N'Chấm điểm xây dựng', 'ChamDiemXayDung', 'Index', NULL, 'HoSoVanBanChamDiems',
+        N'Kích hoạt', NULL, NULL
+    );
+END;
+
+IF NOT EXISTS (SELECT 1 FROM RoleActions WHERE Id = '20000000-0000-0000-0000-000000000050')
+BEGIN
+    INSERT INTO RoleActions
+    (
+        Id, CreatedBy, CreatedDate, UpdatedBy, UpdatedDate,
+        STTSapXep, PhanLoai, Level, Role, RoleGroupId,
+        Title, Controller, Action, Parameter, [Table],
+        Status, UseGroup, Icon
+    )
+    VALUES
+    (
+        '20000000-0000-0000-0000-000000000050', @SystemUser, @Now, @SystemUser, @Now,
+        6, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.TheoDoiTienDoXayDung', '20000000-0000-0000-0000-000000000025',
+        N'Theo dõi tiến độ xây dựng', 'TheoDoiTienDoXayDung', 'Index', NULL, 'HoSoVanBans',
+        N'Kích hoạt', NULL, NULL
+    );
 END;
 
 IF EXISTS (SELECT 1 FROM RoleActions WHERE Id = '20000000-0000-0000-0000-000000000028')
@@ -352,3 +436,11 @@ BEGIN
         N'Kích hoạt', NULL, NULL
     );
 END;
+
+UPDATE RoleActions
+SET Controller = 'GiaHanXayDung',
+    Action = 'Index',
+    [Table] = 'HoSoVanBans',
+    UpdatedBy = @SystemUser,
+    UpdatedDate = @Now
+WHERE Id = '20000000-0000-0000-0000-000000000042';

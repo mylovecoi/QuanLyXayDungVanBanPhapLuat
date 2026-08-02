@@ -1,0 +1,64 @@
+@model Services.Manages.HoSoVanBanDonDocFormModel
+
+@Html.AntiForgeryToken()
+<input type="hidden" name="HoSoVanBanId" value="@Model.HoSoVanBanId" />
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="font-weight-bold">Mã hồ sơ</label>
+            <input class="form-control" value="@Model.MaHoSo" readonly />
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="font-weight-bold">Mức cảnh báo</label>
+            <input class="form-control" value="@Model.MucCanhBao" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="font-weight-bold">Tên hồ sơ</label>
+    <input class="form-control" value="@Model.TenHoSo" readonly />
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="font-weight-bold">Bước hiện tại</label>
+            <input class="form-control" value="@Model.TenBuocHienTai" readonly />
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="font-weight-bold">Hạn xử lý</label>
+            <input class="form-control" value="@(Model.HanXuLy.HasValue ? Model.HanXuLy.Value.ToString("dd/MM/yyyy") : string.Empty)" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="font-weight-bold">Đơn vị chủ trì</label>
+            <input class="form-control" value="@Model.TenDonViSoanThao" readonly />
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label class="font-weight-bold">Đơn vị đang xử lý</label>
+            <input class="form-control" value="@Model.TenDonViXuLyHienTai" readonly />
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    <label class="font-weight-bold">Ghi chú cảnh báo</label>
+    <textarea class="form-control" rows="2" readonly>@Model.GhiChuCanhBao</textarea>
+</div>
+
+<div class="form-group mb-0">
+    <label class="font-weight-bold">Nội dung đôn đốc <span class="text-danger">*</span></label>
+    <textarea class="form-control" name="NoiDungDonDoc" id="NoiDungDonDoc" rows="5" placeholder="Nhập nội dung đôn đốc...">@Model.NoiDungDonDoc</textarea>
+</div>

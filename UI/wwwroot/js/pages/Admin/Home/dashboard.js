@@ -1,641 +1,202 @@
-$(document).ready(() => {
-    HandleRenderApexcharts().init();
-    HandleFetchAllDashboardData();
-
-    // Tự động cập nhật dữ liệu biểu đồ mỗi 30 giây (30000ms)
-    setInterval(HandleFetchAllDashboardData, 30000);
+$(document).ready(function () {
+    const data = window.homeDashboardData || {};
+    renderMonthlyHoSoChart(data.hoSoChart || data.HoSoChart || {});
+    renderXepLoaiChart(data.hoSoChart || data.HoSoChart || {});
+    renderByStepChart(data.hoSoByStep || data.HoSoByStep || []);
+    renderByDonViChart(data.hoSoByDonVi || data.HoSoByDonVi || []);
+    renderThiHanhStatusChart(data.thiHanhChart || data.ThiHanhChart || {});
+    renderThiHanhWarningChart(data.thiHanhChart || data.ThiHanhChart || {});
 });
 
-function HandleFetchAllDashboardData() {
-    HandleFetchDataForTongHopApexCharts();
-    HandleFetchDataForDinhGiaApexCharts();
-    HandleFetchDataForKeKhaiApexCharts();
-    HandleFetchDataForGiaThiTruongApexCharts();
-    HandleFetchDataForThamDinhGiaApexCharts();
-}
-
-function generateSeriesData(count, yrange) {
-    const data = [];
-    for (let i = 0; i < count; i++) {
-        const y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-        data.push(y);
-    }
-    return data;
-}
-
-function HandleGetMonthLabels(prefix = 'Tháng') {
-    return Array.from({ length: 12 }, (_, i) => `${prefix} ${i + 1}`);
-}
-
-const HandleRenderApexcharts = (() => {
-    const primary = '#3699FF';
-    const success = '#1BC5BD';
-    const info = '#8950FC';
-    const warning = '#FFA800';
-    const danger = '#F64E60';
-
-    const categories = HandleGetMonthLabels('Tháng');
-
-    const labelCCCT = {
-        congchung: "Hồ Sơ Công Chứng",
-        chungthuc: "Hồ Sơ Chứng Thực",
-    }
-
-    const init = (data) => {
-        const dataCongChung = data?.congChung ?? generateSeriesData(12, { min: 0, max: 0 });
-        const dataChungThuc = data?.chungThuc ?? generateSeriesData(12, { min: 0, max: 0 });
-        const dataChenhLech = dataCongChung.map((val, i) => val - dataChungThuc[i]);
-
-        _renderChart_HoSoCCCT_ByMonth_Column(dataCongChung, dataChungThuc);
-        _renderChart_HoSoCCCT_ByMonth_Area(dataCongChung, dataChungThuc);
-        _renderChart_HoSoCCCT_Trend_Line(dataChenhLech);
-    }
-
-    const _renderChart_HoSoCCCT_ByMonth_Column = (dataCongChung, dataChungThuc) => {
-        HandleRenderChart({
-            targetId: '#CharColumTotalHoSoCCCTByYear',
-            type: 'bar',
-            //title: 'Hồ sơ công chứng và chứng thực theo tháng',
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: '55%',
-                    endingShape: 'rounded'
-                },
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            series: [
-                { name: labelCCCT.congchung, data: dataCongChung },
-                { name: labelCCCT.chungthuc, data: dataChungThuc }
-            ],
-            categories,
-            colors: [primary, warning]
-        });
-    }
-
-    const _renderChart_HoSoCCCT_ByMonth_Area = (dataCongChung, dataChungThuc) => {
-        HandleRenderChart({
-            targetId: '#CharAreaTotalHoSoCCCTByYear',
-            type: 'area',
-            //title: 'Biểu đồ Tổng hồ sơ công chứng và chứng thực theo tháng',
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            series: [
-                { name: labelCCCT.congchung, data: dataCongChung },
-                { name: labelCCCT.chungthuc, data: dataChungThuc }
-            ],
-            categories,
-            colors: ['#28a745', '#17a2b8']
-        });
-    }
-
-    const _renderChart_HoSoCCCT_Trend_Line = (dataChenhLech) => {
-        HandleRenderChart({
-            targetId: '#CharLineInsDesHoSoCCCTByYear',
-            type: 'line',
-            //title: 'Chênh lệch hồ sơ theo tháng',
-            series: [
-                { name: 'Chênh lệch (Công chứng - Chứng thực)', data: dataChenhLech }
-            ],
-            categories,
-            colors: ['#dc3545']
-        });
-    }
-
-    return { init };
-});
-
-const HandleRenderChart = (options = {}) => {
-    const {
-        targetId,
-        type = 'bar',
-        title = '',
-        series = [],
-        colors = [],
-        height = 250,
-        curve = 'smooth',
-        showToolbar = false,
-        tooltipSuffix = ' hồ sơ',
-        plotOptions = {},
-        dataLabels = {
-            enabled: false
-        },
-        stroke = {}
-    } = options;
-
-    const categories = Array.isArray(options.categories) ? options.categories : [];
-
+function createOrUpdateChart(targetId, options) {
     const el = document.querySelector(targetId);
-    if (!el) {
-        console.warn(`Không tìm thấy phần tử với targetId: ${targetId}`);
+    if (!el || typeof ApexCharts === 'undefined') {
         return;
     }
 
-    const chartOptions = {
-        series,
-        chart: {
-            type,
-            height,
-            toolbar: { show: showToolbar }
-        },
-        plotOptions,
-        dataLabels,
-        stroke: {
-            ...stroke,
-            curve
-        },
-        xaxis: {
-            categories,
-            ...(options.xaxis ?? {})
-        },
-        colors,
-        title: {
-            text: title,
-            align: 'center',         // 'left', 'center', 'right'
-            margin: 0,              // khoảng cách giữa title và chart
-            offsetX: 0,              // dịch theo trục X
-            offsetY: 0,              // dịch theo trục Y
-            floating: false,         // true = không chiếm không gian biểu đồ
-            style: {
-                fontSize: '16px',
-                fontWeight: 'bold',
-                fontFamily: undefined,
-                color: '#263238'
-            }
-        },
-        tooltip: {
-            y: {
-                formatter: function (val) {
-                    return val + tooltipSuffix;
-                }
-            }
-        }
-    };
-
-    //const chart = new ApexCharts(document.querySelector(targetId), chartOptions);
-    //chart.render();
-
-    // Nếu đã có chart instance => update
     if (el._chart) {
-        el._chart.updateSeries(series, true);
-    } else {
-        const chart = new ApexCharts(el, chartOptions);
-        chart.render();
-        el._chart = chart; // gán chart vào DOM để sử dụng lại sau
+        el._chart.updateOptions(options, true, true);
+        return;
     }
-};
 
-const HandleFetchDataForApexCharts = () => {
-    HandleFetchAjax({
-        url: '/Reports/BaoCaoKhac/GetSoLuongHoSoTiepNhanTheoThang',
-        beforeSendCallback: () => {
-        },
-        successCallback: (res) => {
-            HandleRenderApexcharts().init(res.data);
-        },
-        errorCallback: (xhr, status, error) => {
-            toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
-        }
-    });
-};
+    const chart = new ApexCharts(el, options);
+    chart.render();
+    el._chart = chart;
+}
 
-const HandleRenderDinhGiaApexcharts = (() => {
-    const primary = '#3699FF';
-    const success = '#1BC5BD';
+function navigateTo(url) {
+    if (url) {
+        window.location.href = url;
+    }
+}
 
-    const init = (data) => {
-        if (data && data.year) {
-            $('.dinhgia-chart-year').text(data.year);
-        }
+function buildMonthRange(category) {
+    if (!category) {
+        return null;
+    }
 
-        const dgByNghe = (data?.dinhGiaByMaNghe ?? data?.DinhGiaByMaNghe ?? []);
-        const dgCategories = dgByNghe.map(x => {
-            const name = x.tenNghe ?? x.TenNghe ?? 'Khác';
-            return name.length > 22 ? name.substring(0, 22) + '...' : name;
-        });
-        const dgTotalCounts = dgByNghe.map(x => x.totalCount ?? x.TotalCount ?? 0);
-        const dgApprovedCounts = dgByNghe.map(x => x.approvedCount ?? x.ApprovedCount ?? 0);
+    const match = category.match(/(\d{1,2})\/(\d{4})/);
+    if (!match) {
+        return null;
+    }
 
-        // Column Chart for DinhGia
-        HandleRenderChart({
-            targetId: '#CharColumTotalDinhGiaByYear',
+    const month = parseInt(match[1], 10);
+    const year = parseInt(match[2], 10);
+    if (!month || !year) {
+        return null;
+    }
+
+    const from = new Date(year, month - 1, 1);
+    const to = new Date(year, month, 0);
+    return {
+        from: formatDate(from),
+        to: formatDate(to)
+    };
+}
+
+function formatDate(date) {
+    const dd = `${date.getDate()}`.padStart(2, '0');
+    const mm = `${date.getMonth() + 1}`.padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+function renderMonthlyHoSoChart(data) {
+    const categories = data.categories || data.Categories || [];
+    createOrUpdateChart('#dashboard_ho_so_monthly', {
+        chart: {
             type: 'bar',
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: '55%',
-                    endingShape: 'rounded'
-                },
-            },
-            dataLabels: { enabled: false },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            series: [
-                { name: "Tổng số hồ sơ", data: dgTotalCounts },
-                { name: "Hồ sơ đã duyệt/công bố", data: dgApprovedCounts }
-            ],
-            categories: dgCategories,
-            colors: [primary, success],
-            xaxis: {
-                labels: {
-                    rotate: -45,
-                    rotateAlways: false,
-                    hideOverlappingLabels: true,
-                    trim: true,
-                    maxHeight: 120,
-                    style: {
-                        fontSize: '10px'
+            height: 340,
+            toolbar: { show: false },
+            events: {
+                dataPointSelection: function (event, chartContext, config) {
+                    const category = categories[config.dataPointIndex];
+                    const range = buildMonthRange(category);
+                    if (!range) {
+                        return;
                     }
+
+                    navigateTo(`/Manages/TraCuuDangKyVanBan?TuNgayTao=${range.from}&DenNgayTao=${range.to}`);
                 }
             }
-        });
+        },
+        series: [
+            { name: 'Tạo mới', data: data.hoSoTaoMoiTheoThang || data.HoSoTaoMoiTheoThang || [] },
+            { name: 'Hoàn thành', data: data.hoSoHoanThanhTheoThang || data.HoSoHoanThanhTheoThang || [] },
+            { name: 'Ban hành', data: data.hoSoBanHanhTheoThang || data.HoSoBanHanhTheoThang || [] }
+        ],
+        xaxis: { categories: categories },
+        colors: ['#3699FF', '#1BC5BD', '#8950FC'],
+        dataLabels: { enabled: false },
+        plotOptions: { bar: { columnWidth: '45%', endingShape: 'rounded' } },
+        legend: { position: 'top' }
+    });
+}
 
-        // Donut Chart for DinhGia (Percentage of different MaNghe)
-        const elDgDonut = document.querySelector('#CharDonutDinhGiaStatus');
-        if (elDgDonut) {
-            const donutSeries = dgTotalCounts;
-            const donutLabels = dgCategories;
-            const donutOptions = {
-                series: donutSeries,
-                chart: {
-                    type: 'donut',
-                    height: 280
-                },
-                labels: donutLabels,
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: { width: 200 },
-                        legend: { position: 'bottom' }
-                    }
-                }]
-            };
+function renderXepLoaiChart(data) {
+    const labels = data.xepLoaiLabels || data.XepLoaiLabels || [];
+    const values = data.xepLoaiValues || data.XepLoaiValues || [];
 
-            if (elDgDonut._chart) {
-                elDgDonut._chart.updateSeries(donutSeries, true);
-                elDgDonut._chart.updateOptions({ labels: donutLabels });
-            } else {
-                const chart = new ApexCharts(elDgDonut, donutOptions);
-                chart.render();
-                elDgDonut._chart = chart;
-            }
-        }
-    }
+    createOrUpdateChart('#dashboard_xep_loai', {
+        chart: { type: 'donut', height: 340 },
+        series: values,
+        labels: labels.length ? labels : ['Chưa có dữ liệu'],
+        colors: ['#1BC5BD', '#3699FF', '#FFA800', '#F64E60', '#8950FC', '#6c757d'],
+        legend: { position: 'bottom' },
+        noData: { text: 'Chưa có dữ liệu' }
+    });
+}
 
-    return { init };
-})();
-
-const HandleRenderKeKhaiApexcharts = (() => {
-    const primary = '#3699FF';
-    const success = '#1BC5BD';
-    const info = '#8950FC';
-    const warning = '#FFA800';
-    const danger = '#F64E60';
-
-    const monthCategories = HandleGetMonthLabels('Tháng');
-
-    const init = (data) => {
-        if (data && data.year) {
-            $('.kekhai-chart-year').text(data.year);
-        }
-
-        const kkMonthlyCounts = data?.monthlyCounts ?? data?.MonthlyCounts ?? generateSeriesData(12, { min: 0, max: 0 });
-        const kkMonthlyApprovedCounts = data?.monthlyApprovedCounts ?? data?.MonthlyApprovedCounts ?? generateSeriesData(12, { min: 0, max: 0 });
-
-        HandleRenderChart({
-            targetId: '#CharColumTotalKeKhaiByYear',
+function renderByStepChart(items) {
+    createOrUpdateChart('#dashboard_by_step', {
+        chart: {
             type: 'bar',
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: '55%',
-                    endingShape: 'rounded'
-                },
-            },
-            dataLabels: { enabled: false },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            series: [
-                { name: "Tổng số hồ sơ", data: kkMonthlyCounts },
-                { name: "Hồ sơ đã duyệt/công bố", data: kkMonthlyApprovedCounts }
-            ],
-            categories: monthCategories,
-            colors: [primary, success]
-        });
-
-        const kkStatusCounts = data?.statusCounts ?? data?.StatusCounts ?? { CC: 0, CD: 0, DD: 0, CB: 0, BTL: 0 };
-        const cc = kkStatusCounts.CC ?? kkStatusCounts.cc ?? kkStatusCounts.cC ?? 0;
-        const cd = kkStatusCounts.CD ?? kkStatusCounts.cd ?? kkStatusCounts.cD ?? 0;
-        const dd = kkStatusCounts.DD ?? kkStatusCounts.dd ?? kkStatusCounts.dD ?? 0;
-        const cb = kkStatusCounts.CB ?? kkStatusCounts.cb ?? kkStatusCounts.cB ?? 0;
-        const btl = kkStatusCounts.BTL ?? kkStatusCounts.btl ?? kkStatusCounts.btL ?? 0;
-        const kkDonutSeries = [cc, cd, dd, cb, btl];
-
-        const elKkDonut = document.querySelector('#CharDonutKeKhaiStatus');
-        if (elKkDonut) {
-            const donutOptions = {
-                series: kkDonutSeries,
-                chart: {
-                    type: 'donut',
-                    height: 250
-                },
-                labels: ["Chờ chuyển", "Chờ duyệt", "Đã duyệt", "Công bố", "Bị trả lại"],
-                colors: [info, warning, success, primary, danger],
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: { width: 200 },
-                        legend: { position: 'bottom' }
+            height: 320,
+            toolbar: { show: false },
+            events: {
+                dataPointSelection: function (event, chartContext, config) {
+                    const item = items[config.dataPointIndex];
+                    if (!item) {
+                        return;
                     }
-                }]
-            };
 
-            if (elKkDonut._chart) {
-                elKkDonut._chart.updateSeries(kkDonutSeries, true);
-            } else {
-                const chart = new ApexCharts(elKkDonut, donutOptions);
-                chart.render();
-                elKkDonut._chart = chart;
+                    const maBuoc = item.maBuoc || item.MaBuoc;
+                    navigateTo(maBuoc
+                        ? `/Manages/TraCuuDangKyVanBan?MaBuoc=${encodeURIComponent(maBuoc)}`
+                        : '/Manages/TraCuuDangKyVanBan');
+                }
             }
-        }
-    }
+        },
+        series: [{ name: 'Số lượng', data: items.map(x => x.soLuong ?? x.SoLuong ?? 0) }],
+        xaxis: { categories: items.map(x => x.tenBuoc ?? x.TenBuoc ?? '') },
+        colors: ['#3699FF'],
+        plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
+        dataLabels: { enabled: false }
+    });
+}
 
-    return { init };
-})();
-
-const HandleRenderGiaThiTruongApexcharts = (() => {
-    const primary = '#3699FF';
-    const success = '#1BC5BD';
-    const info = '#8950FC';
-    const warning = '#FFA800';
-    const danger = '#F64E60';
-
-    const monthCategories = HandleGetMonthLabels('Tháng');
-
-    const init = (data) => {
-        if (data && data.year) {
-            $('.giathitruong-chart-year').text(data.year);
-        }
-
-        const gttMonthlyCounts = data?.monthlyCounts ?? data?.MonthlyCounts ?? generateSeriesData(12, { min: 0, max: 0 });
-        const gttMonthlyApprovedCounts = data?.monthlyApprovedCounts ?? data?.MonthlyApprovedCounts ?? generateSeriesData(12, { min: 0, max: 0 });
-
-        HandleRenderChart({
-            targetId: '#CharColumTotalGiaThiTruongByYear',
+function renderByDonViChart(items) {
+    createOrUpdateChart('#dashboard_by_donvi', {
+        chart: {
             type: 'bar',
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: '55%',
-                    endingShape: 'rounded'
-                },
-            },
-            dataLabels: { enabled: false },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            series: [
-                { name: "Tổng số hồ sơ", data: gttMonthlyCounts },
-                { name: "Hồ sơ đã duyệt/công bố", data: gttMonthlyApprovedCounts }
-            ],
-            categories: monthCategories,
-            colors: [primary, success]
-        });
-
-        const gttStatusCounts = data?.statusCounts ?? data?.StatusCounts ?? { CC: 0, CD: 0, DD: 0, CB: 0, BTL: 0 };
-        const cc = gttStatusCounts.CC ?? gttStatusCounts.cc ?? gttStatusCounts.cC ?? 0;
-        const cd = gttStatusCounts.CD ?? gttStatusCounts.cd ?? gttStatusCounts.cD ?? 0;
-        const dd = gttStatusCounts.DD ?? gttStatusCounts.dd ?? gttStatusCounts.dD ?? 0;
-        const cb = gttStatusCounts.CB ?? gttStatusCounts.cb ?? gttStatusCounts.cB ?? 0;
-        const btl = gttStatusCounts.BTL ?? gttStatusCounts.btl ?? gttStatusCounts.btL ?? 0;
-        const gttDonutSeries = [cc, cd, dd, cb, btl];
-
-        const elGttDonut = document.querySelector('#CharDonutGiaThiTruongStatus');
-        if (elGttDonut) {
-            const donutOptions = {
-                series: gttDonutSeries,
-                chart: {
-                    type: 'donut',
-                    height: 250
-                },
-                labels: ["Chờ chuyển", "Chờ duyệt", "Đã duyệt", "Công bố", "Bị trả lại"],
-                colors: [info, warning, success, primary, danger],
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: { width: 200 },
-                        legend: { position: 'bottom' }
+            height: 320,
+            toolbar: { show: false },
+            events: {
+                dataPointSelection: function (event, chartContext, config) {
+                    const item = items[config.dataPointIndex];
+                    if (!item) {
+                        return;
                     }
-                }]
-            };
 
-            if (elGttDonut._chart) {
-                elGttDonut._chart.updateSeries(gttDonutSeries, true);
-            } else {
-                const chart = new ApexCharts(elGttDonut, donutOptions);
-                chart.render();
-                elGttDonut._chart = chart;
+                    const donViId = item.donViId || item.DonViId;
+                    navigateTo(donViId
+                        ? `/Manages/TraCuuDangKyVanBan?DonViId=${encodeURIComponent(donViId)}`
+                        : '/Manages/TraCuuDangKyVanBan');
+                }
             }
-        }
-    }
-
-    return { init };
-})();
-
-const HandleFetchDataForDinhGiaApexCharts = () => {
-    HandleFetchAjax({
-        url: '/DinhGiaBaoCao/GetSoLuongDinhGiaTheoThang',
-        successCallback: (res) => {
-            HandleRenderDinhGiaApexcharts.init(res.data);
         },
-        errorCallback: (xhr, status, error) => {
-            toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
-        }
+        series: [{ name: 'Số hồ sơ', data: items.map(x => x.soLuongHoSo ?? x.SoLuongHoSo ?? 0) }],
+        xaxis: { categories: items.map(x => x.tenDonVi ?? x.TenDonVi ?? '') },
+        colors: ['#8950FC'],
+        plotOptions: { bar: { horizontal: true, borderRadius: 4 } },
+        dataLabels: { enabled: false }
     });
-};
+}
 
-const HandleFetchDataForKeKhaiApexCharts = () => {
-    HandleFetchAjax({
-        url: '/KeKhaiDangKyGia/GetSoLuongKeKhaiTheoThang',
-        successCallback: (res) => {
-            HandleRenderKeKhaiApexcharts.init(res.data);
-        },
-        errorCallback: (xhr, status, error) => {
-            toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
-        }
+function renderThiHanhStatusChart(data) {
+    createOrUpdateChart('#dashboard_thihanh_status', {
+        chart: { type: 'pie', height: 320 },
+        series: data.trangThaiValues || data.TrangThaiValues || [],
+        labels: data.trangThaiLabels || data.TrangThaiLabels || [],
+        colors: ['#3699FF', '#1BC5BD', '#FFA800', '#F64E60', '#8950FC'],
+        legend: { position: 'bottom' },
+        noData: { text: 'Chưa có dữ liệu' }
     });
-};
+}
 
-const HandleFetchDataForGiaThiTruongApexCharts = () => {
-    HandleFetchAjax({
-        url: '/GiaThiTruong/GetSoLuongGiaThiTruongTheoThang',
-        successCallback: (res) => {
-            HandleRenderGiaThiTruongApexcharts.init(res.data);
-        },
-        errorCallback: (xhr, status, error) => {
-            toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
-        }
-    });
-};
+function renderThiHanhWarningChart(data) {
+    const labels = data.canhBaoLabels || data.CanhBaoLabels || [];
+    const items = (window.homeDashboardData && (window.homeDashboardData.thiHanhCanhBao || window.homeDashboardData.ThiHanhCanhBao)) || [];
 
-const HandleRenderThamDinhGiaApexcharts = (() => {
-    const primary = '#3699FF';
-    const success = '#1BC5BD';
-    const info = '#8950FC';
-    const warning = '#FFA800';
-    const danger = '#F64E60';
-
-    const monthCategories = HandleGetMonthLabels('Tháng');
-
-    const init = (data) => {
-        if (data && data.year) {
-            $('.thamdinhgia-chart-year').text(data.year);
-        }
-
-        const tdMonthlyCounts = data?.monthlyCounts ?? data?.MonthlyCounts ?? generateSeriesData(12, { min: 0, max: 0 });
-        const tdMonthlyApprovedCounts = data?.monthlyApprovedCounts ?? data?.MonthlyApprovedCounts ?? generateSeriesData(12, { min: 0, max: 0 });
-
-        HandleRenderChart({
-            targetId: '#CharColumTotalThamDinhGiaByYear',
+    createOrUpdateChart('#dashboard_thihanh_warning', {
+        chart: {
             type: 'bar',
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: '55%',
-                    endingShape: 'rounded'
-                },
-            },
-            dataLabels: { enabled: false },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            series: [
-                { name: "Tổng số hồ sơ", data: tdMonthlyCounts },
-                { name: "Hồ sơ đã duyệt/công bố", data: tdMonthlyApprovedCounts }
-            ],
-            categories: monthCategories,
-            colors: [primary, success]
-        });
-
-        const tdStatusCounts = data?.statusCounts ?? data?.StatusCounts ?? { CC: 0, CD: 0, DD: 0, CB: 0, BTL: 0 };
-        const cc = tdStatusCounts.CC ?? tdStatusCounts.cc ?? tdStatusCounts.cC ?? 0;
-        const cd = tdStatusCounts.CD ?? tdStatusCounts.cd ?? tdStatusCounts.cD ?? 0;
-        const dd = tdStatusCounts.DD ?? tdStatusCounts.dd ?? tdStatusCounts.dD ?? 0;
-        const cb = tdStatusCounts.CB ?? tdStatusCounts.cb ?? tdStatusCounts.cB ?? 0;
-        const btl = tdStatusCounts.BTL ?? tdStatusCounts.btl ?? tdStatusCounts.btL ?? 0;
-        const tdDonutSeries = [cc, cd, dd, cb, btl];
-
-        const elTdDonut = document.querySelector('#CharDonutThamDinhGiaStatus');
-        if (elTdDonut) {
-            const donutOptions = {
-                series: tdDonutSeries,
-                chart: {
-                    type: 'donut',
-                    height: 250
-                },
-                labels: ["Chờ chuyển", "Chờ duyệt", "Đã duyệt", "Công bố", "Bị trả lại"],
-                colors: [info, warning, success, primary, danger],
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: { width: 200 },
-                        legend: { position: 'bottom' }
-                    }
-                }]
-            };
-
-            if (elTdDonut._chart) {
-                elTdDonut._chart.updateSeries(tdDonutSeries, true);
-            } else {
-                const chart = new ApexCharts(elTdDonut, donutOptions);
-                chart.render();
-                elTdDonut._chart = chart;
+            height: 320,
+            toolbar: { show: false },
+            events: {
+                dataPointSelection: function (event, chartContext, config) {
+                    const item = items[config.dataPointIndex];
+                    const maCanhBao = item ? (item.maCanhBao || item.MaCanhBao) : null;
+                    navigateTo(maCanhBao
+                        ? `/Manages/DanhGiaKetQuaThiHanhPhapLuat?CanhBao=${encodeURIComponent(maCanhBao)}`
+                        : '/Manages/DanhGiaKetQuaThiHanhPhapLuat');
+                }
             }
-        }
-    }
-
-    return { init };
-})();
-
-const HandleFetchDataForThamDinhGiaApexCharts = () => {
-    HandleFetchAjax({
-        url: '/ThamDinhGia/GetSoLuongThamDinhGiaTheoThang',
-        successCallback: (res) => {
-            HandleRenderThamDinhGiaApexcharts.init(res.data);
         },
-        errorCallback: (xhr, status, error) => {
-            toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
-        }
+        series: [{ name: 'Số lượng', data: data.canhBaoValues || data.CanhBaoValues || [] }],
+        xaxis: { categories: labels },
+        colors: ['#F64E60'],
+        plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+        dataLabels: { enabled: true }
     });
-};
-
-
-const HandleRenderTongHopApexcharts = (() => {
-    const primary = '#3699FF';
-    const success = '#1BC5BD';
-    const warning = '#FFA800';
-    const danger = '#F64E60';
-
-    const monthCategories = HandleGetMonthLabels('Tháng');
-
-    const init = (data) => {
-        if (data && data.year) {
-            $('.tonghop-chart-year').text(data.year);
-        }
-
-        const monthlyDG = data?.monthlyDG ?? data?.MonthlyDG ?? generateSeriesData(12, { min: 0, max: 0 });
-        const monthlyKK = data?.monthlyKK ?? data?.MonthlyKK ?? generateSeriesData(12, { min: 0, max: 0 });
-        const monthlyGTT = data?.monthlyGTT ?? data?.MonthlyGTT ?? generateSeriesData(12, { min: 0, max: 0 });
-        const monthlyTotal = data?.monthlyTotal ?? data?.MonthlyTotal ?? generateSeriesData(12, { min: 0, max: 0 });
-
-        HandleRenderChart({
-            targetId: '#CharCombinedSinWaveByYear',
-            type: 'area',
-            height: 350,
-            curve: 'smooth',
-            series: [
-                { name: "Định giá HHDV", data: monthlyDG },
-                { name: "Kê khai đăng ký giá", data: monthlyKK },
-                { name: "Giá thị trường", data: monthlyGTT },
-                { name: "Tổng cộng hồ sơ", data: monthlyTotal }
-            ],
-            categories: monthCategories,
-            colors: [success, warning, primary, danger]
-        });
-    }
-
-    return { init };
-})();
-
-const HandleFetchDataForTongHopApexCharts = () => {
-    HandleFetchAjax({
-        url: '/Home/GetTongHopHoSoStats',
-        successCallback: (res) => {
-            HandleRenderTongHopApexcharts.init(res.data);
-        },
-        errorCallback: (xhr, status, error) => {
-            toastr.error('Không nhận được phản hồi từ máy chủ. Vui lòng thử lại sau.');
-        }
-    });
-};
+}

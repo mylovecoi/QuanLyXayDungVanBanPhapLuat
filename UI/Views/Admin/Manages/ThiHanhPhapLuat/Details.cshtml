@@ -1,0 +1,521 @@
+@using Services.Manages
+@using DataAccess.Entities.Settings
+@using DataAccess.Entities.Systems
+@model ThiHanhPhapLuatKeHoachDetailModel
+
+@{
+    var donViOptions = ViewData["DonViOptions"] as List<DanhMucDonVi> ?? new();
+    var nguoiDungOptions = ViewData["NguoiDungOptions"] as List<User> ?? new();
+    var trangThaiNhiemVuOptions = ViewData["TrangThaiNhiemVuOptions"] as List<(string Value, string Text)> ?? new();
+    var mucDoUuTienOptions = ViewData["MucDoUuTienOptions"] as List<(string Value, string Text)> ?? new();
+    var loaiChiTietOptions = ViewData["LoaiChiTietOptions"] as List<(string Value, string Text)> ?? new();
+    var routePrefix = ViewData["RoutePrefix"]?.ToString() ?? "/Manages/DanhSachKeHoachThiHanhPhapLuat";
+    var allowEdit = routePrefix.Contains("DanhSachKeHoachThiHanhPhapLuat");
+}
+
+<div class="card card-custom mb-5">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="card-label">CHI TIẾT KẾ HOẠCH</h3>
+        </div>
+        <div class="card-toolbar">
+            <a href="@routePrefix" class="btn btn-light mr-2">Quay lại</a>
+            @if (allowEdit)
+            {
+                <a href="/Manages/DanhSachKeHoachThiHanhPhapLuat/Edit?id=@Model.Id" class="btn btn-primary">Sửa kế hoạch</a>
+            }
+        </div>
+    </div>
+    <div class="card-body">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-light-success">@TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-light-danger">@TempData["ErrorMessage"]</div>
+        }
+
+        <div class="row">
+            <div class="col-md-3"><b>Mã kế hoạch:</b> @Model.MaKeHoach</div>
+            <div class="col-md-3"><b>Năm:</b> @Model.Nam</div>
+            <div class="col-md-3"><b>Đơn vị chủ trì:</b> @Model.TenDonViChuTri</div>
+            <div class="col-md-3"><b>Trạng thái:</b> @Model.TrangThai</div>
+            <div class="col-md-12 mt-3"><b>Tên kế hoạch:</b> @Model.TenKeHoach</div>
+            <div class="col-md-12 mt-3"><b>Căn cứ:</b> @(Model.SoKyHieuVanBanCanCu ?? "-") - @(Model.TrichYeuVanBanCanCu ?? "-")</div>
+        </div>
+    </div>
+</div>
+
+@if (allowEdit)
+{
+    <div class="card card-custom mb-5">
+        <div class="card-header">
+            <div class="card-title"><h3 class="card-label">THÊM NHIỆM VỤ LỚN</h3></div>
+        </div>
+        <form method="post" action="/Manages/DanhSachKeHoachThiHanhPhapLuat/SaveNhiemVu">
+            @Html.AntiForgeryToken()
+            <div class="card-body">
+                <input type="hidden" name="KeHoachId" value="@Model.Id" />
+                <div class="row">
+                    <div class="col-md-3 form-group">
+                        <label>Mã nhiệm vụ</label>
+                        <input name="MaNhiemVu" class="form-control" />
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label>Tên nhiệm vụ</label>
+                        <input name="TenNhiemVu" class="form-control" />
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label>Thứ tự</label>
+                        <input name="ThuTuSapXep" type="number" value="1" class="form-control" />
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label>Nội dung nhiệm vụ</label>
+                        <textarea name="NoiDungNhiemVu" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label>Đơn vị chủ trì</label>
+                        <select name="DonViChuTriId" class="form-control">
+                            <option value="">-- Chọn đơn vị --</option>
+                            @foreach (var item in donViOptions)
+                            {
+                                <option value="@item.Id">@item.TenDonVi</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label>Người điều phối</label>
+                        <select name="NguoiDieuPhoiId" class="form-control">
+                            <option value="">-- Chọn người dùng --</option>
+                            @foreach (var item in nguoiDungOptions)
+                            {
+                                <option value="@item.Id">@item.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label>Mức độ ưu tiên</label>
+                        <select name="MucDoUuTien" class="form-control">
+                            @foreach (var item in mucDoUuTienOptions)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label>Ngày bắt đầu</label>
+                        <input name="NgayBatDau" type="date" class="form-control" />
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label>Hạn hoàn thành</label>
+                        <input name="HanHoanThanh" type="date" class="form-control" />
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label>Trạng thái</label>
+                        <select name="TrangThai" class="form-control">
+                            @foreach (var item in trangThaiNhiemVuOptions)
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label>Ghi chú</label>
+                        <textarea name="GhiChu" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-right">
+                <button class="btn btn-primary">Lưu nhiệm vụ lớn</button>
+            </div>
+        </form>
+    </div>
+}
+
+@foreach (var nhiemVu in Model.NhiemVus)
+{
+    <div class="card card-custom mb-5">
+        <div class="card-header">
+            <div class="card-title">
+                <h3 class="card-label">@nhiemVu.MaNhiemVu - @nhiemVu.TenNhiemVu</h3>
+            </div>
+            @if (allowEdit)
+            {
+                <div class="card-toolbar">
+                    <form method="post" action="/Manages/DanhSachKeHoachThiHanhPhapLuat/DeleteNhiemVu" onsubmit="return confirm('Xác nhận xóa nhiệm vụ lớn này?');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@nhiemVu.Id" />
+                        <input type="hidden" name="keHoachId" value="@Model.Id" />
+                        <button class="btn btn-light-danger btn-sm">Xóa nhiệm vụ lớn</button>
+                    </form>
+                </div>
+            }
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-3"><b>Đơn vị chủ trì:</b> @nhiemVu.TenDonViChuTri</div>
+                <div class="col-md-3"><b>Người điều phối:</b> @(nhiemVu.TenNguoiDieuPhoi ?? "-")</div>
+                <div class="col-md-2"><b>Ưu tiên:</b> @nhiemVu.MucDoUuTien</div>
+                <div class="col-md-2"><b>Trạng thái:</b> @nhiemVu.TrangThai</div>
+                <div class="col-md-2"><b>Thứ tự:</b> @nhiemVu.ThuTuSapXep</div>
+                <div class="col-md-12 mt-3"><b>Nội dung:</b> @(nhiemVu.NoiDungNhiemVu ?? "-")</div>
+            </div>
+
+            @if (allowEdit)
+            {
+                <div class="card card-bordered mb-4">
+                    <div class="card-header">
+                        <div class="card-title"><h5 class="mb-0">Cập nhật nhiệm vụ lớn</h5></div>
+                    </div>
+                    <form method="post" action="/Manages/DanhSachKeHoachThiHanhPhapLuat/SaveNhiemVu">
+                        @Html.AntiForgeryToken()
+                        <div class="card-body">
+                            <input type="hidden" name="Id" value="@nhiemVu.Id" />
+                            <input type="hidden" name="KeHoachId" value="@Model.Id" />
+                            <div class="row">
+                                <div class="col-md-3 form-group">
+                                    <label>Mã nhiệm vụ</label>
+                                    <input name="MaNhiemVu" value="@nhiemVu.MaNhiemVu" class="form-control" />
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>Tên nhiệm vụ</label>
+                                    <input name="TenNhiemVu" value="@nhiemVu.TenNhiemVu" class="form-control" />
+                                </div>
+                                <div class="col-md-3 form-group">
+                                    <label>Thứ tự</label>
+                                    <input name="ThuTuSapXep" type="number" value="@nhiemVu.ThuTuSapXep" class="form-control" />
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label>Nội dung nhiệm vụ</label>
+                                    <textarea name="NoiDungNhiemVu" class="form-control" rows="2">@nhiemVu.NoiDungNhiemVu</textarea>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Đơn vị chủ trì</label>
+                                    <select name="DonViChuTriId" class="form-control">
+                                        @foreach (var item in donViOptions)
+                                        {
+                                            <option value="@item.Id" selected="@(item.Id == nhiemVu.DonViChuTriId ? "selected" : null)">@item.TenDonVi</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Người điều phối</label>
+                                    <select name="NguoiDieuPhoiId" class="form-control">
+                                        <option value="">-- Chọn người dùng --</option>
+                                        @foreach (var item in nguoiDungOptions)
+                                        {
+                                            <option value="@item.Id" selected="@(nhiemVu.NguoiDieuPhoiId.HasValue && item.Id == nhiemVu.NguoiDieuPhoiId.Value ? "selected" : null)">@item.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Mức độ ưu tiên</label>
+                                    <select name="MucDoUuTien" class="form-control">
+                                        @foreach (var item in mucDoUuTienOptions)
+                                        {
+                                            <option value="@item.Value" selected="@(item.Value == nhiemVu.MucDoUuTien ? "selected" : null)">@item.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Ngày bắt đầu</label>
+                                    <input name="NgayBatDau" type="date" value="@nhiemVu.NgayBatDau?.ToString("yyyy-MM-dd")" class="form-control" />
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Hạn hoàn thành</label>
+                                    <input name="HanHoanThanh" type="date" value="@nhiemVu.HanHoanThanh?.ToString("yyyy-MM-dd")" class="form-control" />
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>Trạng thái</label>
+                                    <select name="TrangThai" class="form-control">
+                                        @foreach (var item in trangThaiNhiemVuOptions)
+                                        {
+                                            <option value="@item.Value" selected="@(item.Value == nhiemVu.TrangThai ? "selected" : null)">@item.Text</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label>Ghi chú</label>
+                                    <textarea name="GhiChu" class="form-control" rows="2">@nhiemVu.GhiChu</textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer text-right">
+                            <button class="btn btn-primary btn-sm">Cập nhật nhiệm vụ lớn</button>
+                        </div>
+                    </form>
+                </div>
+            }
+
+            <div class="table-responsive border rounded-lg mb-4">
+                <table class="table table-striped m-0">
+                    <thead>
+                        <tr class="table-active text-center">
+                            <th>Mã</th>
+                            <th>Tên nhiệm vụ nhỏ / chỉ tiêu</th>
+                            <th>Đơn vị thực hiện</th>
+                            <th>Phụ trách chính</th>
+                            <th>Tiến độ</th>
+                            <th>Phối hợp</th>
+                            <th>Hạn</th>
+                            @if (allowEdit)
+                            {
+                                <th>Thao tác</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (nhiemVu.ChiTiets.Any())
+                        {
+                            foreach (var chiTiet in nhiemVu.ChiTiets)
+                            {
+                                <tr>
+                                    <td class="align-middle text-center">@chiTiet.MaChiTiet</td>
+                                    <td class="align-middle">
+                                        <div><b>@chiTiet.TenChiTiet</b></div>
+                                        <div class="text-muted">@(chiTiet.NoiDungChiTiet ?? "-")</div>
+                                    </td>
+                                    <td class="align-middle">@chiTiet.TenDonViThucHien</td>
+                                    <td class="align-middle">@(chiTiet.TenNguoiPhuTrachChinh ?? "-")</td>
+                                    <td class="align-middle text-center">@chiTiet.TyLeHoanThanh%<br />@chiTiet.TrangThai</td>
+                                    <td class="align-middle">@(chiTiet.NguoiDungPhoiHops.Any() ? string.Join(", ", chiTiet.NguoiDungPhoiHops) : "-")</td>
+                                    <td class="align-middle text-center">@(chiTiet.HanHoanThanh?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                    @if (allowEdit)
+                                    {
+                                        <td class="align-middle text-center">
+                                            <form method="post" action="/Manages/DanhSachKeHoachThiHanhPhapLuat/DeleteChiTietNhiemVu" onsubmit="return confirm('Xác nhận xóa nhiệm vụ nhỏ này?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@chiTiet.Id" />
+                                                <input type="hidden" name="keHoachId" value="@Model.Id" />
+                                                <button class="btn btn-light-danger btn-sm">Xóa</button>
+                                            </form>
+                                        </td>
+                                    }
+                                </tr>
+                                @if (allowEdit)
+                                {
+                                    <tr>
+                                        <td colspan="8" class="bg-light">
+                                            <form method="post" action="/Manages/DanhSachKeHoachThiHanhPhapLuat/SaveChiTietNhiemVu">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="Id" value="@chiTiet.Id" />
+                                                <input type="hidden" name="KeHoachId" value="@Model.Id" />
+                                                <input type="hidden" name="NhiemVuId" value="@nhiemVu.Id" />
+                                                <div class="row">
+                                                    <div class="col-md-2 form-group">
+                                                        <label>Mã chi tiết</label>
+                                                        <input name="MaChiTiet" value="@chiTiet.MaChiTiet" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-4 form-group">
+                                                        <label>Tên nhiệm vụ nhỏ / chỉ tiêu</label>
+                                                        <input name="TenChiTiet" value="@chiTiet.TenChiTiet" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-2 form-group">
+                                                        <label>Thứ tự</label>
+                                                        <input name="ThuTuSapXep" type="number" value="@chiTiet.ThuTuSapXep" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-4 form-group">
+                                                        <label>Loại</label>
+                                                        <select name="LoaiChiTiet" class="form-control">
+                                                            @foreach (var item in loaiChiTietOptions)
+                                                            {
+                                                                <option value="@item.Value" selected="@(item.Value == chiTiet.LoaiChiTiet ? "selected" : null)">@item.Text</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Nội dung chi tiết</label>
+                                                        <textarea name="NoiDungChiTiet" class="form-control" rows="2">@chiTiet.NoiDungChiTiet</textarea>
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Đơn vị thực hiện</label>
+                                                        <select name="DonViThucHienId" class="form-control">
+                                                            @foreach (var item in donViOptions)
+                                                            {
+                                                                <option value="@item.Id" selected="@(item.Id == chiTiet.DonViThucHienId ? "selected" : null)">@item.TenDonVi</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Người phụ trách chính</label>
+                                                        <select name="NguoiPhuTrachChinhId" class="form-control">
+                                                            <option value="">-- Chọn người dùng --</option>
+                                                            @foreach (var item in nguoiDungOptions)
+                                                            {
+                                                                <option value="@item.Id" selected="@(chiTiet.NguoiPhuTrachChinhId.HasValue && item.Id == chiTiet.NguoiPhuTrachChinhId.Value ? "selected" : null)">@item.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Ngày bắt đầu</label>
+                                                        <input name="NgayBatDau" type="date" value="@chiTiet.NgayBatDau?.ToString("yyyy-MM-dd")" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Hạn hoàn thành</label>
+                                                        <input name="HanHoanThanh" type="date" value="@chiTiet.HanHoanThanh?.ToString("yyyy-MM-dd")" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Trạng thái</label>
+                                                        <select name="TrangThai" class="form-control">
+                                                            @foreach (var item in trangThaiNhiemVuOptions)
+                                                            {
+                                                                <option value="@item.Value" selected="@(item.Value == chiTiet.TrangThai ? "selected" : null)">@item.Text</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Tỷ lệ hoàn thành</label>
+                                                        <input name="TyLeHoanThanh" type="number" min="0" max="100" value="@chiTiet.TyLeHoanThanh" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Giá trị chỉ tiêu</label>
+                                                        <input name="GiaTriChiTieu" type="number" step="0.01" value="@chiTiet.GiaTriChiTieu" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Đơn vị tính</label>
+                                                        <input name="DonViTinh" value="@chiTiet.DonViTinh" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Người phối hợp</label>
+                                                        <select name="NguoiDungPhoiHopIds" class="form-control" multiple>
+                                                            @foreach (var item in nguoiDungOptions)
+                                                            {
+                                                                var selectedPhoiHop = chiTiet.NguoiDungPhoiHops.Contains(item.Name);
+                                                                <option value="@item.Id" selected="@(selectedPhoiHop ? "selected" : null)">@item.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Kết quả yêu cầu</label>
+                                                        <textarea name="KetQuaYeuCau" class="form-control" rows="2">@chiTiet.KetQuaYeuCau</textarea>
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Ghi chú</label>
+                                                        <textarea name="GhiChu" class="form-control" rows="2">@chiTiet.GhiChu</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <button class="btn btn-primary btn-sm">Cập nhật nhiệm vụ nhỏ</button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="8" class="text-center">Chưa có nhiệm vụ nhỏ / chỉ tiêu.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (allowEdit)
+            {
+                <form method="post" action="/Manages/DanhSachKeHoachThiHanhPhapLuat/SaveChiTietNhiemVu">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="KeHoachId" value="@Model.Id" />
+                    <input type="hidden" name="NhiemVuId" value="@nhiemVu.Id" />
+                    <div class="row">
+                        <div class="col-md-2 form-group">
+                            <label>Mã chi tiết</label>
+                            <input name="MaChiTiet" class="form-control" />
+                        </div>
+                        <div class="col-md-5 form-group">
+                            <label>Tên nhiệm vụ nhỏ / chỉ tiêu</label>
+                            <input name="TenChiTiet" class="form-control" />
+                        </div>
+                        <div class="col-md-2 form-group">
+                            <label>Thứ tự</label>
+                            <input name="ThuTuSapXep" type="number" value="1" class="form-control" />
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>Loại</label>
+                            <select name="LoaiChiTiet" class="form-control">
+                                @foreach (var item in loaiChiTietOptions)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>Nội dung chi tiết</label>
+                            <textarea name="NoiDungChiTiet" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>Đơn vị thực hiện</label>
+                            <select name="DonViThucHienId" class="form-control">
+                                <option value="">-- Chọn đơn vị --</option>
+                                @foreach (var item in donViOptions)
+                                {
+                                    <option value="@item.Id">@item.TenDonVi</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>Người phụ trách chính</label>
+                            <select name="NguoiPhuTrachChinhId" class="form-control">
+                                <option value="">-- Chọn người dùng --</option>
+                                @foreach (var item in nguoiDungOptions)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>Ngày bắt đầu</label>
+                            <input name="NgayBatDau" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>Hạn hoàn thành</label>
+                            <input name="HanHoanThanh" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>Trạng thái</label>
+                            <select name="TrangThai" class="form-control">
+                                @foreach (var item in trangThaiNhiemVuOptions)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>Tỷ lệ hoàn thành</label>
+                            <input name="TyLeHoanThanh" type="number" min="0" max="100" value="0" class="form-control" />
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>Giá trị chỉ tiêu</label>
+                            <input name="GiaTriChiTieu" type="number" step="0.01" class="form-control" />
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label>Đơn vị tính</label>
+                            <input name="DonViTinh" class="form-control" />
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>Người phối hợp</label>
+                            <select name="NguoiDungPhoiHopIds" class="form-control" multiple>
+                                @foreach (var item in nguoiDungOptions)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>Kết quả yêu cầu</label>
+                            <textarea name="KetQuaYeuCau" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <label>Ghi chú</label>
+                            <textarea name="GhiChu" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <button class="btn btn-primary">Lưu nhiệm vụ nhỏ</button>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+}

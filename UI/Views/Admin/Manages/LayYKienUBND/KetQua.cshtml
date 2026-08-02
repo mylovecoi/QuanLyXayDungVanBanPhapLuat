@@ -1,0 +1,6 @@
+@model Services.Manages.HoSoVanBanKetQuaLayYKienFormModel
+@{
+    ViewData["SubmitUrl"] = "/Manages/LayYKienUBND/KetQua";
+    ViewData["BackUrl"] = "/Manages/LayYKienUBND";
+}
+@await Html.PartialAsync("Views/Admin/Manages/LayYKienCoQuan/KetQuaLayYKien.cshtml", Model)

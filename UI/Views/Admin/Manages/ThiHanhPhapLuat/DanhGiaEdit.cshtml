@@ -1,0 +1,29 @@
+@model Services.Manages.ThiHanhPhapLuatDanhGiaFormModel
+@{
+    var ketQuaOptions = ViewData["KetQuaOptions"] as List<(string Value, string Text)> ?? new();
+    var canhBaoOptions = ViewData["CanhBaoOptions"] as List<(string Value, string Text)> ?? new();
+    var trangThaiOptions = ViewData["TrangThaiOptions"] as List<(string Value, string Text)> ?? new();
+}
+<div class="card card-custom">
+    <div class="card-header"><div class="card-title"><h3 class="card-label">@ViewData["Title"]</h3></div></div>
+    <form method="post" action="/Manages/DanhGiaKetQuaThiHanhPhapLuat/Edit">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="KeHoachId" />
+        <input type="hidden" asp-for="DonViDuocDanhGiaId" />
+        <div class="card-body">
+            <div asp-validation-summary="All" class="text-danger mb-4"></div>
+            <div class="alert alert-light-info"><b>Kế hoạch:</b> @Model.TenKeHoach</div>
+            <div class="row">
+                <div class="col-md-4 form-group"><label>Ngày đánh giá</label><input asp-for="NgayDanhGia" type="date" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Kết quả đánh giá</label><select asp-for="KetQuaDanhGia" class="form-control">@foreach (var item in ketQuaOptions){<option value="@item.Value">@item.Text</option>}</select></div>
+                <div class="col-md-4 form-group"><label>Mức độ cảnh báo</label><select asp-for="MucDoCanhBao" class="form-control">@foreach (var item in canhBaoOptions){<option value="@item.Value">@item.Text</option>}</select></div>
+                <div class="col-md-12 form-group"><label>Nội dung đánh giá</label><textarea asp-for="NoiDungDanhGia" class="form-control" rows="3"></textarea></div>
+                <div class="col-md-6 form-group"><label>Kiến nghị xử lý</label><textarea asp-for="KienNghiXuLy" class="form-control" rows="3"></textarea></div>
+                <div class="col-md-6 form-group"><label>Yêu cầu bổ sung</label><textarea asp-for="YeuCauBoSung" class="form-control" rows="3"></textarea></div>
+                <div class="col-md-6 form-group"><label>Trạng thái</label><select asp-for="TrangThai" class="form-control">@foreach (var item in trangThaiOptions){<option value="@item.Value">@item.Text</option>}</select></div>
+                <div class="col-md-12 form-group"><label>Ghi chú</label><textarea asp-for="GhiChu" class="form-control" rows="2"></textarea></div>
+            </div>
+        </div>
+        <div class="card-footer text-right"><a href="/Manages/DanhGiaKetQuaThiHanhPhapLuat" class="btn btn-light mr-2">Quay lại</a><button class="btn btn-primary">Lưu đánh giá</button></div>
+    </form>
+</div>

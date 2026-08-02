@@ -1,0 +1,94 @@
+@model Services.Manages.HoSoVanBanKetQuaLayYKienFormModel
+@{
+    var isLocked = Model.TrangThai == "DA_XAC_NHAN";
+    var coQuan = string.IsNullOrWhiteSpace(Model.CoQuanLayYKien) ? "UBND" : Model.CoQuanLayYKien.ToUpperInvariant();
+    var coQuanLabel = coQuan == "HDND" ? "HĐND" : "UBND";
+    var submitUrl = ViewData["SubmitUrl"]?.ToString() ?? (coQuan == "HDND" ? "/Manages/LayYKienHDND/KetQua" : "/Manages/LayYKienUBND/KetQua");
+    var backUrl = ViewData["BackUrl"]?.ToString() ?? (coQuan == "HDND" ? "/Manages/LayYKienHDND" : "/Manages/LayYKienUBND");
+    var attachedFileContainerId = coQuan == "HDND" ? "attachedFileHdnd" : "attachedFileUbnd";
+}
+
+@section custom_script {
+<script>
+    function toggleMode() {
+        const detail = $('#CheDoNhapYKien').val() === 'CHI_TIET';
+        $('#summaryFields').toggle(!detail).find(':input').prop('readonly', detail);
+        $('#detailFields').toggle(detail);
+    }
+    function refreshRows() {
+        $('#memberBody tr').each(function(i) {
+            $(this).find('[data-field]').each(function() { this.name = `ThanhViens[${i}].${this.dataset.field}`; });
+        });
+    }
+    function addMember() {
+        $('#memberBody').append(`<tr>
+            <td><input class="form-control" data-field="HoTenThanhVien" required /></td>
+            <td><input class="form-control" data-field="ChucVu" /></td>
+            <td><input class="form-control" data-field="TenDonVi" /></td>
+            <td><select class="form-control" data-field="KetQuaYKien"><option value="CHUA_PHAN_HOI">ChÆ°a pháº£n há»“i</option><option value="DONG_Y">Äá»“ng Ă½</option><option value="DONG_Y_CO_Y_KIEN">Äá»“ng Ă½, cĂ³ Ă½ kiáº¿n</option><option value="KHONG_DONG_Y">KhĂ´ng Ä‘á»“ng Ă½</option><option value="KHONG_THAM_GIA">KhĂ´ng tham gia</option></select></td>
+            <td><textarea class="form-control" data-field="NoiDungYKien" rows="2"></textarea></td>
+            <td class="text-center"><input type="hidden" data-field="CoQuyenBieuQuyet" value="false"/><input type="checkbox" data-field="CoQuyenBieuQuyet" value="true" checked /></td>
+            <td><button type="button" class="btn btn-sm btn-light-danger" onclick="$(this).closest('tr').remove();refreshRows();">XĂ³a</button></td>
+        </tr>`);
+        refreshRows();
+    }
+    $(function() {
+        toggleMode(); refreshRows(); $('#CheDoNhapYKien').change(toggleMode);
+        $('#@attachedFileContainerId').load('@Url.Action("GetAttachedFiles", "AttachedFile")?GroupId=@Model.AttachedFileGroupId&TableName=HoSoVanBanDotLayYKien');
+    });
+</script>
+}
+
+<div class="card card-custom">
+    <div class="card-header"><div class="card-title"><h3 class="card-label">KẾT QUẢ LẤY Ý KIẾN @coQuanLabel<span class="d-block text-muted pt-2 font-size-sm">@Model.TenHoSo</span></h3></div></div>
+    <form method="post" action="@submitUrl">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id"/><input type="hidden" asp-for="HoSoVanBanId"/><input type="hidden" asp-for="LanLayYKien"/>
+        <input type="hidden" asp-for="AttachedFileGroupId"/><input type="hidden" asp-for="CoQuanLayYKien"/>
+        <div class="card-body">
+            <div asp-validation-summary="All" class="text-danger mb-4"></div>
+            <div class="alert alert-light-info"><b>Loáº¡i vÄƒn báº£n:</b> @Model.TenLoaiVanBan &nbsp; <b>ÄÆ¡n vá»‹ soáº¡n tháº£o:</b> @Model.TenDonViSoanThao &nbsp; <b>BÆ°á»›c:</b> @Model.TenBuocHienTai</div>
+            <div class="row">
+                <div class="col-md-4 form-group"><label>Cháº¿ Ä‘á»™ nháº­p</label><select asp-for="CheDoNhapYKien" class="form-control" disabled="@isLocked"><option value="TONG_HOP">Nháº­p káº¿t quáº£ tá»•ng há»£p</option><option value="CHI_TIET">Nháº­p chi tiáº¿t tá»«ng thĂ nh viĂªn</option></select></div>
+                <div class="col-md-4 form-group"><label>HĂ¬nh thá»©c láº¥y Ă½ kiáº¿n</label><select asp-for="HinhThucLayYKien" class="form-control" disabled="@isLocked"><option value="VAN_BAN">VÄƒn báº£n</option><option value="PHIEU">Phiáº¿u</option><option value="DIEN_TU">Äiá»‡n tá»­</option><option value="PHIEN_HOP">PhiĂªn há»p</option></select></div>
+                <div class="col-md-4 form-group"><label>Sá»‘ vÄƒn báº£n láº¥y Ă½ kiáº¿n</label><input asp-for="SoVanBanLayYKien" class="form-control" readonly="@isLocked"/></div>
+                <div class="col-md-4 form-group"><label>NgĂ y gá»­i</label><input asp-for="NgayGuiLayYKien" type="date" class="form-control" readonly="@isLocked"/></div>
+                <div class="col-md-4 form-group"><label>Háº¡n pháº£n há»“i</label><input asp-for="HanPhanHoi" type="date" class="form-control" readonly="@isLocked"/></div>
+                <div class="col-md-4 form-group"><label>NgĂ y cĂ³ káº¿t quáº£</label><input asp-for="NgayCoKetQua" type="date" class="form-control" readonly="@isLocked"/></div>
+                <div class="col-12 form-group"><label>Ná»™i dung yĂªu cáº§u</label><textarea asp-for="NoiDungYeuCau" class="form-control" rows="2" readonly="@isLocked"></textarea></div>
+            </div>
+
+            <div id="summaryFields" class="row">
+                <div class="col-md form-group"><label>Tá»•ng thĂ nh viĂªn</label><input asp-for="TongSoThanhVien" type="number" min="0" class="form-control"/></div>
+                <div class="col-md form-group"><label>Äá»“ng Ă½</label><input asp-for="SoDongY" type="number" min="0" class="form-control"/></div>
+                <div class="col-md form-group"><label>Äá»“ng Ă½ cĂ³ Ă½ kiáº¿n</label><input asp-for="SoDongYCoYKien" type="number" min="0" class="form-control"/></div>
+                <div class="col-md form-group"><label>KhĂ´ng Ä‘á»“ng Ă½</label><input asp-for="SoKhongDongY" type="number" min="0" class="form-control"/></div>
+                <div class="col-md form-group"><label>KhĂ´ng pháº£n há»“i</label><input asp-for="SoKhongPhanHoi" type="number" min="0" class="form-control"/></div>
+            </div>
+
+            <div id="detailFields" style="display:none">
+                <div class="d-flex justify-content-between mb-3"><h5>Ă kiáº¿n tá»«ng thĂ nh viĂªn</h5>@if (!isLocked) { <button type="button" class="btn btn-light-primary" onclick="addMember()">ThĂªm thĂ nh viĂªn</button> }</div>
+                <div class="table-responsive"><table class="table table-bordered"><thead><tr><th>Há» tĂªn</th><th>Chá»©c vá»¥</th><th>ÄÆ¡n vá»‹</th><th>Káº¿t quáº£</th><th>Ná»™i dung Ă½ kiáº¿n</th><th>Biá»ƒu quyáº¿t</th><th></th></tr></thead><tbody id="memberBody">
+                @for (var i = 0; i < Model.ThanhViens.Count; i++) { var x = Model.ThanhViens[i]; <tr>
+                    <td><input asp-for="ThanhViens[i].HoTenThanhVien" data-field="HoTenThanhVien" class="form-control"/></td>
+                    <td><input asp-for="ThanhViens[i].ChucVu" data-field="ChucVu" class="form-control"/></td>
+                    <td><input asp-for="ThanhViens[i].TenDonVi" data-field="TenDonVi" class="form-control"/></td>
+                    <td><select asp-for="ThanhViens[i].KetQuaYKien" data-field="KetQuaYKien" class="form-control"><option value="CHUA_PHAN_HOI">ChÆ°a pháº£n há»“i</option><option value="DONG_Y">Äá»“ng Ă½</option><option value="DONG_Y_CO_Y_KIEN">Äá»“ng Ă½, cĂ³ Ă½ kiáº¿n</option><option value="KHONG_DONG_Y">KhĂ´ng Ä‘á»“ng Ă½</option><option value="KHONG_THAM_GIA">KhĂ´ng tham gia</option></select></td>
+                    <td><textarea asp-for="ThanhViens[i].NoiDungYKien" data-field="NoiDungYKien" class="form-control" rows="2"></textarea></td>
+                    <td class="text-center"><input type="hidden" data-field="CoQuyenBieuQuyet" value="false"/><input asp-for="ThanhViens[i].CoQuyenBieuQuyet" data-field="CoQuyenBieuQuyet"/></td>
+                    <td>@if (!isLocked) { <button type="button" class="btn btn-sm btn-light-danger" onclick="$(this).closest('tr').remove();refreshRows();">XĂ³a</button> }</td>
+                </tr> }
+                </tbody></table></div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-md-4 form-group"><label>Káº¿t quáº£ chung</label><select asp-for="KetQuaChung" class="form-control" disabled="@isLocked"><option value="DONG_Y">Äá»“ng Ă½</option><option value="DONG_Y_CO_CHINH_SUA">Äá»“ng Ă½ cĂ³ chá»‰nh sá»­a</option><option value="KHONG_DONG_Y">KhĂ´ng Ä‘á»“ng Ă½</option><option value="YEU_CAU_BO_SUNG">YĂªu cáº§u bá»• sung</option></select></div>
+                <div class="col-md-8 form-group"><label>Ná»™i dung tá»•ng há»£p</label><textarea asp-for="NoiDungTongHop" class="form-control" rows="3" readonly="@isLocked"></textarea></div>
+                <div class="col-12 form-group"><label>Ná»™i dung tiáº¿p thu, giáº£i trĂ¬nh</label><textarea asp-for="NoiDungTiepThu" class="form-control" rows="3" readonly="@isLocked"></textarea></div>
+                <div class="col-12 form-group"><label>Ghi chĂº</label><textarea asp-for="GhiChu" class="form-control" rows="2" readonly="@isLocked"></textarea></div>
+            </div>
+            <div class="card border mt-4"><div class="card-body"><h5 class="text-primary">Biên bản và tài liệu kết quả @coQuanLabel</h5><div id="@attachedFileContainerId"><div class="text-center text-muted py-5">Äang táº£i khu vá»±c file Ä‘Ă­nh kĂ¨m...</div></div></div></div>
+        </div>
+        <div class="card-footer text-right"><a href="@backUrl" class="btn btn-light mr-2">Quay láº¡i</a>@if (!isLocked) { <button name="submitAction" value="SAVE" class="btn btn-light-primary mr-2">LÆ°u nhĂ¡p</button><button name="submitAction" value="CONFIRM" class="btn btn-primary" onclick="return confirm('XĂ¡c nháº­n káº¿t quáº£ vĂ  chuyá»ƒn bÆ°á»›c há»“ sÆ¡?')">XĂ¡c nháº­n káº¿t quáº£</button> }</div>
+    </form>
+</div>

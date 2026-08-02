@@ -1,0 +1,33 @@
+@model Services.Manages.ThiHanhPhapLuatTienDoFormModel
+@{
+    var trangThaiOptions = ViewData["TrangThaiBaoCaoOptions"] as List<(string Value, string Text)> ?? new();
+}
+<div class="card card-custom">
+    <div class="card-header"><div class="card-title"><h3 class="card-label">@ViewData["Title"]</h3></div></div>
+    <form method="post" action="/Manages/QuaTrinhToChucThucHien/CapNhatTienDo">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ChiTietNhiemVuId" />
+        <input type="hidden" asp-for="KeHoachId" />
+        <input type="hidden" asp-for="DonViCapNhatId" />
+        <input type="hidden" asp-for="AttachedFileGroupId" />
+        <div class="card-body">
+            <div asp-validation-summary="All" class="text-danger mb-4"></div>
+            <div class="alert alert-light-info">
+                <b>@Model.MaKeHoach</b> - @Model.TenKeHoach<br />
+                <b>Nhiệm vụ:</b> @Model.TenNhiemVu<br />
+                <b>Chi tiết:</b> @Model.TenChiTiet
+            </div>
+            <div class="row">
+                <div class="col-md-4 form-group"><label>Ngày cập nhật</label><input asp-for="NgayCapNhat" type="date" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Tỷ lệ hoàn thành</label><input asp-for="TyLeHoanThanh" type="number" min="0" max="100" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Trạng thái báo cáo</label><select asp-for="TrangThaiBaoCao" class="form-control">@foreach (var item in trangThaiOptions){<option value="@item.Value">@item.Text</option>}</select></div>
+                <div class="col-md-12 form-group"><label>Kết quả thực hiện</label><textarea asp-for="KetQuaThucHien" class="form-control" rows="2"></textarea></div>
+                <div class="col-md-12 form-group"><label>Nội dung báo cáo</label><textarea asp-for="NoiDungBaoCao" class="form-control" rows="3"></textarea></div>
+                <div class="col-md-6 form-group"><label>Khó khăn, vướng mắc</label><textarea asp-for="KhoKhanVuongMac" class="form-control" rows="3"></textarea></div>
+                <div class="col-md-6 form-group"><label>Đề xuất, kiến nghị</label><textarea asp-for="DeXuatKienNghi" class="form-control" rows="3"></textarea></div>
+                <div class="col-md-12 form-group"><label>Ghi chú</label><textarea asp-for="GhiChu" class="form-control" rows="2"></textarea></div>
+            </div>
+        </div>
+        <div class="card-footer text-right"><a href="/Manages/QuaTrinhToChucThucHien" class="btn btn-light mr-2">Quay lại</a><button class="btn btn-primary">Lưu tiến độ</button></div>
+    </form>
+</div>

@@ -1,0 +1,32 @@
+@model Services.Manages.ThiHanhPhapLuatTongHopFormModel
+@{
+    var trangThaiOptions = ViewData["TrangThaiOptions"] as List<(string Value, string Text)> ?? new();
+}
+<div class="card card-custom">
+    <div class="card-header"><div class="card-title"><h3 class="card-label">@ViewData["Title"]</h3></div></div>
+    <form method="post" action="/Manages/DanhGiaKetQuaThiHanhPhapLuat/TongHop">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="KeHoachId" />
+        <input type="hidden" asp-for="AttachedFileGroupId" />
+        <div class="card-body">
+            <div asp-validation-summary="All" class="text-danger mb-4"></div>
+            <div class="alert alert-light-info"><b>Kế hoạch:</b> @Model.TenKeHoach</div>
+            <div class="row">
+                <div class="col-md-4 form-group"><label>Ngày tổng hợp</label><input asp-for="NgayTongHop" type="date" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Tổng số chi tiết nhiệm vụ</label><input asp-for="TongSoChiTietNhiemVu" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Tỷ lệ hoàn thành (%)</label><input asp-for="TyLeHoanThanh" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Đã hoàn thành</label><input asp-for="SoChiTietDaHoanThanh" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Chưa hoàn thành</label><input asp-for="SoChiTietChuaHoanThanh" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Chậm tiến độ</label><input asp-for="SoChiTietChamTienDo" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Quá hạn</label><input asp-for="SoChiTietQuaHan" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Chưa nhập liệu</label><input asp-for="SoChiTietChuaNhapLieu" class="form-control" /></div>
+                <div class="col-md-4 form-group"><label>Trạng thái</label><select asp-for="TrangThai" class="form-control">@foreach (var item in trangThaiOptions){<option value="@item.Value">@item.Text</option>}</select></div>
+                <div class="col-md-12 form-group"><label>Nhận xét tổng hợp</label><textarea asp-for="NhanXetTongHop" class="form-control" rows="3"></textarea></div>
+                <div class="col-md-6 form-group"><label>Kết luận</label><textarea asp-for="KetLuan" class="form-control" rows="3"></textarea></div>
+                <div class="col-md-6 form-group"><label>Kiến nghị</label><textarea asp-for="KienNghi" class="form-control" rows="3"></textarea></div>
+                <div class="col-md-12 form-group"><label>Ghi chú</label><textarea asp-for="GhiChu" class="form-control" rows="2"></textarea></div>
+            </div>
+        </div>
+        <div class="card-footer text-right"><a href="/Manages/DanhGiaKetQuaThiHanhPhapLuat" class="btn btn-light mr-2">Quay lại</a><button class="btn btn-primary">Lưu tổng hợp</button></div>
+    </form>
+</div>

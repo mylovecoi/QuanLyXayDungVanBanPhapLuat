@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using UI.Security;
 
 namespace UI.Controllers.Admin.Systems
@@ -8,23 +8,23 @@ namespace UI.Controllers.Admin.Systems
     {
         [HttpGet("Systems/DangPhatTrien")]
         [AuthorizeAction("Index")]
-        public IActionResult Index() => BuildView("Chức năng đang được phát triển.");
+        public IActionResult Index() => BuildView("Chá»©c nÄƒng Ä‘ang Ä‘Æ°á»£c phĂ¡t triá»ƒn.");
 
         [HttpGet("Systems/DangPhatTrien/TrangThai")]
         [AuthorizeAction("Index")]
-        public IActionResult TrangThai() => BuildView("Chức năng Danh sách trạng thái đang được phát triển.");
+        public IActionResult TrangThai() => BuildView("Chá»©c nÄƒng Danh sĂ¡ch tráº¡ng thĂ¡i Ä‘ang Ä‘Æ°á»£c phĂ¡t triá»ƒn.");
 
         [HttpGet("Systems/DangPhatTrien/DangKyXayDung")]
         [AuthorizeAction("Index")]
-        public IActionResult DangKyXayDung() => BuildView("Chức năng Đăng ký xây dựng đang được phát triển.");
+        public IActionResult DangKyXayDung() => BuildView("Chá»©c nÄƒng ÄÄƒng kĂ½ xĂ¢y dá»±ng Ä‘ang Ä‘Æ°á»£c phĂ¡t triá»ƒn.");
 
         [HttpGet("Systems/DangPhatTrien/XetDuyetDangKy")]
         [AuthorizeAction("Index")]
-        public IActionResult XetDuyetDangKy() => BuildView("Chức năng Xét duyệt đăng ký đang được phát triển.");
+        public IActionResult XetDuyetDangKy() => BuildView("Chá»©c nÄƒng XĂ©t duyá»‡t Ä‘Äƒng kĂ½ Ä‘ang Ä‘Æ°á»£c phĂ¡t triá»ƒn.");
 
         [HttpGet("Systems/DangPhatTrien/PheDuyetDangKy")]
         [AuthorizeAction("Index")]
-        public IActionResult PheDuyetDangKy() => BuildView("Chức năng Phê duyệt đăng ký đang được phát triển.");
+        public IActionResult PheDuyetDangKy() => BuildView("Chá»©c nÄƒng PhĂª duyá»‡t Ä‘Äƒng kĂ½ Ä‘ang Ä‘Æ°á»£c phĂ¡t triá»ƒn.");
 
         [HttpGet("Systems/DangPhatTrien/QuyTrinhSoanThao")]
         [AuthorizeAction("Index")]
@@ -32,11 +32,11 @@ namespace UI.Controllers.Admin.Systems
 
         [HttpGet("Systems/DangPhatTrien/XayDungVanBan")]
         [AuthorizeAction("Index")]
-        public IActionResult XayDungVanBan() => BuildView("Chức năng Xây dựng văn bản đang được phát triển.");
+        public IActionResult XayDungVanBan() => BuildView("Chá»©c nÄƒng XĂ¢y dá»±ng vÄƒn báº£n Ä‘ang Ä‘Æ°á»£c phĂ¡t triá»ƒn.");
 
         [HttpGet("Systems/DangPhatTrien/GopYDanhGia")]
         [AuthorizeAction("Index")]
-        public IActionResult GopYDanhGia() => RedirectToAction("Index", "LayYKienVanBan");
+        public IActionResult GopYDanhGia() => RedirectToAction("Index", "LayYKienUBND");
 
         [HttpGet("Systems/DangPhatTrien/XetDuyetSoanThao")]
         [AuthorizeAction("Index")]
@@ -44,11 +44,11 @@ namespace UI.Controllers.Admin.Systems
 
         [HttpGet("Systems/DangPhatTrien/GiaHanXayDung")]
         [AuthorizeAction("Index")]
-        public IActionResult GiaHanXayDung() => BuildView("Chức năng Gia hạn thời gian xây dựng đang được phát triển.");
+        public IActionResult GiaHanXayDung() => RedirectToAction("Index", "GiaHanXayDung");
 
         [HttpGet("Systems/DangPhatTrien/DanhSachGiaHanXayDung")]
         [AuthorizeAction("Index")]
-        public IActionResult DanhSachGiaHanXayDung() => BuildView("Chức năng Danh sách văn bản gia hạn đang được phát triển.");
+        public IActionResult DanhSachGiaHanXayDung() => RedirectToAction("Index", "GiaHanXayDung");
 
         [HttpGet("Systems/DangPhatTrien/XetDuyetVanBan")]
         [AuthorizeAction("Index")]
@@ -56,27 +56,27 @@ namespace UI.Controllers.Admin.Systems
 
         [HttpGet("Systems/DangPhatTrien/PheDuyetVanBan")]
         [AuthorizeAction("Index")]
-        public IActionResult PheDuyetVanBan() => BuildView("Chức năng Phê duyệt văn bản đang được phát triển.");
+        public IActionResult PheDuyetVanBan() => BuildView("Chá»©c nÄƒng PhĂª duyá»‡t vÄƒn báº£n Ä‘ang Ä‘Æ°á»£c phĂ¡t triá»ƒn.");
 
         [HttpGet("Systems/DangPhatTrien/XetDuyetBanHanhVanBan")]
         [AuthorizeAction("Index")]
-        public IActionResult XetDuyetBanHanhVanBan() => BuildView("Chức năng Xét duyệt ban hành văn bản đang được phát triển.");
+        public IActionResult XetDuyetBanHanhVanBan() => BuildView("Chá»©c nÄƒng XĂ©t duyá»‡t ban hĂ nh vÄƒn báº£n Ä‘ang Ä‘Æ°á»£c phĂ¡t triá»ƒn.");
 
         [HttpGet("Systems/DangPhatTrien/BanHanhVanBan")]
         [AuthorizeAction("Index")]
-        public IActionResult BanHanhVanBan() => BuildView("Chức năng Ban hành văn bản đang được phát triển.");
+        public IActionResult BanHanhVanBan() => BuildView("Chá»©c nÄƒng Ban hĂ nh vÄƒn báº£n Ä‘ang Ä‘Æ°á»£c phĂ¡t triá»ƒn.");
 
         [HttpGet("Systems/DangPhatTrien/DanhSachKeHoach")]
         [AuthorizeAction("Index")]
-        public IActionResult DanhSachKeHoach() => BuildView("Chức năng Danh sách kế hoạch đang được phát triển.");
+        public IActionResult DanhSachKeHoach() => RedirectToAction("Index", "DanhSachKeHoachThiHanhPhapLuat");
 
         [HttpGet("Systems/DangPhatTrien/QuaTrinhToChucThucHien")]
         [AuthorizeAction("Index")]
-        public IActionResult QuaTrinhToChucThucHien() => BuildView("Chức năng Danh sách quá trình tổ chức thực hiện đang được phát triển.");
+        public IActionResult QuaTrinhToChucThucHien() => RedirectToAction("Index", "QuaTrinhToChucThucHien");
 
         [HttpGet("Systems/DangPhatTrien/DanhGiaKetQua")]
         [AuthorizeAction("Index")]
-        public IActionResult DanhGiaKetQua() => BuildView("Chức năng Đánh giá kết quả đang được phát triển.");
+        public IActionResult DanhGiaKetQua() => RedirectToAction("Index", "DanhGiaKetQuaThiHanhPhapLuat");
 
         private IActionResult BuildView(string message)
         {

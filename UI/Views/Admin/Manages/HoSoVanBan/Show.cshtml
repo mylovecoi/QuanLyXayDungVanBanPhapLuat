@@ -179,6 +179,43 @@
         flex-wrap: wrap;
     }
 
+    .hoso-history-list {
+        display: grid;
+        gap: 12px;
+    }
+
+    .hoso-history-card {
+        border: 1px solid #e7ebf3;
+        border-radius: 14px;
+        background: #f8fbff;
+        padding: 16px 18px;
+    }
+
+    .hoso-history-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .hoso-history-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #181c32;
+    }
+
+    .hoso-history-meta {
+        color: #7e8299;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .hoso-history-body {
+        color: #181c32;
+        white-space: pre-line;
+    }
+
     @@media (max-width: 991.98px) {
         .hoso-detail-summary,
         .hoso-info-grid,
@@ -282,6 +319,68 @@
             <div id="attachedFileReadonlyContainer">
                 <div class="empty-attachment-state">Đang tải danh sách file đính kèm...</div>
             </div>
+        </div>
+
+        <div class="hoso-attachment-card">
+            <div class="hoso-section-title">Lịch sử đôn đốc</div>
+            @if (Model.LichSuDonDocs.Any())
+            {
+                <div class="hoso-history-list">
+                    @foreach (var item in Model.LichSuDonDocs)
+                    {
+                        <div class="hoso-history-card">
+                            <div class="hoso-history-header">
+                                <div class="hoso-history-title">Đôn đốc tiến độ</div>
+                                <span class="badge @(item.DaXem ? "badge-light-success" : "badge-light-warning")">
+                                    @(item.DaXem ? "Đã xem" : "Chưa xem")
+                                </span>
+                            </div>
+                            <div class="hoso-history-meta">
+                                <div><span class="font-weight-bold">Thời gian:</span> @FuntionGlobal.ConvertDateTimeToStr(item.CreatedDate)</div>
+                                <div><span class="font-weight-bold">Đơn vị gửi:</span> @(string.IsNullOrWhiteSpace(item.TenDonViGui) ? "-" : item.TenDonViGui)</div>
+                                <div><span class="font-weight-bold">Đơn vị nhận:</span> @(string.IsNullOrWhiteSpace(item.TenDonViNhan) ? "-" : item.TenDonViNhan)</div>
+                            </div>
+                            <div class="hoso-history-body">@item.NoiDung</div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-attachment-state">Chưa phát sinh lịch sử đôn đốc nào cho hồ sơ này.</div>
+            }
+        </div>
+
+        <div class="hoso-attachment-card">
+            <div class="hoso-section-title">Lá»‹ch sá»­ gia háº¡n</div>
+            @if (Model.LichSuGiaHans.Any())
+            {
+                <div class="hoso-history-list">
+                    @foreach (var item in Model.LichSuGiaHans)
+                    {
+                        <div class="hoso-history-card">
+                            <div class="hoso-history-header">
+                                <div class="hoso-history-title">Gia háº¡n tiáº¿n Ä‘á»™</div>
+                                <span class="badge badge-light-info">+@item.SoNgayGiaHan ngĂ y</span>
+                            </div>
+                            <div class="hoso-history-meta">
+                                <div><span class="font-weight-bold">Thá»i gian gia háº¡n:</span> @FuntionGlobal.ConvertDateTimeToStr(item.CreatedDate)</div>
+                                <div><span class="font-weight-bold">NgÆ°á»i gia háº¡n:</span> @(string.IsNullOrWhiteSpace(item.TenNguoiGiaHan) ? "-" : item.TenNguoiGiaHan)</div>
+                                <div><span class="font-weight-bold">Háº¡n cÅ©:</span> @FuntionGlobal.ConvertDateToStr(item.HanXuLyCu)</div>
+                                <div><span class="font-weight-bold">Háº¡n má»›i:</span> @FuntionGlobal.ConvertDateToStr(item.HanXuLyMoi)</div>
+                            </div>
+                            <div class="hoso-history-body">
+                                <div><span class="font-weight-bold">LĂ½ do:</span> @(string.IsNullOrWhiteSpace(item.LyDoGiaHan) ? "-" : item.LyDoGiaHan)</div>
+                                <div class="mt-2"><span class="font-weight-bold">Ghi chĂº:</span> @(string.IsNullOrWhiteSpace(item.GhiChu) ? "-" : item.GhiChu)</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-attachment-state">ChÆ°a phĂ¡t sinh láº§n gia háº¡n nĂ o cho há»“ sÆ¡ nĂ y.</div>
+            }
         </div>
     }
 

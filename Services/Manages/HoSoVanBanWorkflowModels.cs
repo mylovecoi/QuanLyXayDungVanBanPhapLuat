@@ -187,6 +187,14 @@ namespace Services.Manages
         public DateTime NgayTaoHoSo { get; set; }
         public DateTime? HanXuLy { get; set; }
         public DateTime? NgayHoanThanh { get; set; }
+        public int? TongThoiGianXayDungNgay { get; set; }
+        public int? TongThoiGianQuyDinhNgay { get; set; }
+        public decimal? TyLeThoiGianXayDung { get; set; }
+        public decimal? DiemTienDoXayDung { get; set; }
+        public decimal? DiemChatLuongVanBan { get; set; }
+        public decimal? TongDiemDanhGia { get; set; }
+        public string? XepLoaiDanhGia { get; set; }
+        public DateTime? NgayChamDiem { get; set; }
         public string? MoTa { get; set; }
         public string? GhiChu { get; set; }
         public bool CanXuLyBuocHienTai { get; set; }
@@ -206,6 +214,8 @@ namespace Services.Manages
         public bool CoTheTongHopLayYKien { get; set; }
         public List<HoSoVanBanLayYKienItemModel> CacLayYKien { get; set; } = new();
         public List<HoSoVanBanDuThaoVersionItemModel> CacVersionDuThao { get; set; } = new();
+        public List<HoSoVanBanDonDocHistoryItemModel> LichSuDonDocs { get; set; } = new();
+        public List<HoSoVanBanGiaHanHistoryItemModel> LichSuGiaHans { get; set; } = new();
     }
 
     public class HoSoVanBanDuThaoVersionItemModel
@@ -230,6 +240,7 @@ namespace Services.Manages
         public string TenHoSo { get; set; } = string.Empty;
         public string? MaBuocHienTai { get; set; }
         public string? TenLoaiVanBan { get; set; }
+        public string? ChuTheBanHanh { get; set; }
         public string? TenQuyTrinh { get; set; }
         public string? TenBuocHienTai { get; set; }
         public string? MaTrangThai { get; set; }
@@ -246,6 +257,11 @@ namespace Services.Manages
         public DateTime NgayTaoHoSo { get; set; }
         public DateTime? HanXuLy { get; set; }
         public DateTime? NgayHoanThanh { get; set; }
+        public decimal? DiemTienDoXayDung { get; set; }
+        public decimal? DiemChatLuongVanBan { get; set; }
+        public decimal? TongDiemDanhGia { get; set; }
+        public string? XepLoaiDanhGia { get; set; }
+        public bool DaCoBanGhiChamDiem { get; set; }
         public int SoLanTraLaiHienTai { get; set; }
         public bool CanXuLyBuocHienTai { get; set; }
         public bool CanNhanHoSo { get; set; }
@@ -261,6 +277,13 @@ namespace Services.Manages
         public string TenTrangThaiTienDo { get; set; } = "Chưa thực hiện";
         public string MaMauTienDo { get; set; } = "#CED4DA";
         public bool DangOQuaHan { get; set; }
+        public string MucCanhBao { get; set; } = "BINH_THUONG";
+        public string TenMucCanhBao { get; set; } = "Bình thường";
+        public string MaMauCanhBao { get; set; } = "#28A745";
+        public int? SoNgayConLai { get; set; }
+        public int? SoNgayQuaHanHienTai { get; set; }
+        public string? GhiChuCanhBao { get; set; }
+        public int SoLanGiaHan { get; set; }
         public bool CoThePhanHoiLayYKien { get; set; }
         public bool CoTheTongHopLayYKien { get; set; }
         public string? CheDoLayYKienHienTai { get; set; }
@@ -374,5 +397,215 @@ namespace Services.Manages
     {
         public string Value { get; set; } = string.Empty;
         public string Text { get; set; } = string.Empty;
+    }
+
+    public class HoSoVanBanKetQuaLayYKienFormModel
+    {
+        public Guid Id { get; set; }
+        public Guid HoSoVanBanId { get; set; }
+        public string TenHoSo { get; set; } = string.Empty;
+        public string? TenLoaiVanBan { get; set; }
+        public string? TenDonViSoanThao { get; set; }
+        public string? TenBuocHienTai { get; set; }
+        public int LanLayYKien { get; set; } = 1;
+        public string CoQuanLayYKien { get; set; } = "UBND";
+        public string CheDoNhapYKien { get; set; } = "TONG_HOP";
+        public string? HinhThucLayYKien { get; set; }
+        public string? SoVanBanLayYKien { get; set; }
+        public DateTime? NgayGuiLayYKien { get; set; }
+        public DateTime? HanPhanHoi { get; set; }
+        public DateTime? NgayCoKetQua { get; set; }
+        public string? NoiDungYeuCau { get; set; }
+        public int? TongSoThanhVien { get; set; }
+        public int? SoDongY { get; set; }
+        public int? SoDongYCoYKien { get; set; }
+        public int? SoKhongDongY { get; set; }
+        public int? SoKhongPhanHoi { get; set; }
+        public decimal? TyLeDongY { get; set; }
+        public string? KetQuaChung { get; set; }
+        public string? NoiDungTongHop { get; set; }
+        public string? NoiDungTiepThu { get; set; }
+        public string TrangThai { get; set; } = "NHAP";
+        public Guid? AttachedFileGroupId { get; set; }
+        public string? GhiChu { get; set; }
+        public List<HoSoVanBanYKienThanhVienModel> ThanhViens { get; set; } = new();
+    }
+
+    public class HoSoVanBanYKienThanhVienModel
+    {
+        public Guid Id { get; set; }
+        public Guid? ThanhVienId { get; set; }
+        public string HoTenThanhVien { get; set; } = string.Empty;
+        public string? ChucVu { get; set; }
+        public Guid? DonViId { get; set; }
+        public string? TenDonVi { get; set; }
+        public int ThuTuHienThi { get; set; }
+        public bool CoQuyenBieuQuyet { get; set; } = true;
+        public string? KetQuaYKien { get; set; }
+        public string? NoiDungYKien { get; set; }
+        public string? NoiDungTiepThu { get; set; }
+        public DateTime? NgayPhanHoi { get; set; }
+        public Guid? AttachedFileGroupId { get; set; }
+        public string? GhiChu { get; set; }
+    }
+
+    public class GuidTextOptionModel
+    {
+        public Guid Id { get; set; }
+        public string Text { get; set; } = string.Empty;
+    }
+
+    public class HoSoVanBanBanHanhFormModel
+    {
+        public Guid HoSoVanBanId { get; set; }
+        public string TenHoSo { get; set; } = string.Empty;
+        public string? TenLoaiVanBan { get; set; }
+        public string? TenDonViSoanThao { get; set; }
+        public string? TenBuocHienTai { get; set; }
+        public Guid AttachedFileGroupId { get; set; }
+        public string? LoaiVanBanBanHanh { get; set; }
+        public string? SoKyHieuBanHanh { get; set; }
+        public string? TrichYeuBanHanh { get; set; }
+        public Guid? CoQuanBanHanhId { get; set; }
+        public Guid? NguoiKyId { get; set; }
+        public string? HoTenNguoiKy { get; set; }
+        public string? ChucVuNguoiKy { get; set; }
+        public DateTime? NgayKy { get; set; }
+        public DateTime? NgayBanHanh { get; set; }
+        public DateTime? NgayCoHieuLuc { get; set; }
+        public DateTime? NgayHetHieuLuc { get; set; }
+        public string TrangThaiBanHanh { get; set; } = "CHUA_BAN_HANH";
+        public Guid? VanBanPhapLuatId { get; set; }
+        public DateTime? NgayCongKhai { get; set; }
+        public string? DuongDanCongKhai { get; set; }
+        public Guid? QuyetDinhBanHanhFileId { get; set; }
+        public int? TongThoiGianXayDungNgay { get; set; }
+        public int? TongThoiGianQuyDinhNgay { get; set; }
+        public decimal? TyLeThoiGianXayDung { get; set; }
+        public decimal? DiemTienDoXayDung { get; set; }
+        public decimal? DiemChatLuongVanBan { get; set; }
+        public decimal? TongDiemDanhGia { get; set; }
+        public string? XepLoaiDanhGia { get; set; }
+        public DateTime? NgayChamDiem { get; set; }
+        public string? GhiChu { get; set; }
+        public List<DonViOptionModel> CoQuanBanHanhOptions { get; set; } = new();
+        public List<GuidTextOptionModel> NguoiKyOptions { get; set; } = new();
+        public List<GuidTextOptionModel> QuyetDinhFileOptions { get; set; } = new();
+    }
+
+    public class HoSoVanBanChamDiemFormModel
+    {
+        public Guid? Id { get; set; }
+        public Guid HoSoVanBanId { get; set; }
+        public string TenHoSo { get; set; } = string.Empty;
+        public string? MaHoSo { get; set; }
+        public string? TenLoaiVanBan { get; set; }
+        public string? TenDonViSoanThao { get; set; }
+        public DateTime NgayTaoHoSo { get; set; }
+        public DateTime? NgayBanHanh { get; set; }
+        public int SoLanTraLaiHienTai { get; set; }
+        public int? TongThoiGianXayDungNgay { get; set; }
+        public int? TongThoiGianQuyDinhNgay { get; set; }
+        public decimal? TyLeThoiGianXayDung { get; set; }
+        public DateTime NgayChamDiem { get; set; } = DateTime.Today;
+        public string TrangThai { get; set; } = "NHAP";
+        public decimal TongDiem { get; set; }
+        public string? XepLoai { get; set; }
+        public string? GhiChu { get; set; }
+        public bool DaCoBanGhiChamDiem { get; set; }
+        public List<HoSoVanBanChamDiemChiTietFormModel> ChiTiets { get; set; } = new();
+    }
+
+    public class HoSoVanBanChamDiemChiTietFormModel
+    {
+        public Guid? Id { get; set; }
+        public Guid DanhMucTieuChiDiemId { get; set; }
+        public string MaTieuChi { get; set; } = string.Empty;
+        public string TenTieuChi { get; set; } = string.Empty;
+        public string LoaiTieuChi { get; set; } = string.Empty;
+        public decimal DiemToiDa { get; set; }
+        public decimal? GiaTriTinhDiem { get; set; }
+        public string? DienGiaiGiaTri { get; set; }
+        public decimal? DiemDeXuat { get; set; }
+        public decimal DiemChinhThuc { get; set; }
+        public string? GhiChu { get; set; }
+    }
+
+    public class HoSoVanBanDonDocFormModel
+    {
+        public Guid HoSoVanBanId { get; set; }
+        public string TenHoSo { get; set; } = string.Empty;
+        public string? MaHoSo { get; set; }
+        public string? TenLoaiVanBan { get; set; }
+        public string? TenBuocHienTai { get; set; }
+        public string? TenDonViSoanThao { get; set; }
+        public string? TenDonViXuLyHienTai { get; set; }
+        public DateTime? HanXuLy { get; set; }
+        public string MucCanhBao { get; set; } = "BINH_THUONG";
+        public string? GhiChuCanhBao { get; set; }
+        public string NoiDungDonDoc { get; set; } = string.Empty;
+    }
+
+    public class HoSoVanBanDonDocHangLoatFormModel
+    {
+        public List<Guid> HoSoVanBanIds { get; set; } = new();
+        public int TongSoHoSo { get; set; }
+        public string NoiDungDonDoc { get; set; } = string.Empty;
+        public List<HoSoVanBanDonDocHangLoatItemModel> HoSos { get; set; } = new();
+    }
+
+    public class HoSoVanBanDonDocHangLoatItemModel
+    {
+        public Guid HoSoVanBanId { get; set; }
+        public string MaHoSo { get; set; } = string.Empty;
+        public string TenHoSo { get; set; } = string.Empty;
+        public string? TenBuocHienTai { get; set; }
+        public string? TenDonViXuLyHienTai { get; set; }
+        public string? TenMucCanhBao { get; set; }
+        public DateTime? HanXuLy { get; set; }
+    }
+
+    public class HoSoVanBanDonDocHistoryItemModel
+    {
+        public Guid Id { get; set; }
+        public Guid DonViGuiId { get; set; }
+        public string? TenDonViGui { get; set; }
+        public Guid DonViNhanId { get; set; }
+        public string? TenDonViNhan { get; set; }
+        public string NoiDung { get; set; } = string.Empty;
+        public DateTime CreatedDate { get; set; }
+        public bool DaXem { get; set; }
+    }
+
+    public class HoSoVanBanGiaHanFormModel
+    {
+        public Guid? Id { get; set; }
+        public Guid HoSoVanBanId { get; set; }
+        public string TenHoSo { get; set; } = string.Empty;
+        public string? MaHoSo { get; set; }
+        public string? TenLoaiVanBan { get; set; }
+        public string? TenBuocHienTai { get; set; }
+        public string? TenDonViSoanThao { get; set; }
+        public string? TenDonViXuLyHienTai { get; set; }
+        public DateTime? HanXuLyHienTai { get; set; }
+        public DateTime HanXuLyMoi { get; set; } = DateTime.Today.AddDays(7);
+        public int SoNgayGiaHan { get; set; }
+        public string? LyDoGiaHan { get; set; }
+        public Guid AttachedFileGroupId { get; set; } = Guid.NewGuid();
+        public string? GhiChu { get; set; }
+        public List<HoSoVanBanGiaHanHistoryItemModel> LichSus { get; set; } = new();
+    }
+
+    public class HoSoVanBanGiaHanHistoryItemModel
+    {
+        public Guid Id { get; set; }
+        public DateTime HanXuLyCu { get; set; }
+        public DateTime HanXuLyMoi { get; set; }
+        public int SoNgayGiaHan { get; set; }
+        public string? LyDoGiaHan { get; set; }
+        public string? TenNguoiGiaHan { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public Guid? AttachedFileGroupId { get; set; }
+        public string? GhiChu { get; set; }
     }
 }

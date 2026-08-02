@@ -1,0 +1,166 @@
+@model Services.Manages.HoSoVanBanChamDiemFormModel
+
+@{
+    var isLocked = string.Equals(Model.TrangThai, "DA_XAC_NHAN", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="card card-custom">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="card-label">CHẤM ĐIỂM XÂY DỰNG<span class="d-block text-muted pt-2 font-size-sm">@Model.TenHoSo</span></h3>
+        </div>
+    </div>
+    <form method="post" action="/Manages/ChamDiemXayDung/Edit">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="HoSoVanBanId" />
+        <input type="hidden" asp-for="TongThoiGianXayDungNgay" />
+        <input type="hidden" asp-for="TongThoiGianQuyDinhNgay" />
+        <input type="hidden" asp-for="TyLeThoiGianXayDung" />
+        <div class="card-body">
+            <div asp-validation-summary="All" class="text-danger mb-4"></div>
+            <div class="alert alert-light-info">
+                <b>Mã hồ sơ:</b> @Model.MaHoSo &nbsp;
+                <b>Loại văn bản:</b> @Model.TenLoaiVanBan &nbsp;
+                <b>Đơn vị soạn thảo:</b> @Model.TenDonViSoanThao
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 form-group">
+                    <label>Ngày tạo hồ sơ</label>
+                    <input class="form-control" value="@Model.NgayTaoHoSo.ToString("yyyy-MM-dd")" readonly />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label>Ngày ban hành</label>
+                    <input class="form-control" value="@Model.NgayBanHanh?.ToString("yyyy-MM-dd")" readonly />
+                </div>
+                <div class="col-md-2 form-group">
+                    <label>Số lần trả lại</label>
+                    <input class="form-control" value="@Model.SoLanTraLaiHienTai" readonly />
+                </div>
+                <div class="col-md-2 form-group">
+                    <label>TG xây dựng (ngày)</label>
+                    <input class="form-control" value="@Model.TongThoiGianXayDungNgay" readonly />
+                </div>
+                <div class="col-md-2 form-group">
+                    <label>Tỷ lệ thời gian (%)</label>
+                    <input class="form-control" value="@Model.TyLeThoiGianXayDung" readonly />
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Tiêu chí</th>
+                            <th>Giá trị tính điểm</th>
+                            <th>Điểm tối đa</th>
+                            <th>Điểm đề xuất</th>
+                            <th>Điểm chấm</th>
+                            <th>Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (var i = 0; i < Model.ChiTiets.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <input asp-for="ChiTiets[i].Id" type="hidden" />
+                                    <input asp-for="ChiTiets[i].DanhMucTieuChiDiemId" type="hidden" />
+                                    <input asp-for="ChiTiets[i].MaTieuChi" type="hidden" />
+                                    <input asp-for="ChiTiets[i].TenTieuChi" type="hidden" />
+                                    <input asp-for="ChiTiets[i].LoaiTieuChi" type="hidden" />
+                                    <input asp-for="ChiTiets[i].DiemToiDa" type="hidden" />
+                                    <input asp-for="ChiTiets[i].GiaTriTinhDiem" type="hidden" />
+                                    <input asp-for="ChiTiets[i].DiemDeXuat" type="hidden" />
+                                    <input asp-for="ChiTiets[i].DienGiaiGiaTri" type="hidden" />
+                                    <div class="font-weight-bold">@Model.ChiTiets[i].TenTieuChi</div>
+                                    <div class="text-muted">@Model.ChiTiets[i].MaTieuChi</div>
+                                </td>
+                                <td class="align-middle">
+                                    @if (!string.IsNullOrWhiteSpace(Model.ChiTiets[i].DienGiaiGiaTri))
+                                    {
+                                        <div>@Model.ChiTiets[i].DienGiaiGiaTri</div>
+                                    }
+                                    <div class="text-muted">Giá trị: @Model.ChiTiets[i].GiaTriTinhDiem</div>
+                                </td>
+                                <td class="text-center align-middle">@Model.ChiTiets[i].DiemToiDa</td>
+                                <td class="text-center align-middle">@Model.ChiTiets[i].DiemDeXuat</td>
+                                <td class="align-middle">
+                                    <input asp-for="ChiTiets[i].DiemChinhThuc" type="number" step="0.01" min="0" max="@Model.ChiTiets[i].DiemToiDa" class="form-control diem-cham" readonly="@isLocked" />
+                                </td>
+                                <td class="align-middle">
+                                    <input asp-for="ChiTiets[i].GhiChu" class="form-control" readonly="@isLocked" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4" class="text-right">Tổng điểm</th>
+                            <th>
+                                <input asp-for="TongDiem" id="TongDiem" class="form-control font-weight-bold" readonly />
+                            </th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-3 form-group">
+                    <label>Ngày chấm điểm</label>
+                    <input asp-for="NgayChamDiem" type="date" class="form-control" readonly="@isLocked" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <label>Trạng thái</label>
+                    <select asp-for="TrangThai" class="form-control" disabled="@isLocked">
+                        <option value="NHAP">Nháp</option>
+                        <option value="DA_XAC_NHAN">Đã xác nhận</option>
+                    </select>
+                </div>
+                <div class="col-md-3 form-group">
+                    <label>Xếp loại</label>
+                    <input asp-for="XepLoai" id="XepLoai" class="form-control" readonly />
+                </div>
+                <div class="col-md-12 form-group">
+                    <label>Ghi chú chung</label>
+                    <textarea asp-for="GhiChu" class="form-control" rows="2" readonly="@isLocked"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-right">
+            <a href="/Manages/ChamDiemXayDung" class="btn btn-light mr-2">Quay lại</a>
+            @if (!isLocked)
+            {
+                <button type="submit" class="btn btn-primary">Lưu chấm điểm</button>
+            }
+        </div>
+    </form>
+</div>
+
+@section custom_script {
+<script>
+    function resolveXepLoai(total) {
+        if (total >= 90) return 'XUAT_SAC';
+        if (total >= 80) return 'TOT';
+        if (total >= 65) return 'KHA';
+        if (total >= 50) return 'TRUNG_BINH';
+        return 'CAN_CAI_THIEN';
+    }
+
+    function refreshTongDiem() {
+        let total = 0;
+        $('.diem-cham').each(function () {
+            total += parseFloat($(this).val() || '0');
+        });
+        $('#TongDiem').val(total.toFixed(2).replace(/\.00$/, ''));
+        $('#XepLoai').val(resolveXepLoai(total));
+    }
+
+    $(function () {
+        $('.diem-cham').on('input', refreshTongDiem);
+        refreshTongDiem();
+    });
+</script>
+}

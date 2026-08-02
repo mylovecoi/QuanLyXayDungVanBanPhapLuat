@@ -946,6 +946,16 @@ VALUES
     N'Kích hoạt', NULL, NULL
 ),
 (
+    '20000000-0000-0000-0000-000000000051',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    4, 'Detail', 2, 'VanBanQPPL.DangKyXayDung.TraCuuDangKyVanBan', '20000000-0000-0000-0000-000000000021',
+    N'Tra cứu đăng ký văn bản', 'TraCuuDangKyVanBan', 'Index', NULL, 'HoSoVanBans',
+    N'Kích hoạt', NULL, NULL
+),
+(
     '20000000-0000-0000-0000-000000000025',
     '11111111-1111-1111-1111-111111111111',
     @Now,
@@ -971,8 +981,38 @@ VALUES
     @Now,
     '11111111-1111-1111-1111-111111111111',
     @Now,
-    2, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.GopYDanhGia', '20000000-0000-0000-0000-000000000025',
-    N'Góp ý đánh giá', 'DangPhatTrien', 'GopYDanhGia', NULL, 'DangPhatTrien',
+    2, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.LayYKienUBND', '20000000-0000-0000-0000-000000000025',
+    N'Lấy ý kiến UBND', 'LayYKienUBND', 'Index', NULL, 'HoSoVanBans',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000047',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    3, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.LayYKienHDND', '20000000-0000-0000-0000-000000000025',
+    N'Lấy ý kiến HĐND', 'LayYKienHDND', 'Index', NULL, 'HoSoVanBans',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000049',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    5, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.ChamDiemXayDung', '20000000-0000-0000-0000-000000000025',
+    N'Chấm điểm xây dựng', 'ChamDiemXayDung', 'Index', NULL, 'HoSoVanBanChamDiems',
+    N'Kích hoạt', NULL, NULL
+),
+(
+    '20000000-0000-0000-0000-000000000050',
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    '11111111-1111-1111-1111-111111111111',
+    @Now,
+    6, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.TheoDoiTienDoXayDung', '20000000-0000-0000-0000-000000000025',
+    N'Theo dõi tiến độ xây dựng', 'TheoDoiTienDoXayDung', 'Index', NULL, 'HoSoVanBans',
     N'Kích hoạt', NULL, NULL
 ),
 (
@@ -981,7 +1021,7 @@ VALUES
     @Now,
     '11111111-1111-1111-1111-111111111111',
     @Now,
-    3, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.DuThaoVanBan', '20000000-0000-0000-0000-000000000025',
+    4, 'Detail', 2, 'VanBanQPPL.XayDungVanBan.DuThaoVanBan', '20000000-0000-0000-0000-000000000025',
     N'Xét duyệt soạn thảo', 'DuThaoVanBan', 'Index', NULL, 'HoSoVanBans',
     N'Kích hoạt', NULL, NULL
 ),
@@ -1122,7 +1162,7 @@ VALUES
     '11111111-1111-1111-1111-111111111111',
     @Now,
     1, 'Detail', 2, 'VanBanQPPL.GiaHanThoiGianXayDung.DanhSachVanBan', '20000000-0000-0000-0000-000000000041',
-    N'Danh sách văn bản', 'DangPhatTrien', 'DanhSachGiaHanXayDung', NULL, 'DangPhatTrien',
+    N'Danh sách văn bản', 'GiaHanXayDung', 'Index', NULL, 'HoSoVanBans',
     N'Kích hoạt', NULL, NULL
 ),
 (
@@ -1142,7 +1182,7 @@ VALUES
     '11111111-1111-1111-1111-111111111111',
     @Now,
     1, 'Detail', 1, 'ThiHanhPhapLuat.DanhSachKeHoach', '20000000-0000-0000-0000-000000000031',
-    N'Danh sách kế hoạch', 'DangPhatTrien', 'DanhSachKeHoach', NULL, 'DangPhatTrien',
+    N'Danh sách kế hoạch', 'DanhSachKeHoachThiHanhPhapLuat', 'Index', NULL, 'ThiHanhPhapLuatKeHoach',
     N'Kích hoạt', NULL, NULL
 ),
 (
@@ -1152,7 +1192,7 @@ VALUES
     '11111111-1111-1111-1111-111111111111',
     @Now,
     2, 'Detail', 1, 'ThiHanhPhapLuat.QuaTrinhToChucThucHien', '20000000-0000-0000-0000-000000000031',
-    N'Danh sách quá trình tổ chức thực hiện', 'DangPhatTrien', 'QuaTrinhToChucThucHien', NULL, 'DangPhatTrien',
+    N'Danh sách quá trình tổ chức thực hiện', 'QuaTrinhToChucThucHien', 'Index', NULL, 'ThiHanhPhapLuatKeHoach',
     N'Kích hoạt', NULL, NULL
 ),
 (
@@ -1162,7 +1202,7 @@ VALUES
     '11111111-1111-1111-1111-111111111111',
     @Now,
     3, 'Detail', 1, 'ThiHanhPhapLuat.DanhGiaKetQua', '20000000-0000-0000-0000-000000000031',
-    N'Đánh giá kết quả', 'DangPhatTrien', 'DanhGiaKetQua', NULL, 'DangPhatTrien',
+    N'Đánh giá kết quả', 'DanhGiaKetQuaThiHanhPhapLuat', 'Index', NULL, 'ThiHanhPhapLuatKeHoach',
     N'Kích hoạt', 'QuanTriHeThong', NULL
 );
 

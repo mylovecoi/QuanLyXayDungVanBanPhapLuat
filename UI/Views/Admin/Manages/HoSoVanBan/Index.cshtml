@@ -1,4 +1,5 @@
 @using Services.Manages
+@using Services.Model
 @using UI.ViewModels
 @model IEnumerable<HoSoVanBanListItemModel>
 
@@ -23,12 +24,25 @@
     var isDangKyVanBan = string.Equals(routePrefix, "/Manages/DangKyVanBan", StringComparison.OrdinalIgnoreCase);
     var isSoanThaoVanBan = string.Equals(routePrefix, "/Manages/HoSoVanBan", StringComparison.OrdinalIgnoreCase);
     var isLayYKienVanBan = string.Equals(routePrefix, "/Manages/LayYKienVanBan", StringComparison.OrdinalIgnoreCase);
+    var isLayYKienCoQuan = string.Equals(routePrefix, "/Manages/LayYKienUBND", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(routePrefix, "/Manages/LayYKienHDND", StringComparison.OrdinalIgnoreCase);
+    var isLayYKienUBND = string.Equals(routePrefix, "/Manages/LayYKienUBND", StringComparison.OrdinalIgnoreCase);
+    var isLayYKienHDND = string.Equals(routePrefix, "/Manages/LayYKienHDND", StringComparison.OrdinalIgnoreCase);
     var isDuThaoVanBan = string.Equals(routePrefix, "/Manages/DuThaoVanBan", StringComparison.OrdinalIgnoreCase);
     var isXetDuyetDuThao = string.Equals(routePrefix, "/Manages/XetDuyetDuThao", StringComparison.OrdinalIgnoreCase);
     var isXetDuyetVanBan = string.Equals(routePrefix, "/Manages/XetDuyetVanBan", StringComparison.OrdinalIgnoreCase);
     var isPheDuyetVanBan = string.Equals(routePrefix, "/Manages/PheDuyetVanBan", StringComparison.OrdinalIgnoreCase);
     var isDanhGiaVanBanList = string.Equals(routePrefix, "/Manages/DanhGiaVanBan", StringComparison.OrdinalIgnoreCase);
     var isDanhGiaVanBan = isXetDuyetDuThao || isXetDuyetVanBan || isDanhGiaVanBanList;
+    var isTraCuuDangKy = string.Equals(routePrefix, "/Manages/TraCuuDangKyVanBan", StringComparison.OrdinalIgnoreCase);
+    var trangThaiOptions = ViewData["TrangThaiOptions"] as List<SelectOptionModel> ?? new List<SelectOptionModel>();
+    var buocDangKyOptions = ViewData["BuocDangKyOptions"] as List<SelectOptionModel> ?? new List<SelectOptionModel>();
+    var selectedMaTrangThai = ViewData["SelectedMaTrangThai"]?.ToString();
+    var selectedMaBuoc = ViewData["SelectedMaBuoc"]?.ToString();
+    var tuNgayTao = ViewData["TuNgayTao"] as DateTime?;
+    var denNgayTao = ViewData["DenNgayTao"] as DateTime?;
+    var tuHanXuLy = ViewData["TuHanXuLy"] as DateTime?;
+    var denHanXuLy = ViewData["DenHanXuLy"] as DateTime?;
 
     string GetTienDoLabel(HoSoVanBanListItemModel item) => item.TrangThaiTienDo switch
     {
@@ -69,7 +83,8 @@
             var timKiem = '&TimKiem=' + ($('#txt_Search').val() || '');
             var pageSize = '&PageSize=' + ($('#PageSize_Search').val() || '5');
             var donViId = $('#DonViId_Search').length ? '&DonViId=' + ($('#DonViId_Search').val() || '') : '';
-            window.location.href = currentPathUrl + timKiem + pageSize + donViId;
+            var advancedFilters = buildAdvancedFilters();
+            window.location.href = currentPathUrl + timKiem + pageSize + donViId + advancedFilters;
         }
 
         function ClickPage(pageSelect) {
@@ -78,7 +93,22 @@
             var pageSize = '&PageSize=' + ($('#PageSize_Search').val() || '5');
             var donViId = $('#DonViId_Search').length ? '&DonViId=' + ($('#DonViId_Search').val() || '') : '';
             var pageCurrent = '&PageCurrent=' + pageSelect;
-            window.location.href = currentPathUrl + timKiem + pageSize + donViId + pageCurrent;
+            var advancedFilters = buildAdvancedFilters();
+            window.location.href = currentPathUrl + timKiem + pageSize + donViId + advancedFilters + pageCurrent;
+        }
+
+        function buildAdvancedFilters() {
+            if ('@isTraCuuDangKy'.toLowerCase() !== 'true') {
+                return '';
+            }
+
+            var maTrangThai = $('#MaTrangThai_Search').length ? '&MaTrangThai=' + ($('#MaTrangThai_Search').val() || '') : '';
+            var maBuoc = $('#MaBuoc_Search').length ? '&MaBuoc=' + ($('#MaBuoc_Search').val() || '') : '';
+            var tuNgayTao = $('#TuNgayTao_Search').length ? '&TuNgayTao=' + ($('#TuNgayTao_Search').val() || '') : '';
+            var denNgayTao = $('#DenNgayTao_Search').length ? '&DenNgayTao=' + ($('#DenNgayTao_Search').val() || '') : '';
+            var tuHanXuLy = $('#TuHanXuLy_Search').length ? '&TuHanXuLy=' + ($('#TuHanXuLy_Search').val() || '') : '';
+            var denHanXuLy = $('#DenHanXuLy_Search').length ? '&DenHanXuLy=' + ($('#DenHanXuLy_Search').val() || '') : '';
+            return maTrangThai + maBuoc + tuNgayTao + denNgayTao + tuHanXuLy + denHanXuLy;
         }
 
         function ChuyenLayYKien(id) {
@@ -91,6 +121,21 @@
 
         function ChuyenPheDuyetVanBan(id, suggestedDeadline) {
             OpenChuyenPheDuyetVanBan(id, suggestedDeadline);
+        }
+
+        function ChuyenLayYKienUBND(id) {
+            if (!confirm('Chuyển hồ sơ sang bước lấy ý kiến thành viên UBND?')) return;
+            $.ajax({
+                url: '/Manages/LayYKienUBND/Chuyen',
+                type: 'POST',
+                headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                data: { id: id },
+                success: function (res) {
+                    if (res.status === 'success') window.location.reload();
+                    else toastr.error(res.message || 'Không thể chuyển hồ sơ.');
+                },
+                error: function () { toastr.error('Không thể chuyển hồ sơ sang lấy ý kiến UBND.'); }
+            });
         }
     </script>
 }
@@ -197,6 +242,73 @@
             </div>
         </div>
 
+        @if (isTraCuuDangKy)
+        {
+            <div class="row">
+                <div class="col-xl-3">
+                    <div class="form-group">
+                        <label class="text-blue font-weight-bold">Trạng thái</label>
+                        <select class="form-control" id="MaTrangThai_Search">
+                            <option value="">-- Tất cả trạng thái --</option>
+                            @foreach (var item in trangThaiOptions)
+                            {
+                                <option value="@item.Value" selected="@(selectedMaTrangThai == item.Value ? "selected" : null)">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xl-3">
+                    <div class="form-group">
+                        <label class="text-blue font-weight-bold">Bước hiện tại</label>
+                        <select class="form-control" id="MaBuoc_Search">
+                            <option value="">-- Tất cả bước --</option>
+                            @foreach (var item in buocDangKyOptions)
+                            {
+                                <option value="@item.Value" selected="@(selectedMaBuoc == item.Value ? "selected" : null)">@item.Text</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xl-3">
+                    <div class="form-group">
+                        <label class="text-blue font-weight-bold">Từ ngày tạo</label>
+                        <input type="date" class="form-control" id="TuNgayTao_Search" value="@(tuNgayTao.HasValue ? tuNgayTao.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                    </div>
+                </div>
+                <div class="col-xl-3">
+                    <div class="form-group">
+                        <label class="text-blue font-weight-bold">Đến ngày tạo</label>
+                        <input type="date" class="form-control" id="DenNgayTao_Search" value="@(denNgayTao.HasValue ? denNgayTao.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-3">
+                    <div class="form-group">
+                        <label class="text-blue font-weight-bold">Từ hạn xử lý</label>
+                        <input type="date" class="form-control" id="TuHanXuLy_Search" value="@(tuHanXuLy.HasValue ? tuHanXuLy.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                    </div>
+                </div>
+                <div class="col-xl-3">
+                    <div class="form-group">
+                        <label class="text-blue font-weight-bold">Đến hạn xử lý</label>
+                        <input type="date" class="form-control" id="DenHanXuLy_Search" value="@(denHanXuLy.HasValue ? denHanXuLy.Value.ToString("yyyy-MM-dd") : string.Empty)" />
+                    </div>
+                </div>
+                <div class="col-xl-6 d-flex align-items-end justify-content-end">
+                    <div class="form-group mb-0">
+                        <button type="button" class="btn btn-light-danger mr-2" onclick="window.location.href='@routePrefix'">
+                            Xóa lọc
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="ReloadFrm()">
+                            Áp dụng bộ lọc
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
         <div class="table-responsive border rounded-lg mb-8">
             <table class="table table-striped table-hover table-responsive-lg rounded-lg m-0">
                 <thead>
@@ -243,6 +355,12 @@
                                 </td>
                                 <td class="align-middle">
                                     <div>@item.TenLoaiVanBan</div>
+                                    @if (isLayYKienCoQuan)
+                                    {
+                                        <div class="mt-1">
+                                            <span class="badge badge-light-primary">@(string.Equals(item.ChuTheBanHanh, "HĐND", StringComparison.OrdinalIgnoreCase) ? "HĐND" : "UBND")</span>
+                                        </div>
+                                    }
                                     <div class="text-muted">@item.TenQuyTrinh</div>
                                 </td>
                                 <td class="align-middle">
@@ -255,7 +373,7 @@
                                     {
                                         <div class="text-warning font-weight-bold mt-1">Chờ nhận hồ sơ</div>
                                     }
-                                    else if (!isDangKyVanBan && !isSoanThaoVanBan && !isLayYKienVanBan && item.CanNhanHoSo)
+                                    else if (!isDangKyVanBan && !isSoanThaoVanBan && !isLayYKienVanBan && !isLayYKienCoQuan && item.CanNhanHoSo)
                                     {
                                         <div class="text-warning font-weight-bold mt-1">Chưa nhận hồ sơ</div>
                                     }
@@ -399,6 +517,27 @@
                                             <button type="button" onclick="window.location.href='/Manages/LayYKienVanBan/TongHop?id=@item.Id'" class="btn btn-sm btn-clean btn-icon" title="Tổng hợp góp ý">
                                                 <i class="icon-lg la la-check-square text-success"></i>
                                             </button>
+                                        }
+                                        @if (isLayYKienCoQuan && FuntionGlobal.CheckPermission(session, role, "Edit") && item.CanXuLyBuocHienTai)
+                                        {
+                                            @if (isLayYKienUBND && item.MaBuocHienTai == "BUOC_04_TRINH_HO_SO_XAY_DUNG")
+                                            {
+                                                <button type="button" onclick="ChuyenLayYKienUBND('@item.Id')" class="btn btn-sm btn-clean btn-icon" title="Chuyển lấy ý kiến UBND">
+                                                    <i class="icon-lg la la-share-square text-warning"></i>
+                                                </button>
+                                            }
+                                            @if (isLayYKienUBND && item.MaBuocHienTai == "BUOC_05_LAY_Y_KIEN_THANH_VIEN_UBND")
+                                            {
+                                                <button type="button" onclick="window.location.href='/Manages/LayYKienUBND/KetQua?id=@item.Id'" class="btn btn-sm btn-clean btn-icon" title="Nhập kết quả lấy ý kiến UBND">
+                                                    <i class="icon-lg la la-edit text-success"></i>
+                                                </button>
+                                            }
+                                            @if (isLayYKienHDND && item.MaBuocHienTai == "BUOC_06_TRINH_HDND_HOP")
+                                            {
+                                                <button type="button" onclick="window.location.href='/Manages/LayYKienHDND/KetQua?id=@item.Id'" class="btn btn-sm btn-clean btn-icon" title="Nhập kết quả lấy ý kiến HĐND">
+                                                    <i class="icon-lg la la-edit text-primary"></i>
+                                                </button>
+                                            }
                                         }
                                         @if (isXetDuyetDangKy &&
                                              item.MaBuocHienTai == "BUOC_02_THONG_NHAT" &&

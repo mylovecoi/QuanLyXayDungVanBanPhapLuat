@@ -1,0 +1,116 @@
+@using Services.Manages
+@using DataAccess.Entities.QuanLyDanhMuc
+@using DataAccess.Entities.Settings
+@model ThiHanhPhapLuatKeHoachFormModel
+
+@{
+    var donViOptions = ViewData["DonViOptions"] as List<DanhMucDonVi> ?? new();
+    var danhMucVanBanOptions = ViewData["DanhMucVanBanOptions"] as List<DanhMucVanBan> ?? new();
+    var trangThaiOptions = ViewData["TrangThaiOptions"] as List<(string Value, string Text)> ?? new();
+}
+
+<div class="card card-custom">
+    <div class="card-header">
+        <div class="card-title">
+            <h3 class="card-label">@ViewData["Title"]</h3>
+        </div>
+    </div>
+
+    <form method="post" action="/Manages/DanhSachKeHoachThiHanhPhapLuat/Edit">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="AttachedFileGroupId" />
+        <div class="card-body">
+            <div asp-validation-summary="All" class="text-danger mb-4"></div>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <label>Mã kế hoạch <span class="text-danger">*</span></label>
+                    <input asp-for="MaKeHoach" class="form-control" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Năm <span class="text-danger">*</span></label>
+                    <input asp-for="Nam" type="number" class="form-control" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Trạng thái</label>
+                    <select asp-for="TrangThai" class="form-control">
+                        @foreach (var item in trangThaiOptions)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-12 form-group">
+                    <label>Tên kế hoạch <span class="text-danger">*</span></label>
+                    <input asp-for="TenKeHoach" class="form-control" />
+                </div>
+
+                <div class="col-md-6 form-group">
+                    <label>Loại văn bản căn cứ</label>
+                    <select asp-for="DanhMucVanBanId" class="form-control">
+                        <option value="">-- Chọn loại văn bản --</option>
+                        @foreach (var item in danhMucVanBanOptions)
+                        {
+                            <option value="@item.Id">@item.TenLoaiVanBan</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6 form-group">
+                    <label>Đơn vị chủ trì <span class="text-danger">*</span></label>
+                    <select asp-for="DonViChuTriId" class="form-control">
+                        <option value="">-- Chọn đơn vị --</option>
+                        @foreach (var item in donViOptions)
+                        {
+                            <option value="@item.Id">@item.TenDonVi</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-4 form-group">
+                    <label>Số ký hiệu căn cứ</label>
+                    <input asp-for="SoKyHieuVanBanCanCu" class="form-control" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Ngày ban hành căn cứ</label>
+                    <input asp-for="NgayBanHanhVanBanCanCu" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Cơ quan ban hành</label>
+                    <input asp-for="CoQuanBanHanhVanBanCanCu" class="form-control" />
+                </div>
+
+                <div class="col-md-12 form-group">
+                    <label>Trích yếu căn cứ</label>
+                    <textarea asp-for="TrichYeuVanBanCanCu" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="col-md-4 form-group">
+                    <label>Ngày bắt đầu</label>
+                    <input asp-for="NgayBatDau" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Ngày kết thúc</label>
+                    <input asp-for="NgayKetThuc" type="date" class="form-control" />
+                </div>
+                <div class="col-md-4 form-group">
+                    <label>Ngày công bố</label>
+                    <input asp-for="NgayCongBo" type="date" class="form-control" />
+                </div>
+
+                <div class="col-md-12 form-group">
+                    <label>Mô tả</label>
+                    <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="col-md-12 form-group">
+                    <label>Ghi chú</label>
+                    <textarea asp-for="GhiChu" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-right">
+            <a href="/Manages/DanhSachKeHoachThiHanhPhapLuat" class="btn btn-light mr-2">Quay lại</a>
+            <button class="btn btn-primary">Lưu kế hoạch</button>
+        </div>
+    </form>
+</div>
