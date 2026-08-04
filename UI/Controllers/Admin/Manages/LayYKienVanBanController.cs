@@ -15,7 +15,7 @@ namespace UI.Controllers.Admin.Manages
         private readonly IAuthService _authService = authService;
 
         [HttpGet("Manages/LayYKienVanBan")]
-        [AuthorizeAction("Index", "DangPhatTrien", "GopYDanhGia")]
+        [AuthorizeAction("Index", "LayYKienVanBan", "Index")]
         public async Task<IActionResult> Index(string TimKiem = "", Guid? DonViId = null, int PageSize = 5, int PageCurrent = 1)
         {
             PageCurrent = PageCurrent < 1 ? 1 : PageCurrent;
@@ -46,7 +46,7 @@ namespace UI.Controllers.Admin.Manages
 
         [HttpPost("Manages/LayYKienVanBan/Show")]
         [ValidateAntiForgeryToken]
-        [AuthorizeAction("Index", "DangPhatTrien", "GopYDanhGia")]
+        [AuthorizeAction("Index", "LayYKienVanBan", "Index")]
         public async Task<IActionResult> Show(Guid id)
         {
             ViewData["RoutePrefix"] = "/Manages/LayYKienVanBan";
@@ -66,7 +66,7 @@ namespace UI.Controllers.Admin.Manages
 
         [HttpPost("Manages/LayYKienVanBan/Timeline")]
         [ValidateAntiForgeryToken]
-        [AuthorizeAction("Index", "DangPhatTrien", "GopYDanhGia")]
+        [AuthorizeAction("Index", "LayYKienVanBan", "Index")]
         public async Task<IActionResult> Timeline(Guid id)
         {
             var model = await _hoSoVanBanWorkflowService.GetChiTietAsync(id);
@@ -82,7 +82,7 @@ namespace UI.Controllers.Admin.Manages
         }
 
         [HttpGet("Manages/LayYKienVanBan/PhanHoi")]
-        [AuthorizeAction("Edit", "DangPhatTrien", "GopYDanhGia")]
+        [AuthorizeAction("Edit", "LayYKienVanBan", "Index")]
         public async Task<IActionResult> PhanHoi(Guid id)
         {
             var model = await _hoSoVanBanWorkflowService.GetLayYKienFormAsync(id, "PHAN_HOI_DON_VI");
@@ -101,7 +101,7 @@ namespace UI.Controllers.Admin.Manages
 
         [HttpPost("Manages/LayYKienVanBan/PhanHoi")]
         [ValidateAntiForgeryToken]
-        [AuthorizeAction("Edit", "DangPhatTrien", "GopYDanhGia")]
+        [AuthorizeAction("Edit", "LayYKienVanBan", "Index")]
         public async Task<IActionResult> PhanHoiSave(HoSoVanBanLayYKienStepModel request)
         {
             var currentUser = _authService.GetUserInfo();
@@ -123,7 +123,7 @@ namespace UI.Controllers.Admin.Manages
         }
 
         [HttpGet("Manages/LayYKienVanBan/TongHop")]
-        [AuthorizeAction("Edit", "DangPhatTrien", "GopYDanhGia")]
+        [AuthorizeAction("Edit", "LayYKienVanBan", "Index")]
         public async Task<IActionResult> TongHop(Guid id)
         {
             var model = await _hoSoVanBanWorkflowService.GetLayYKienFormAsync(id, "TONG_HOP_Y_KIEN");
@@ -142,7 +142,7 @@ namespace UI.Controllers.Admin.Manages
 
         [HttpPost("Manages/LayYKienVanBan/TongHop")]
         [ValidateAntiForgeryToken]
-        [AuthorizeAction("Edit", "DangPhatTrien", "GopYDanhGia")]
+        [AuthorizeAction("Edit", "LayYKienVanBan", "Index")]
         public async Task<IActionResult> TongHopSave(HoSoVanBanLayYKienStepModel request)
         {
             request.ActionMode = "TONG_HOP_Y_KIEN";

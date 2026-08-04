@@ -1,0 +1,74 @@
+<svg width="1904" height="173" viewBox="0 0 1904 173" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1904" y2="173" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7FBFF"/>
+      <stop offset="0.5" stop-color="#FFF5F1"/>
+      <stop offset="1" stop-color="#EEF8FF"/>
+    </linearGradient>
+    <linearGradient id="wave1" x1="0" y1="86.5" x2="1904" y2="86.5" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D6EBFF" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#F6D7C9" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="wave2" x1="0" y1="86.5" x2="1904" y2="86.5" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FDE6DF" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#D9F0FF" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="circleA" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2F8BD8"/>
+      <stop offset="1" stop-color="#7FD0FF"/>
+    </linearGradient>
+    <linearGradient id="circleB" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#1F9F7A"/>
+      <stop offset="1" stop-color="#A3E4A7"/>
+    </linearGradient>
+    <linearGradient id="circleC" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#D86B43"/>
+      <stop offset="1" stop-color="#F6C68D"/>
+    </linearGradient>
+    <filter id="shadow" x="-20" y="-20" width="220" height="220" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#24507A" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <rect width="1904" height="173" fill="url(#bg)"/>
+
+  <path d="M0 120C120 84 250 66 402 83C543 99 633 144 780 145C926 146 1018 96 1166 91C1317 85 1447 134 1602 135C1730 136 1823 110 1904 78V173H0V120Z" fill="url(#wave1)"/>
+  <path d="M0 48C146 73 252 114 409 114C554 114 662 63 817 54C996 44 1098 92 1269 101C1455 111 1593 52 1904 27V173H0V48Z" fill="url(#wave2)"/>
+
+  <g opacity="0.18">
+    <path d="M130 24C195 66 257 119 324 151" stroke="#E38C6D" stroke-width="3"/>
+    <path d="M278 10C340 60 408 112 480 156" stroke="#B9D9F7" stroke-width="3"/>
+    <path d="M1330 14C1395 54 1455 104 1518 156" stroke="#E38C6D" stroke-width="3"/>
+    <path d="M1492 8C1552 49 1620 101 1692 152" stroke="#B9D9F7" stroke-width="3"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <circle cx="635" cy="63" r="72" fill="url(#circleB)"/>
+    <path d="M587 80C606 52 634 37 670 32C656 52 648 69 652 96C629 104 607 99 587 80Z" fill="#F6FFF5" fill-opacity="0.95"/>
+    <path d="M611 99C631 76 659 60 691 55C687 71 690 86 698 101C670 111 639 111 611 99Z" fill="#E9F8E1"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <circle cx="905" cy="88" r="86" fill="url(#circleA)"/>
+    <path d="M844 105C863 78 889 60 921 53C907 72 902 89 905 112C883 119 862 116 844 105Z" fill="#F2FBFF" fill-opacity="0.95"/>
+    <path d="M889 123C910 92 938 72 974 64C972 82 977 97 989 113C957 128 922 131 889 123Z" fill="#DFF4FF"/>
+    <path d="M861 65C874 77 885 92 894 109" stroke="#DFF4FF" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <circle cx="1158" cy="49" r="68" fill="url(#circleC)"/>
+    <path d="M1120 68H1194" stroke="#FFF6E9" stroke-width="5" stroke-linecap="round"/>
+    <path d="M1132 56L1150 39L1168 56L1186 39" stroke="#FFF6E9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M1128 88C1142 76 1157 70 1176 68C1172 80 1173 89 1179 98C1159 103 1142 101 1128 88Z" fill="#FFE9CF" fill-opacity="0.95"/>
+  </g>
+
+  <g>
+    <text x="126" y="66" fill="#1377C5" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800">UBND TỈNH QUẢNG TRỊ</text>
+    <text x="206" y="112" fill="#1377C5" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="800">SỞ TƯ PHÁP</text>
+  </g>
+
+  <g>
+    <text x="1244" y="66" fill="#1377C5" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800">PHẦN MỀM XÂY DỰNG</text>
+    <text x="1244" y="104" fill="#1377C5" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="800">VĂN BẢN QUY PHẠM PHÁP LUẬT</text>
+  </g>
+</svg>
